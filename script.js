@@ -132,18 +132,34 @@
   const typingLines = Array.from(document.querySelectorAll('.typing-line'));
   if (typingLines.length && !reducedMotion) {
     typingLines.forEach((line) => {
-      line.dataset.fullText = line.textContent;
-      line.setAttribute('aria-label', line.textContent);
-      line.textContent = '';
+      const fullText = line.textContent;
+      line.dataset.fullText = fullText;
+
+      // Keep the complete sentence available to assistive technology while
+      // the visible copy animates independently.
+      const visualText = document.createElement('span');
+      visualText.className = 'typing-visual';
+      visualText.setAttribute('aria-hidden', 'true');
+
+      const accessibleText = document.createElement('span');
+      accessibleText.className = 'typing-accessible';
+      accessibleText.textContent = fullText;
+
+      line.replaceChildren(visualText, accessibleText);
     });
     const typeLine = (line, done) => {
       const fullText = line.dataset.fullText || '';
       const speed = Number(line.dataset.typeSpeed) || 34;
+      const visualText = line.querySelector('.typing-visual');
+      if (!visualText) {
+        if (done) done();
+        return;
+      }
       let index = 0;
       line.classList.add('is-typing');
       const typeNext = () => {
         index += 1;
-        line.textContent = fullText.slice(0, index);
+        visualText.textContent = fullText.slice(0, index);
         if (index < fullText.length) {
           window.setTimeout(typeNext, speed);
         } else {
@@ -173,7 +189,10 @@
       }, { threshold: 0.18 });
       typingObserver.observe(aboutCopy);
     } else {
-      typingLines.forEach((line) => { line.textContent = line.dataset.fullText || ''; });
+      typingLines.forEach((line) => {
+        const visualText = line.querySelector('.typing-visual');
+        if (visualText) visualText.textContent = line.dataset.fullText || '';
+      });
     }
   }
 
