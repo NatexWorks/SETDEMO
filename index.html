@@ -496,18 +496,19 @@
           button.addEventListener('click', () => {
             const targetIndex = Number(button.dataset.projectTarget);
             const target = slides[targetIndex];
-            if (target) track.scrollTo({ left: target.offsetLeft, behavior: reducedMotion ? 'auto' : 'smooth' });
+            if (target) track.scrollTo({ left: slideOffsets[targetIndex] || targetIndex * trackWidth, behavior: reducedMotion ? 'auto' : 'smooth' });
           });
         });
         let scrollFrame = 0;
         let trackWidth = 1;
         let slideOffsets = [];
-        const measureProjectTrack = () => {
-          trackWidth = Math.max(1, track.clientWidth);
-          slideOffsets = slides.map(slide => slide.offsetLeft);
-        };
-        // Wait until the browser's layout pass before measuring carousel geometry.
-        window.requestAnimationFrame(measureProjectTrack);
+        // ResizeObserver provides the measured box from the completed layout pass—no sync geometry reads.
+        const trackSizeObserver = new ResizeObserver(entries => {
+          const width = entries[0]?.contentRect?.width || 1;
+          trackWidth = Math.max(1, width);
+          slideOffsets = slides.map((_, index) => index * trackWidth);
+        });
+        trackSizeObserver.observe(track);
         const syncProjectSlides = () => {
           scrollFrame = 0;
           const activeIndex = Math.max(0, Math.min(slides.length - 1, Math.round(track.scrollLeft / trackWidth)));
@@ -517,13 +518,12 @@
           if (scrollFrame) return;
           scrollFrame = window.requestAnimationFrame(syncProjectSlides);
         }, { passive: true });
-        window.addEventListener('resize', () => {
-          window.requestAnimationFrame(() => {
-            const activeIndex = Math.max(0, Math.min(slides.length - 1, Math.round(track.scrollLeft / trackWidth)));
-            measureProjectTrack();
-            if (slides[activeIndex]) track.scrollTo({ left: slideOffsets[activeIndex] || 0, behavior: 'auto' });
-          });
-        }, { passive: true });
+        const preserveProjectSlide = () => {
+          const activeIndex = Math.max(0, Math.min(slides.length - 1, Math.round(track.scrollLeft / trackWidth)));
+          track.scrollTo({ left: slideOffsets[activeIndex] || activeIndex * trackWidth, behavior: 'auto' });
+        };
+        trackSizeObserver.observe(track);
+        window.addEventListener('resize', () => window.requestAnimationFrame(preserveProjectSlide), { passive: true });
         syncProjectSlides();
       }
     })();
