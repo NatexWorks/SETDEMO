@@ -30,12 +30,22 @@
 
   // Use one animation clock for Lenis and ScrollTrigger.
   const lenis = window.__natexLenis;
-  if (lenis && window.gsap && window.ScrollTrigger && !lenis.__natexGsapConnected) {
-    window.gsap.registerPlugin(window.ScrollTrigger);
-    lenis.on('scroll', window.ScrollTrigger.update);
-    window.gsap.ticker.add((time) => lenis.raf(time * 1000));
-    window.gsap.ticker.lagSmoothing(0);
-    lenis.__natexGsapConnected = true;
+  if (lenis && !lenis.__natexFrameConnected) {
+    if (window.gsap && window.ScrollTrigger) {
+      window.gsap.registerPlugin(window.ScrollTrigger);
+      lenis.on('scroll', window.ScrollTrigger.update);
+      window.gsap.ticker.add((time) => lenis.raf(time * 1000));
+      window.gsap.ticker.lagSmoothing(0);
+      lenis.__natexGsapConnected = true;
+    } else {
+      // If the GSAP CDN is unavailable, keep Lenis alive on its own RAF loop.
+      const raf = (time) => {
+        lenis.raf(time);
+        lenis.__natexFallbackFrame = requestAnimationFrame(raf);
+      };
+      lenis.__natexFallbackFrame = requestAnimationFrame(raf);
+    }
+    lenis.__natexFrameConnected = true;
   }
 
   // Lazy-load a low-poly wireframe accent only when the hero preview is near the viewport.
