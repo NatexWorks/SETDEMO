@@ -741,15 +741,6 @@
   if (!serviceSection || !serviceGrid || serviceCards.length !== 4 || !nextSection) return;
 
   const clamp = (value) => Math.max(0, Math.min(1, value));
-  const documentTop = (element) => {
-    let top = 0;
-    let node = element;
-    while (node && node !== document.body && node !== document.documentElement) {
-      top += node.offsetTop || 0;
-      node = node.offsetParent;
-    }
-    return top;
-  };
   let metrics = null;
   let frame = 0;
   let enabled = false;
@@ -770,13 +761,24 @@
 
   const measure = () => {
     const vh = Math.max(1, window.innerHeight || document.documentElement.clientHeight);
-    const sectionBottom = documentTop(serviceSection) + serviceSection.offsetHeight;
+    const sectionRect = serviceSection.getBoundingClientRect();
+    const sectionTop = sectionRect.top + (window.scrollY || window.pageYOffset || 0);
+    const sectionBottom = sectionTop + sectionRect.height;
     const exitDuration = Math.max(vh * 0.3, 170);
     metrics = {
       vh,
       exitDuration,
-      exitStart: Math.max(sectionBottom - vh * 0.78, documentTop(serviceSection) + vh * 0.6)
+      exitStart: Math.max(sectionBottom - vh * 0.78, sectionTop + vh * 0.6)
     };
+  };
+  let measureFrame = 0;
+  const scheduleMeasure = () => {
+    if (measureFrame) return;
+    measureFrame = window.requestAnimationFrame(() => {
+      measureFrame = 0;
+      measure();
+      schedule();
+    });
   };
 
   const update = () => {
@@ -791,7 +793,10 @@
       nextSection.classList.add('service-foreground-enabled');
       measure();
     }
-    if (!metrics) measure();
+    if (!metrics) {
+      scheduleMeasure();
+      return;
+    }
 
     // Cards stay fully visible and have no JavaScript-driven transform: no fade, no lateral drift.
     serviceCards.forEach((card) => {
@@ -833,11 +838,10 @@
   if (mobileQuery.matches && !reduceQuery.matches) {
     serviceSection.classList.add('service-exit-motion-enabled');
     nextSection.classList.add('service-foreground-enabled');
-    measure();
-    schedule();
+    scheduleMeasure();
   }
   window.addEventListener('scroll', schedule, { passive:true });
-  window.addEventListener('resize', () => { metrics = null; schedule(); }, { passive:true });
+  window.addEventListener('resize', () => { metrics = null; scheduleMeasure(); }, { passive:true });
   if (mobileQuery.addEventListener) mobileQuery.addEventListener('change', syncMotionPreference);
   else if (mobileQuery.addListener) mobileQuery.addListener(syncMotionPreference);
   if (reduceQuery.addEventListener) reduceQuery.addEventListener('change', syncMotionPreference);
