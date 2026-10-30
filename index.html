@@ -499,28 +499,16 @@
             if (target) track.scrollTo({ left: slideOffsets[targetIndex] || targetIndex * trackWidth, behavior: reducedMotion ? 'auto' : 'smooth' });
           });
         });
-        let scrollFrame = 0;
-        let trackWidth = 1;
-        let slideOffsets = [];
-        // ResizeObserver provides the measured box from the completed layout pass—no sync geometry reads.
-        const trackSizeObserver = new ResizeObserver(entries => {
-          const activeIndex = Math.max(0, Math.min(slides.length - 1, Math.round(track.scrollLeft / trackWidth)));
-          const width = entries[0]?.contentRect?.width || 1;
-          trackWidth = Math.max(1, width);
-          slideOffsets = slides.map((_, index) => index * trackWidth);
-          track.scrollTo({ left: slideOffsets[activeIndex] || 0, behavior: 'auto' });
-        });
-        trackSizeObserver.observe(track);
-        const syncProjectSlides = () => {
-          scrollFrame = 0;
-          const activeIndex = Math.max(0, Math.min(slides.length - 1, Math.round(track.scrollLeft / trackWidth)));
-          slides.forEach((slide, index) => slide.setAttribute('aria-current', index === activeIndex ? 'true' : 'false'));
-        };
-        track.addEventListener('scroll', () => {
-          if (scrollFrame) return;
-          scrollFrame = window.requestAnimationFrame(syncProjectSlides);
-        }, { passive: true });
-        syncProjectSlides();
+        // Keep the active project slide announced without reading layout/scroll geometry on every swipe.
+        if ('IntersectionObserver' in window) {
+          const slideObserver = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+              if (!entry.isIntersecting || entry.intersectionRatio < 0.55) return;
+              slides.forEach(slide => slide.setAttribute('aria-current', slide === entry.target ? 'true' : 'false'));
+            });
+          }, { root: track, threshold: [0.55, 0.8] });
+          slides.forEach(slide => slideObserver.observe(slide));
+        }
       }
     })();
   </script>
