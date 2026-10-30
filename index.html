@@ -504,9 +504,11 @@
         let slideOffsets = [];
         // ResizeObserver provides the measured box from the completed layout pass—no sync geometry reads.
         const trackSizeObserver = new ResizeObserver(entries => {
+          const activeIndex = Math.max(0, Math.min(slides.length - 1, Math.round(track.scrollLeft / trackWidth)));
           const width = entries[0]?.contentRect?.width || 1;
           trackWidth = Math.max(1, width);
           slideOffsets = slides.map((_, index) => index * trackWidth);
+          track.scrollTo({ left: slideOffsets[activeIndex] || 0, behavior: 'auto' });
         });
         trackSizeObserver.observe(track);
         const syncProjectSlides = () => {
@@ -518,12 +520,6 @@
           if (scrollFrame) return;
           scrollFrame = window.requestAnimationFrame(syncProjectSlides);
         }, { passive: true });
-        const preserveProjectSlide = () => {
-          const activeIndex = Math.max(0, Math.min(slides.length - 1, Math.round(track.scrollLeft / trackWidth)));
-          track.scrollTo({ left: slideOffsets[activeIndex] || activeIndex * trackWidth, behavior: 'auto' });
-        };
-        trackSizeObserver.observe(track);
-        window.addEventListener('resize', () => window.requestAnimationFrame(preserveProjectSlide), { passive: true });
         syncProjectSlides();
       }
     })();
