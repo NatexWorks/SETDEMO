@@ -5,6 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#10120f">
   <meta name="description" content="Explore Manish's MERN-stack Inventory Management System for small retailers: product and stock workflows, billing concepts, barcode-assisted lookup, and business reporting.">
+  <link rel="canonical" href="https://natexworks.github.io/Portfolio/inventory.html">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="NatexWorks">
+  <meta property="og:title" content="Inventory Management System — NatexWorks">
+  <meta property="og:description" content="A practical retail workflow concept: products, stock visibility, checkout and barcode-assisted lookup in one workspace.">
+  <meta property="og:url" content="https://natexworks.github.io/SETDEMO/inventory.html">
+  <meta property="og:image" content="https://natexworks.github.io/SETDEMO/og-image.svg">
+  <meta property="og:image:secure_url" content="https://natexworks.github.io/SETDEMO/og-image.svg">
+  <meta property="og:image:type" content="image/svg+xml">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="NatexWorks — More than websites. Custom solutions.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Inventory Management System — NatexWorks">
+  <meta name="twitter:description" content="A practical retail workflow concept: products, stock visibility, checkout and barcode-assisted lookup in one workspace.">
+  <meta name="twitter:image" content="https://natexworks.github.io/SETDEMO/og-image.svg">
+  <meta name="twitter:image:alt" content="NatexWorks — More than websites. Custom solutions.">
+  <meta name="robots" content="noindex, nofollow">
   <title>Inventory Management System — Manish / NatexWorks</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,8 +43,12 @@
     .scroll-next { backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
   </style>
   <link rel="stylesheet" href="https://unpkg.com/lenis@1.3.27/dist/lenis.css">
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js" defer></script>
+  <script src="https://unpkg.com/lucide@1.64.0/dist/umd/lucide.js" defer></script>
   <script src="https://unpkg.com/lenis@1.3.27/dist/lenis.min.js" defer></script>
-  <script src="inventory.js?v=20261025-4" defer></script>
+  <script src="inventory.js?v=20261030-gsap" defer></script>
+  <script src="site-effects.js?v=20261030-1" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -96,10 +118,10 @@
     <section class="wrap workflows section-space" id="workflows">
       <div class="section-heading reveal"><div><div class="eyebrow">02 / WHAT'S IN THE BUILD</div><h2>Useful workflows.<br><em>One workspace.</em></h2></div><p>Built around the tasks retailers repeat every day—not a wall of features.</p></div>
       <div class="workflow-grid">
-        <article class="workflow-card reveal"><span class="workflow-icon">▤</span><span class="card-index">01 / CATALOGUE</span><h3>Products & categories</h3><p>Keep product details organised and find items quickly with search and filtering.</p><div class="card-foot"><span>PRODUCT RECORDS</span><span>↗</span></div></article>
-        <article class="workflow-card reveal"><span class="workflow-icon">◫</span><span class="card-index">02 / STOCK</span><h3>Inventory visibility</h3><p>Track stock levels, spot low-stock items, and get a clearer view of what needs attention.</p><div class="card-foot"><span>STOCK TRACKING</span><span>↗</span></div></article>
-        <article class="workflow-card reveal"><span class="workflow-icon">▦</span><span class="card-index">03 / CHECKOUT</span><h3>POS & billing flow</h3><p>Bring product lookup and sales workflows closer together instead of juggling disconnected steps.</p><div class="card-foot"><span>SALES WORKFLOW</span><span>↗</span></div></article>
-        <article class="workflow-card reveal"><span class="workflow-icon">⌗</span><span class="card-index">04 / LOOKUP</span><h3>Barcode-assisted flow</h3><p>Support faster item identification through barcode-based product lookup where the scanner setup is supported.</p><div class="card-foot"><span>PRODUCT LOOKUP</span><span>↗</span></div></article>
+        <article class="workflow-card reveal"><span class="workflow-icon" aria-hidden="true"><i data-lucide="package"></i></span><span class="card-index">01 / CATALOGUE</span><h3>Products & categories</h3><p>Keep product details organised and find items quickly with search and filtering.</p><div class="card-foot"><span>PRODUCT RECORDS</span><span>↗</span></div></article>
+        <article class="workflow-card reveal"><span class="workflow-icon" aria-hidden="true"><i data-lucide="boxes"></i></span><span class="card-index">02 / STOCK</span><h3>Inventory visibility</h3><p>Track stock levels, spot low-stock items, and get a clearer view of what needs attention.</p><div class="card-foot"><span>STOCK TRACKING</span><span>↗</span></div></article>
+        <article class="workflow-card reveal"><span class="workflow-icon" aria-hidden="true"><i data-lucide="shopping-cart"></i></span><span class="card-index">03 / CHECKOUT</span><h3>POS & billing flow</h3><p>Bring product lookup and sales workflows closer together instead of juggling disconnected steps.</p><div class="card-foot"><span>SALES WORKFLOW</span><span>↗</span></div></article>
+        <article class="workflow-card reveal"><span class="workflow-icon" aria-hidden="true"><i data-lucide="barcode"></i></span><span class="card-index">04 / LOOKUP</span><h3>Barcode-assisted flow</h3><p>Support faster item identification through barcode-based product lookup where the scanner setup is supported.</p><div class="card-foot"><span>PRODUCT LOOKUP</span><span>↗</span></div></article>
         
         
       </div>
