@@ -501,15 +501,19 @@
     const fullText = servicesHeroTypingTarget.textContent.trim();
     const words = fullText.split(/\s+/);
     const wordNodes = [];
-    servicesHeroTypingTarget.setAttribute('aria-label', fullText);
-    servicesHeroTypingTarget.replaceChildren();
+    const visualCopy = document.createElement('span');
+    visualCopy.className = 'services-hero-visual-copy';
+    visualCopy.setAttribute('aria-hidden', 'true');
+    const accessibleCopy = document.createElement('span');
+    accessibleCopy.className = 'services-hero-accessible-copy';
+    accessibleCopy.textContent = fullText;
+    servicesHeroTypingTarget.replaceChildren(visualCopy, accessibleCopy);
 
     words.forEach((word, index) => {
       const span = document.createElement('span');
       span.textContent = word + (index < words.length - 1 ? ' ' : '');
       span.style.opacity = '0';
-      span.setAttribute('aria-hidden', 'true');
-      servicesHeroTypingTarget.appendChild(span);
+      visualCopy.appendChild(span);
       wordNodes.push(span);
     });
 
