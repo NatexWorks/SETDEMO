@@ -53,7 +53,7 @@
     if (initialized) return;
     initialized = true;
     try {
-      const THREE = await import('https://cdn.jsdelivr.net/npm/three@0.185.0/build/three.module.js');
+      const THREE = await import('https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js');
       if (!host.isConnected) return;
       scene = new THREE.Scene();
       camera = new THREE.PerspectiveCamera(34, 1, .1, 20);
