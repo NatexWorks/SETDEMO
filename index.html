@@ -440,6 +440,7 @@
       const measurePageHeight = () => {
         pageHeightFrame = 0;
         cachedPageHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
+        syncNavigationButton();
       };
       const schedulePageHeightMeasure = () => {
         if (pageHeightFrame) return;
@@ -449,7 +450,7 @@
       window.addEventListener('resize', schedulePageHeightMeasure, { passive: true });
       window.addEventListener('load', schedulePageHeightMeasure, { once: true });
       if (document.fonts && document.fonts.ready) document.fonts.ready.then(schedulePageHeightMeasure);
-      measurePageHeight();
+      schedulePageHeightMeasure();
 
       const isAtPageEnd = () => {
         const scrollY = window.scrollY || window.pageYOffset || 0;
@@ -457,6 +458,7 @@
       };
       let previousBackMode = null;
       const syncNavigationButton = () => {
+        if (!cachedPageHeight) return;
         const backMode = isAtPageEnd();
         if (backMode === previousBackMode) return;
         previousBackMode = backMode;
