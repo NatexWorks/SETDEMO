@@ -7,7 +7,7 @@
   // Mobile-only Lenis scrolling; preserve native layout and leave desktop/tablet scroll unchanged.
   if (mobileLenisQuery.matches && !reducedMotion && typeof window.Lenis === 'function') {
     lenisInstance = new window.Lenis({
-      autoRaf: true,
+      autoRaf: false,
       anchors: true,
       smoothWheel: true,
       syncTouch: true,
@@ -17,6 +17,7 @@
       respectReducedMotion: true,
       stopInertiaOnNavigate: true
     });
+    window.__natexLenis = lenisInstance;
   }
 
   const toggle = document.querySelector('.menu-toggle');
@@ -355,6 +356,117 @@
     document.documentElement.classList.add('mobile-workflow-motion');
     workflowGrid.classList.add('mobile-workflow-stack');
     nextSection.classList.add('workflow-stack-foreground');
+
+    // GSAP / ScrollTrigger path. The native scroll-position controller below remains a CDN-failure fallback.
+    if (window.gsap && window.ScrollTrigger) {
+      const gsap = window.gsap;
+      const ScrollTrigger = window.ScrollTrigger;
+      gsap.registerPlugin(ScrollTrigger);
+      const documentTop = element => {
+        let top = 0, current = element;
+        while (current && current !== document.body && current !== document.documentElement) {
+          top += current.offsetTop || 0;
+          current = current.offsetParent;
+        }
+        return top;
+      };
+      let context = null;
+      let resizeFrame = 0;
+      const measureStack = () => {
+        const viewportHeight = Math.max(1, window.innerHeight || document.documentElement.clientHeight);
+        const stackTop = Math.max(70, Math.min(108, viewportHeight * 0.13));
+        workflowGrid.style.setProperty('--workflow-stack-top', stackTop + 'px');
+        workflowGrid.style.setProperty('--stack-note-tail-space', '0px');
+        let cursor = documentTop(workflowGrid) + (parseFloat(getComputedStyle(workflowGrid).paddingTop) || 0);
+        const entries = workflowCards.map((card, index) => {
+          const styles = getComputedStyle(card);
+          const height = card.offsetHeight || 220;
+          const marginBottom = parseFloat(styles.marginBottom) || 0;
+          const stickyTop = stackTop + (workflowCards.length - index - 1) * 10;
+          card.style.top = stickyTop + 'px';
+          card.style.zIndex = String(index + 1);
+          const entry = { card, index, height, stickyTop, staticTop: cursor };
+          cursor += height + marginBottom;
+          return entry;
+        });
+        const finalCard = entries[entries.length - 1];
+        const triggerY = finalCard.staticTop - finalCard.stickyTop;
+        const naturalNoteTop = workflowLiveNote ? documentTop(workflowLiveNote) : documentTop(workflowGrid) + workflowGrid.offsetHeight;
+        const stackBottom = Math.max(...entries.map(entry => entry.stickyTop + entry.height));
+        const tailSpace = Math.max(0, triggerY + stackBottom + 25 - naturalNoteTop);
+        workflowGrid.style.setProperty('--stack-note-tail-space', tailSpace + 'px');
+        return { entries, stackTop, triggerY, viewportHeight };
+      };
+      const buildGsapMotion = () => {
+        if (context) context.revert();
+        const metrics = measureStack();
+        context = gsap.context(() => {
+          metrics.entries.forEach(entry => {
+            const side = entry.index % 2 === 0 ? -1 : 1;
+            gsap.fromTo(entry.card, {
+              x: side * (entry.index === 0 ? 20 : 30),
+              y: 28,
+              z: -18,
+              rotateY: side * 2.8,
+              scale: .982
+            }, {
+              x: 0, y: 0, z: 0, rotateY: 0, scale: 1,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: entry.card,
+                start: 'top 90%',
+                end: () => 'top ' + (metrics.stackTop + (workflowCards.length - entry.index - 1) * 10) + 'px',
+                scrub: .7,
+                invalidateOnRefresh: true
+              }
+            });
+          });
+          const handoffTrigger = workflowLiveNote || nextSection;
+          const handoff = gsap.timeline({
+            scrollTrigger: {
+              trigger: handoffTrigger,
+              start: 'top 92%',
+              end: 'top 48%',
+              scrub: .85,
+              invalidateOnRefresh: true
+            }
+          });
+          handoff.to(workflowSection, {
+            y: -18, rotateX: 2.5, scale: .975,
+            transformOrigin: '50% 12%',
+            ease: 'none'
+          }, 0);
+          handoff.fromTo(nextSection, { y: 84 }, { y: 0, ease: 'none' }, 0);
+        }, workflowSection);
+        ScrollTrigger.refresh();
+      };
+      const onResize = () => {
+        if (resizeFrame) cancelAnimationFrame(resizeFrame);
+        resizeFrame = requestAnimationFrame(() => {
+          resizeFrame = 0;
+          buildGsapMotion();
+        });
+      };
+      buildGsapMotion();
+      window.addEventListener('resize', onResize, { passive: true });
+      teardownMobileWorkflowMotion = () => {
+        window.removeEventListener('resize', onResize);
+        if (resizeFrame) cancelAnimationFrame(resizeFrame);
+        if (context) context.revert();
+        workflowGrid.style.removeProperty('--workflow-stack-top');
+        workflowGrid.style.removeProperty('--stack-note-tail-space');
+        workflowCards.forEach(card => {
+          card.style.removeProperty('top');
+          card.style.removeProperty('z-index');
+        });
+        workflowGrid.classList.remove('mobile-workflow-stack');
+        nextSection.classList.remove('workflow-stack-foreground');
+        document.documentElement.classList.remove('mobile-workflow-motion');
+        mobileWorkflowMotionInitialized = false;
+        teardownMobileWorkflowMotion = null;
+      };
+      return;
+    }
 
     const clamp = value => Math.max(0, Math.min(1, value));
     const smoothstep = value => value * value * (3 - 2 * value);
