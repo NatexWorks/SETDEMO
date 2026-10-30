@@ -324,37 +324,17 @@
 
     const metrics = serviceMotionMetrics;
     const scrollY = window.scrollY || window.pageYOffset || 0;
-    const sideDistance = Math.min(56, Math.max(24, (window.innerWidth || 1024) * 0.035));
-
     metrics.entries.forEach((entry) => {
       const progress = clampServiceProgress((scrollY - entry.start) / (entry.end - entry.start));
       const approach = 1 - progress;
-      let x = 0;
-      let y = 34 * approach;
-      let z = -18 * approach;
-      let scale = 0.98 + progress * 0.02;
-
-      if (entry.index === 1) {
-        x = -sideDistance * approach;
-        y = 38 * approach;
-        z = -16 * approach;
-        scale = 0.98 + progress * 0.02;
-      } else if (entry.index === 2) {
-        x = sideDistance * approach;
-        y = 28 * approach;
-        z = -14 * approach;
-        scale = 0.982 + progress * 0.018;
-      } else if (entry.index === 3) {
-        x = -sideDistance * 0.62 * approach;
-        y = 43 * approach;
-        z = -18 * approach;
-        scale = 0.978 + progress * 0.022;
-      }
+      const verticalOffset = (entry.index === 1 ? 38 : entry.index === 2 ? 28 : entry.index === 3 ? 43 : 34) * approach;
+      const depthOffset = (entry.index === 1 ? 16 : entry.index === 2 ? 14 : 18) * approach;
+      const scale = entry.index === 2 ? 0.982 + progress * 0.018 : entry.index === 3 ? 0.978 + progress * 0.022 : 0.98 + progress * 0.02;
 
       entry.card.style.opacity = String(Math.min(1, progress * 1.08));
       if (progress < 1) {
         entry.card.style.transform =
-          `perspective(1200px) translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, ${z.toFixed(2)}px) scale(${scale.toFixed(4)})`;
+          `perspective(1200px) translate3d(0, ${verticalOffset.toFixed(2)}px, ${(-depthOffset).toFixed(2)}px) scale(${scale.toFixed(4)})`;
         const shadowY = 4 + progress * 5;
         const shadowBlur = 10 + progress * 8;
         const shadowAlpha = 0.06 + progress * 0.06;
@@ -399,10 +379,8 @@
   };
 
   if (serviceMotionSection && serviceMotionGrid && serviceMotionNext && serviceMotionCards.length === 4) {
-    activateServiceCardMotion();
-    scheduleServiceCardMotion();
-    window.addEventListener('scroll', scheduleServiceCardMotion, { passive: true });
-    window.addEventListener('resize', () => {
+    let serviceMotionListenersBound = false;
+    const handleServiceMotionResize = () => {
       if (!serviceMotionMedia.matches || reducedMotion) {
         resetServiceCardMotion();
         return;
@@ -410,7 +388,29 @@
       activateServiceCardMotion();
       if (serviceMotionActive) measureServiceCardMotion();
       scheduleServiceCardMotion();
-    }, { passive: true });
+    };
+    const syncServiceMotionListeners = () => {
+      const shouldRunDesktopMotion = serviceMotionMedia.matches && !reducedMotion;
+      if (shouldRunDesktopMotion && !serviceMotionListenersBound) {
+        window.addEventListener('scroll', scheduleServiceCardMotion, { passive: true });
+        window.addEventListener('resize', handleServiceMotionResize, { passive: true });
+        serviceMotionListenersBound = true;
+      } else if (!shouldRunDesktopMotion && serviceMotionListenersBound) {
+        window.removeEventListener('scroll', scheduleServiceCardMotion);
+        window.removeEventListener('resize', handleServiceMotionResize);
+        serviceMotionListenersBound = false;
+      }
+      if (shouldRunDesktopMotion) {
+        activateServiceCardMotion();
+        measureServiceCardMotion();
+        scheduleServiceCardMotion();
+      } else {
+        resetServiceCardMotion();
+      }
+    };
+    if (serviceMotionMedia.addEventListener) serviceMotionMedia.addEventListener('change', syncServiceMotionListeners);
+    else if (serviceMotionMedia.addListener) serviceMotionMedia.addListener(syncServiceMotionListeners);
+    syncServiceMotionListeners();
   }
 
   // Services page: scroll-linked entrance for Business websites, Custom web applications, and SEO.
@@ -596,4 +596,231 @@
   }
 
 
+})();
+/* Mobile-only behavior: accessible glass navigation and scroll-progress card reveals. */
+(() => {
+  const mobileQuery = window.matchMedia('(max-width:650px)');
+  const reduceQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const menuButton = document.querySelector('.menu-toggle');
+  const nav = document.querySelector('#primary-nav');
+  let previousOverflow = null;
+
+  if (menuButton && nav) {
+    const syncMenuState = () => {
+      const open = nav.classList.contains('is-open');
+      const shouldLock = open && mobileQuery.matches;
+      document.body.classList.toggle('mobile-menu-open', shouldLock);
+      if (shouldLock && previousOverflow === null) {
+        previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+      } else if (!shouldLock && previousOverflow !== null) {
+        document.body.style.overflow = previousOverflow;
+        previousOverflow = null;
+      }
+      menuButton.setAttribute('aria-expanded', String(open));
+    };
+    new MutationObserver(syncMenuState).observe(nav, { attributes:true, attributeFilter:['class'] });
+    syncMenuState();
+    if (mobileQuery.addEventListener) mobileQuery.addEventListener('change', syncMenuState);
+    else if (mobileQuery.addListener) mobileQuery.addListener(syncMenuState);
+  }
+
+  if (!mobileQuery.matches || reduceQuery.matches) return;
+
+  // Keep the process cards touch-responsive; numbers remain in accessible labels, not as decoration.
+  document.querySelectorAll('#process .process-step, .process-film-scene').forEach((card) => {
+    card.addEventListener('touchstart', () => card.classList.add('mobile-touch-active'), { passive:true });
+    ['touchend','touchcancel','touchmove'].forEach((type) => {
+      card.addEventListener(type, () => card.classList.remove('mobile-touch-active'), { passive:true });
+    });
+  });
+
+  const wrapTextWords = (element, className, inlineBlock = false, hideFromAssistiveTech = true) => {
+    if (!element || element.dataset[className]) return [];
+    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+    const textNodes = [];
+    while (walker.nextNode()) textNodes.push(walker.currentNode);
+    const wrapped = [];
+    textNodes.forEach((node) => {
+      const value = node.nodeValue || '';
+      if (!value.trim()) return;
+      const fragment = document.createDocumentFragment();
+      value.split(/(\s+)/).forEach((part) => {
+        if (!part) return;
+        if (/^\s+$/.test(part)) {
+          fragment.appendChild(document.createTextNode(part));
+          return;
+        }
+        const span = document.createElement('span');
+        span.className = 'mobile-reveal-word';
+        if (hideFromAssistiveTech) span.setAttribute('aria-hidden', 'true');
+        span.textContent = part;
+        // Inline-block keeps each word's transform animatable without changing its text.
+        // The explicit initial state makes the diagonal/line-rise keyframes visible.
+        span.style.display = 'inline-block';
+        span.style.verticalAlign = 'baseline';
+        span.style.opacity = '0';
+        span.style.filter = 'blur(4px)';
+        const side = wrapped.length % 2 === 0 ? '-7px' : '7px';
+        span.style.transform = inlineBlock ? `translate3d(${side},7px,0)` : 'translateY(7px)';
+        wrapped.push(span);
+        fragment.appendChild(span);
+      });
+      node.parentNode.replaceChild(fragment, node);
+    });
+    element.dataset[className] = 'true';
+    return wrapped;
+  };
+
+  // Service headline: words arrive diagonally, while the heading keeps one accessible text label.
+  const heroHeading = document.querySelector('.services-page-hero h1');
+  if (heroHeading) {
+    const label = heroHeading.innerText.replace(/\s+/g, ' ').replace(/\s+([.])/g, '$1').trim();
+    heroHeading.setAttribute('aria-label', label);
+    const wordSpans = wrapTextWords(heroHeading, 'mobileWordRevealDone', true);
+    wordSpans.forEach((span, index) => {
+      span.style.animation = `mobileWordReveal .42s ease-out ${Math.min(index * 45, 1400)}ms both`;
+    });
+  }
+
+  // Visibility paragraph: reveal the rendered lines once, preserving the existing inline emphasis.
+  const visibilityParagraph = document.querySelector('.service-principle > p');
+  if (visibilityParagraph) {
+    const words = wrapTextWords(visibilityParagraph, 'mobileLineRevealDone', false, false);
+    const revealLines = () => {
+      const lineTops = [];
+      const wordLines = words.map((word) => {
+        const top = Math.round(word.getBoundingClientRect().top / 2) * 2;
+        let line = lineTops.findIndex((existingTop) => Math.abs(existingTop - top) <= 2);
+        if (line < 0) { lineTops.push(top); line = lineTops.length - 1; }
+        return line;
+      });
+      words.forEach((word, index) => {
+        word.style.animation = `mobileLineReveal .55s ease-out ${wordLines[index] * 180}ms both`;
+      });
+    };
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries, currentObserver) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          currentObserver.unobserve(entry.target);
+          window.requestAnimationFrame(revealLines);
+        });
+      }, { threshold:.18 });
+      observer.observe(visibilityParagraph);
+    } else {
+      window.requestAnimationFrame(revealLines);
+    }
+  }
+
+  // Homepage service cards: keep their natural appearance and let CSS sticky positioning stack them.
+  // Only the completed section and the next section move during the final handoff.
+  const serviceSection = document.querySelector('#services.services-section');
+  const serviceGrid = serviceSection?.querySelector('.service-grid');
+  const serviceCards = serviceGrid ? Array.from(serviceGrid.querySelectorAll(':scope > .service-card')) : [];
+  const nextSection = document.querySelector('#skills');
+  if (!serviceSection || !serviceGrid || serviceCards.length !== 4 || !nextSection) return;
+
+  const clamp = (value) => Math.max(0, Math.min(1, value));
+  const documentTop = (element) => {
+    let top = 0;
+    let node = element;
+    while (node && node !== document.body && node !== document.documentElement) {
+      top += node.offsetTop || 0;
+      node = node.offsetParent;
+    }
+    return top;
+  };
+  let metrics = null;
+  let frame = 0;
+  let enabled = false;
+
+  const clearInlineMotion = () => {
+    serviceSection.style.removeProperty('transform');
+    serviceSection.style.removeProperty('transform-origin');
+    nextSection.style.removeProperty('transform');
+    serviceCards.forEach((card) => {
+      card.style.removeProperty('opacity');
+      card.style.removeProperty('transform');
+      card.style.removeProperty('box-shadow');
+    });
+    serviceSection.classList.remove('service-exit-motion-enabled');
+    nextSection.classList.remove('service-foreground-enabled');
+    enabled = false;
+  };
+
+  const measure = () => {
+    const vh = Math.max(1, window.innerHeight || document.documentElement.clientHeight);
+    const sectionBottom = documentTop(serviceSection) + serviceSection.offsetHeight;
+    const exitDuration = Math.max(vh * 0.3, 170);
+    metrics = {
+      vh,
+      exitDuration,
+      exitStart: Math.max(sectionBottom - vh * 0.78, documentTop(serviceSection) + vh * 0.6)
+    };
+  };
+
+  const update = () => {
+    frame = 0;
+    if (!mobileQuery.matches || reduceQuery.matches) {
+      clearInlineMotion();
+      return;
+    }
+    if (!enabled) {
+      enabled = true;
+      serviceSection.classList.add('service-exit-motion-enabled');
+      nextSection.classList.add('service-foreground-enabled');
+      measure();
+    }
+    if (!metrics) measure();
+
+    // Cards stay fully visible and have no JavaScript-driven transform: no fade, no lateral drift.
+    serviceCards.forEach((card) => {
+      card.style.removeProperty('opacity');
+      card.style.removeProperty('transform');
+      card.style.removeProperty('box-shadow');
+    });
+
+    const y = window.scrollY || window.pageYOffset || 0;
+    const transitionStart = metrics.exitStart;
+    const progress = clamp((y - transitionStart) / metrics.exitDuration);
+
+    if (y >= transitionStart) {
+      serviceSection.style.transformOrigin = 'center bottom';
+      serviceSection.style.transform =
+        `perspective(1100px) translate3d(0,${(-14 * progress).toFixed(2)}px,0) rotateX(${(4 * progress).toFixed(2)}deg) scale(${(1 - 0.035 * progress).toFixed(4)})`;
+      nextSection.style.transform = `translate3d(0,${(76 * (1 - progress)).toFixed(2)}px,0)`;
+    } else {
+      serviceSection.style.removeProperty('transform');
+      serviceSection.style.removeProperty('transform-origin');
+      nextSection.style.removeProperty('transform');
+    }
+  };
+
+  const schedule = () => {
+    if (!frame) frame = window.requestAnimationFrame(update);
+  };
+
+  const syncMotionPreference = () => {
+    if (!mobileQuery.matches || reduceQuery.matches) {
+      clearInlineMotion();
+      return;
+    }
+    enabled = true;
+    metrics = null;
+    schedule();
+  };
+
+  if (mobileQuery.matches && !reduceQuery.matches) {
+    serviceSection.classList.add('service-exit-motion-enabled');
+    nextSection.classList.add('service-foreground-enabled');
+    measure();
+    schedule();
+  }
+  window.addEventListener('scroll', schedule, { passive:true });
+  window.addEventListener('resize', () => { metrics = null; schedule(); }, { passive:true });
+  if (mobileQuery.addEventListener) mobileQuery.addEventListener('change', syncMotionPreference);
+  else if (mobileQuery.addListener) mobileQuery.addListener(syncMotionPreference);
+  if (reduceQuery.addEventListener) reduceQuery.addEventListener('change', syncMotionPreference);
+  else if (reduceQuery.addListener) reduceQuery.addListener(syncMotionPreference);
 })();
