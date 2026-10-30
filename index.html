@@ -500,7 +500,14 @@
           });
         });
         let scrollFrame = 0;
-        let trackWidth = Math.max(1, track.clientWidth);
+        let trackWidth = 1;
+        let slideOffsets = [];
+        const measureProjectTrack = () => {
+          trackWidth = Math.max(1, track.clientWidth);
+          slideOffsets = slides.map(slide => slide.offsetLeft);
+        };
+        // Wait until the browser's layout pass before measuring carousel geometry.
+        window.requestAnimationFrame(measureProjectTrack);
         const syncProjectSlides = () => {
           scrollFrame = 0;
           const activeIndex = Math.max(0, Math.min(slides.length - 1, Math.round(track.scrollLeft / trackWidth)));
@@ -511,9 +518,11 @@
           scrollFrame = window.requestAnimationFrame(syncProjectSlides);
         }, { passive: true });
         window.addEventListener('resize', () => {
-          trackWidth = Math.max(1, track.clientWidth);
-          const activeIndex = Math.max(0, Math.min(slides.length - 1, Math.round(track.scrollLeft / trackWidth)));
-          if (slides[activeIndex]) track.scrollTo({ left: slides[activeIndex].offsetLeft, behavior: 'auto' });
+          window.requestAnimationFrame(() => {
+            const activeIndex = Math.max(0, Math.min(slides.length - 1, Math.round(track.scrollLeft / trackWidth)));
+            measureProjectTrack();
+            if (slides[activeIndex]) track.scrollTo({ left: slideOffsets[activeIndex] || 0, behavior: 'auto' });
+          });
         }, { passive: true });
         syncProjectSlides();
       }
