@@ -445,11 +445,10 @@
         if (pageHeightFrame) return;
         pageHeightFrame = window.requestAnimationFrame(measurePageHeight);
       };
-      const pageSizeObserver = 'ResizeObserver' in window
-        ? new ResizeObserver(schedulePageHeightMeasure)
-        : null;
-      if (pageSizeObserver) pageSizeObserver.observe(document.body);
+      // Measure on page setup, asset/font completion and viewport changes—never in the scroll handler.
       window.addEventListener('resize', schedulePageHeightMeasure, { passive: true });
+      window.addEventListener('load', schedulePageHeightMeasure, { once: true });
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(schedulePageHeightMeasure);
       measurePageHeight();
 
       const isAtPageEnd = () => {
