@@ -436,21 +436,23 @@
         .filter(section => section.getBoundingClientRect().height > 0);
 
       let cachedPageHeight = 0;
-      let pageHeightFrame = 0;
-      const measurePageHeight = () => {
-        pageHeightFrame = 0;
-        cachedPageHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
-        syncNavigationButton();
-      };
-      const schedulePageHeightMeasure = () => {
-        if (pageHeightFrame) return;
-        pageHeightFrame = window.requestAnimationFrame(measurePageHeight);
-      };
-      // Measure on page setup, asset/font completion and viewport changes—never in the scroll handler.
-      window.addEventListener('resize', schedulePageHeightMeasure, { passive: true });
-      window.addEventListener('load', schedulePageHeightMeasure, { once: true });
-      if (document.fonts && document.fonts.ready) document.fonts.ready.then(schedulePageHeightMeasure);
-      schedulePageHeightMeasure();
+      // ResizeObserver supplies the body's already-calculated content height without a synchronous layout read.
+      if ('ResizeObserver' in window) {
+        const pageSizeObserver = new ResizeObserver(entries => {
+          const contentHeight = entries[0]?.contentRect?.height || window.innerHeight;
+          cachedPageHeight = Math.max(contentHeight, window.innerHeight);
+          syncNavigationButton();
+        });
+        pageSizeObserver.observe(document.body);
+      } else {
+        // Older-browser fallback: one measurement after load and on viewport changes, never per scroll.
+        const measurePageHeight = () => {
+          cachedPageHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
+          syncNavigationButton();
+        };
+        window.addEventListener('resize', measurePageHeight, { passive: true });
+        window.addEventListener('load', measurePageHeight, { once: true });
+      }
 
       const isAtPageEnd = () => {
         const scrollY = window.scrollY || window.pageYOffset || 0;
