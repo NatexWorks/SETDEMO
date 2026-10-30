@@ -50,7 +50,7 @@ natexworks@gmail.com
 
 - GSAP 3.15.0 + ScrollTrigger: scroll-linked workflow card entrances and the section handoff on the inventory case study.
 - Lenis 1.3.27: mobile-only smooth scrolling, connected to the GSAP ticker; native desktop/tablet scrolling is preserved.
-- Three.js 0.185.0: a small decorative 3D wireframe accent in the homepage project preview. It is lazy-loaded and omitted for data-saver / low-memory devices.
+- Three.js 0.186.1: a small decorative 3D wireframe accent in the homepage project preview. It is lazy-loaded and omitted for data-saver / low-memory devices.
 - Lucide 1.64.0: consistent inline SVG icons.
 - Open Graph and Twitter preview metadata use the shared `og-image.svg` artwork. SETDEMO pages carry `noindex` metadata and retain Portfolio canonicals so the staging copy is not intended for search indexing.
 
