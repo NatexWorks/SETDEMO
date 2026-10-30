@@ -585,7 +585,7 @@ html.brand-intro-running .brand-dust-cloud{animation:brandDustBurst 1.1s .38s ea
 
   #services .service-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    grid-template-rows: repeat(2, minmax(340px, 1fr));
+    grid-template-rows: repeat(2, minmax(288px, 1fr));
     gap: 0;
     perspective: 1200px;
     transform-style: preserve-3d;
@@ -596,7 +596,7 @@ html.brand-intro-running .brand-dust-cloud{animation:brandDustBurst 1.1s .38s ea
     display: flex;
     flex-direction: column;
     min-width: 0;
-    min-height: 340px;
+    min-height: 288px;
     height: 100%;
     padding: 25px 28px 24px;
     position: relative;
