@@ -18,11 +18,11 @@
 .build-heading span{display:inline-block;color:var(--lime);position:relative}
 .build-heading span::after{content:"";position:absolute;left:0;right:0;bottom:-5px;height:1px;background:var(--lime);transform:scaleX(0);transform-origin:left;transition:transform .85s .35s cubic-bezier(.2,.7,.2,1)}
 .build-note.is-visible .build-heading span::after{transform:scaleX(1)}
-.window-dots{display:flex;align-items:center;gap:5px}
-.window-dot{width:9px;height:9px;padding:0;border:1px solid #737c66;border-radius:50%;background:#454d3c;cursor:pointer;transition:transform .2s,background .2s,border-color .2s}
-
-.window-dot.is-active{background:var(--lime);border-color:var(--lime);box-shadow:0 0 10px #c5f36b73;transform:scale(1.28);outline:2px solid #c5f36b35;outline-offset:3px}
-.window-dot:focus-visible{outline:2px solid var(--lime);outline-offset:4px}
+.window-dots{display:flex;align-items:center;gap:8px}
+.window-dot{position:relative;display:grid;place-items:center;flex:0 0 24px;width:24px;height:24px;min-width:24px;min-height:24px;padding:0;border:0;border-radius:50%;background:transparent;cursor:pointer;transition:background .2s ease}
+.window-dot::before{content:"";width:9px;height:9px;border:1px solid #737c66;border-radius:50%;background:#454d3c;transition:transform .2s,background .2s,border-color .2s,box-shadow .2s}
+.window-dot.is-active::before{background:var(--lime);border-color:var(--lime);box-shadow:0 0 10px #c5f36b73;transform:scale(1.28)}
+.window-dot:focus-visible{outline:2px solid var(--lime);outline-offset:0}
 .app-content[data-preview-view="products"] .app-stats article:first-child,.app-content[data-preview-view="billing"] .app-stats article:nth-child(2){border-color:#697b4b}
 .scroll-next{position:fixed;right:max(18px,calc((100vw - var(--wrap))/2));bottom:22px;z-index:900;display:flex;align-items:center;gap:12px;padding:10px 13px;background:#171b14e8;border:1px solid #4b5540;color:var(--text);font:8px var(--mono);letter-spacing:.09em;backdrop-filter:blur(14px);cursor:pointer;box-shadow:0 10px 28px #0004;transition:background .2s,border-color .2s,transform .2s}
 .scroll-next b{font:16px var(--sans);color:var(--lime)}
