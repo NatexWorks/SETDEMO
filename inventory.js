@@ -1,11 +1,61 @@
 (() => {
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const mobileLenisQuery = window.matchMedia('(max-width: 760px)');
+  const motionDeviceEligible = mobileLenisQuery.matches && !reducedMotion &&
+    !(navigator.connection && navigator.connection.saveData) &&
+    !(Number(navigator.deviceMemory || 0) > 0 && Number(navigator.deviceMemory) <= 2);
+
+  const loadMotionScript = (src) => new Promise(resolve => {
+    const script = document.createElement('script');
+    script.src = src;
+    script.async = true;
+    script.onload = () => resolve(true);
+    script.onerror = () => { script.remove(); resolve(false); };
+    document.head.appendChild(script);
+  });
+
+  const motionDependenciesReady = (async () => {
+    if (!motionDeviceEligible) return false;
+    const gsapReady = await loadMotionScript('https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js');
+    if (gsapReady) await loadMotionScript('https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/ScrollTrigger.min.js');
+    const lenisReady = await loadMotionScript('https://unpkg.com/lenis@1.3.27/dist/lenis.min.js');
+    if (lenisReady && !document.querySelector('link[data-lenis-styles]')) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://unpkg.com/lenis@1.3.27/dist/lenis.css';
+      link.dataset.lenisStyles = 'true';
+      document.head.appendChild(link);
+    }
+    return Boolean(gsapReady && window.ScrollTrigger);
+  })();
+  window.__natexMobileMotionReady = motionDependenciesReady;
+
   let lenisInstance = null;
   let workflowStepController = null;
 
-  // Mobile-only Lenis scrolling; preserve native layout and leave desktop/tablet scroll unchanged.
-  if (mobileLenisQuery.matches && !reducedMotion && typeof window.Lenis === 'function') {
+  // Start Lenis after the deferred mobile-only library load; native scroll remains the fallback.
+  motionDependenciesReady.then(() => {
+    if (!motionDeviceEligible || typeof window.Lenis !== 'function' || window.__natexLenis) return;
+    try {
+      lenisInstance = new window.Lenis({
+        autoRaf: false,
+        anchors: true,
+        smoothWheel: true,
+        syncTouch: true,
+        syncTouchLerp: 0.075,
+        touchInertiaExponent: 1.7,
+        lerp: 0.09,
+        respectReducedMotion: true,
+        stopInertiaOnNavigate: true
+      });
+      window.__natexLenis = lenisInstance;
+    } catch (error) {
+      console.warn('[NatexWorks] Lenis unavailable; using native scroll.', error);
+    }
+  });
+
+  /* Legacy synchronous Lenis initialization removed; dependency loader above owns setup. */
+  if (false && mobileLenisQuery.matches && !reducedMotion && typeof window.Lenis === 'function') {
     lenisInstance = new window.Lenis({
       autoRaf: false,
       anchors: true,
@@ -85,21 +135,27 @@
   const workflowLiveNote = document.querySelector('.workflow-live-note[data-live-demo-text]');
   if (workflowLiveNote && mobileLenisQuery.matches && !reducedMotion && 'IntersectionObserver' in window) {
     const fullLiveNote = workflowLiveNote.dataset.liveDemoText || workflowLiveNote.textContent;
-    workflowLiveNote.setAttribute('aria-label', fullLiveNote);
+    const noteVisual = document.createElement('span');
+    noteVisual.className = 'workflow-note-visual';
+    noteVisual.setAttribute('aria-hidden', 'true');
+    const noteAccessible = document.createElement('span');
+    noteAccessible.className = 'typing-accessible';
+    noteAccessible.textContent = fullLiveNote;
+    workflowLiveNote.replaceChildren(noteVisual, noteAccessible);
     // Reserve the exact final height only on mobile, keeping tablet/laptop layout untouched.
     const mobileWorkflowNoteQuery = window.matchMedia('(max-width: 650px)');
     const reserveWorkflowLiveNoteHeight = () => {
-      const currentText = workflowLiveNote.textContent;
+      const currentText = noteVisual.textContent;
       workflowLiveNote.style.removeProperty('min-height');
       if (mobileWorkflowNoteQuery.matches) {
-        workflowLiveNote.textContent = fullLiveNote;
+        noteVisual.textContent = fullLiveNote;
         workflowLiveNote.style.minHeight = workflowLiveNote.getBoundingClientRect().height + 'px';
       }
-      workflowLiveNote.textContent = currentText;
+      noteVisual.textContent = currentText;
     };
     reserveWorkflowLiveNoteHeight();
     window.addEventListener('resize', reserveWorkflowLiveNoteHeight, { passive: true });
-    workflowLiveNote.textContent = '';
+    noteVisual.textContent = '';
     const liveNoteObserver = new IntersectionObserver((entries, observer) => {
       entries.forEach(entry => {
         if (!entry.isIntersecting) return;
@@ -108,7 +164,7 @@
         workflowLiveNote.classList.add('is-typing');
         const typeNext = () => {
           position += 1;
-          workflowLiveNote.textContent = fullLiveNote.slice(0, position);
+          noteVisual.textContent = fullLiveNote.slice(0, position);
           if (position < fullLiveNote.length) window.setTimeout(typeNext, 22);
           else workflowLiveNote.classList.remove('is-typing');
         };
@@ -124,13 +180,24 @@
   const buildNote = document.querySelector('.build-note');
   if (buildNote && !reducedMotion) {
     buildNote.classList.add('is-build-sequence-running');
-    [...buildTypeTargets, ...buildCopyTargets].forEach(target => { target.textContent = ''; });
+    [...buildTypeTargets, ...buildCopyTargets].forEach(target => {
+      const fullText = target.dataset.buildHeadingType || target.dataset.buildCopyType || target.textContent;
+      const visual = document.createElement('span');
+      visual.className = 'build-visual-text';
+      visual.setAttribute('aria-hidden', 'true');
+      const accessible = document.createElement('span');
+      accessible.className = 'typing-accessible';
+      accessible.textContent = fullText;
+      target.replaceChildren(visual, accessible);
+    });
 
     const typeTextTarget = (targets, targetIndex, onComplete) => {
       const target = targets[targetIndex];
       if (!target) { onComplete?.(); return; }
 
       const fullText = target.dataset.buildHeadingType || target.dataset.buildCopyType || '';
+      const visualText = target.querySelector('.build-visual-text');
+      if (!visualText) { onComplete?.(); return; }
       const mode = target.dataset.buildMode || 'characters';
       const speed = Math.max(12, Number(target.dataset.buildSpeed) || 54);
       target.classList.add('is-typing');
@@ -146,7 +213,7 @@
         const tailSpeed = Math.max(speed, Number(target.dataset.buildTailSpeed) || speed);
         let wordIndex = 0;
         const typeWord = () => {
-          target.textContent += (wordIndex ? ' ' : '') + words[wordIndex];
+          visualText.textContent += (wordIndex ? ' ' : '') + words[wordIndex];
           wordIndex += 1;
           if (wordIndex < words.length) {
             let delay = speed;
@@ -164,7 +231,7 @@
         let charIndex = 0;
         const typeCharacter = () => {
           charIndex += 1;
-          target.textContent = fullText.slice(0, charIndex);
+          visualText.textContent = fullText.slice(0, charIndex);
           if (charIndex < fullText.length) window.setTimeout(typeCharacter, speed);
           else finishTarget();
         };
@@ -606,6 +673,13 @@
   };
 
   initMobileWorkflowMotion();
+  if (workflowMobileQuery.matches && !reducedMotion) {
+    motionDependenciesReady.then(() => {
+      if (!window.gsap || !window.ScrollTrigger || !mobileWorkflowMotionInitialized) return;
+      if (teardownMobileWorkflowMotion) teardownMobileWorkflowMotion();
+      initMobileWorkflowMotion();
+    });
+  }
   if (typeof workflowMobileQuery.addEventListener === 'function') {
     workflowMobileQuery.addEventListener('change', event => {
       if (event.matches) initMobileWorkflowMotion();
