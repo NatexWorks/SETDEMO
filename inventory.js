@@ -54,22 +54,6 @@
     }
   });
 
-  /* Legacy synchronous Lenis initialization removed; dependency loader above owns setup. */
-  if (false && mobileLenisQuery.matches && !reducedMotion && typeof window.Lenis === 'function') {
-    lenisInstance = new window.Lenis({
-      autoRaf: false,
-      anchors: true,
-      smoothWheel: true,
-      syncTouch: true,
-      syncTouchLerp: 0.075,
-      touchInertiaExponent: 1.7,
-      lerp: 0.09,
-      respectReducedMotion: true,
-      stopInertiaOnNavigate: true
-    });
-    window.__natexLenis = lenisInstance;
-  }
-
   const toggle = document.querySelector('.menu-toggle');
   const menu = document.querySelector('#site-menu');
   if (toggle && menu) {
