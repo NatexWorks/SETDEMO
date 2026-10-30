@@ -7,7 +7,7 @@ A responsive, dark portfolio website for NatexWorks, built with semantic HTML, C
 Open the live site after enabling GitHub Pages:
 **Settings → Pages → Deploy from a branch → main → /(root) → Save**
 
-The URL will be: https://natexworks.github.io/Portfolio/ (GitHub Pages URLs may be case-sensitive; confirm the URL in repository Settings → Pages).
+The staging preview URL is: https://natexworks.github.io/SETDEMO/ (GitHub Pages URLs may be case-sensitive; confirm deployment status in Actions).
 
 ## Features
 
