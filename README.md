@@ -48,10 +48,20 @@ natexworks@gmail.com
 
 ## Experimental motion stack (SETDEMO)
 
-- GSAP 3.15.0 + ScrollTrigger: scroll-linked workflow card entrances and the section handoff on the inventory case study.
-- Lenis 1.3.27: mobile-only smooth scrolling, connected to the GSAP ticker; native desktop/tablet scrolling is preserved.
-- Three.js 0.186.1: a small decorative 3D wireframe accent in the homepage project preview. It is lazy-loaded and omitted for data-saver / low-memory devices.
-- Lucide 1.64.0: consistent inline SVG icons.
+- GSAP 3.15.0 + ScrollTrigger: scroll-linked workflow card entrances and the section handoff on the inventory case study; libraries load only on eligible mobile devices.
+- Lenis 1.3.27: mobile-only smooth scrolling, synchronized with the GSAP ticker; native desktop/tablet scrolling is preserved.
+- Three.js 0.186.1: a decorative 3D wireframe accent in the homepage preview, loaded only after desktop pointer or keyboard focus intent. Mobile and reduced-motion visitors retain a lightweight inline SVG fallback.
+- Lucide icon artwork: the selected icons are embedded as inline SVGs, avoiding the full icon-library runtime on every page.
 - Open Graph and Twitter preview metadata use the shared `og-image.svg` artwork. SETDEMO pages carry `noindex` metadata and retain Portfolio canonicals so the staging copy is not intended for search indexing.
 
 All third-party scripts are CDN-loaded; the project still has no build step. When a CDN is unavailable, existing CSS/native-scroll fallbacks remain available.
+
+
+## Lighthouse-focused refinements (staging)
+
+- Kept the existing page layouts and card order; contrast fixes adjust only secondary-label colors.
+- Replaced typewriter `aria-label` attributes on non-interactive spans/paragraphs with visually hidden full text plus an `aria-hidden` animated visual copy.
+- Removed unnecessary animation libraries from the homepage and services page; inventory motion dependencies are requested only on eligible mobile devices, with a native-scroll fallback.
+- Reduced the featured café image payload using responsive `srcset` sizes and a smaller encoded rendition.
+- Deferred the optional 3D accent until desktop pointer/focus intent; mobile keeps a static SVG fallback.
+- The staging site intentionally remains `noindex,nofollow`; Lighthouse's crawlability/SEO check therefore stays flagged until the staging copy is promoted to the canonical production host.
