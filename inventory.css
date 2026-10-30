@@ -469,3 +469,7 @@ body:has(.glass-menu.is-open) .topbar .back-link {
   visibility: hidden !important;
   pointer-events: none !important;
 }
+
+
+/* Lucide workflow icons — maintain the existing card layout and spacing. */
+.workflow-icon [data-lucide]{width:24px;height:24px;stroke-width:1.55}
