@@ -6,10 +6,16 @@ import { absoluteSiteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Selected work",
-  description: "Explore NatexWorks projects: a MERN-stack inventory application, a café website preview, and a clearly labelled local-search concept.",
+  description: "Explore NatexWorks projects: an inventory and point-of-sale application, a café website preview, and a clearly labelled local-search concept.",
   alternates: { canonical: absoluteSiteUrl("/work") },
   openGraph: { url: absoluteSiteUrl("/work") }
 };
+
+function artworkCaption(kind: (typeof projects)[number]["kind"]): string {
+  if (kind === "inventory") return "Illustrative interface artwork · not a product screenshot";
+  if (kind === "cafe") return "Website direction study · not a page capture";
+  return "Illustrative local-search concept";
+}
 
 export default function WorkPage() {
   return (
@@ -34,6 +40,7 @@ export default function WorkPage() {
                 <ProjectArt kind={project.kind} />
                 <span className="project-open-mark" aria-hidden="true">↗</span>
               </Link>
+              <p className="project-art-caption">{artworkCaption(project.kind)}</p>
               <div className="project-card-info">
                 <p className="eyebrow">{project.kicker}</p>
                 <h2><Link href={"/work/" + project.slug}>{project.title}</Link></h2>
@@ -47,8 +54,8 @@ export default function WorkPage() {
       </section>
       <section className="work-index-note">
         <p className="eyebrow">A NOTE ON PROJECT CONTEXT</p>
-        <p>The inventory application is a working project with a live demo. Neswef is presented as a website preview. The local-search example is a concept only. Interface mockups may contain sample or illustrative details; use each project’s notes for context.</p>
-        <Link className="arrow-link" href="/contact">Discuss a similar challenge <span aria-hidden="true">↗</span></Link>
+        <p>The inventory application is documented from its public source repository and linked demo. Neswef is presented as a website preview. The local-search example is a concept only. Portfolio artwork is illustrative; project notes explain which functionality is source-verified and which content remains sample data.</p>
+        <Link className="arrow-link" href="/start-project">Discuss a similar challenge <span aria-hidden="true">↗</span></Link>
       </section>
     </main>
   );

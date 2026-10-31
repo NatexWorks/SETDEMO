@@ -2,6 +2,12 @@ import Link from "next/link";
 import ProjectArt from "@/components/project-art";
 import type { Project } from "@/lib/projects";
 
+function artworkCaption(kind: Project["kind"]): string {
+  if (kind === "inventory") return "Illustrative interface artwork · not a product screenshot";
+  if (kind === "cafe") return "Website direction study · not a page capture";
+  return "Illustrative local-search concept";
+}
+
 export default function ProjectCard({ project, index = 0 }: { project: Project; index?: number }) {
   return (
     <article className={`project-card project-card-${project.kind}`} data-reveal>
@@ -9,6 +15,7 @@ export default function ProjectCard({ project, index = 0 }: { project: Project; 
         <ProjectArt kind={project.kind} />
         <span className="project-open-mark" aria-hidden="true">↗</span>
       </Link>
+      <p className="project-art-caption">{artworkCaption(project.kind)}</p>
       <div className="project-card-info">
         <p className="eyebrow">{String(index + 1).padStart(2, "0")} / {project.category}</p>
         <h3><Link href={`/work/${project.slug}`}>{project.title}</Link></h3>

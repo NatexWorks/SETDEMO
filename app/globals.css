@@ -1087,3 +1087,15 @@ h1 em, h2 em { color: var(--blue); font-style: normal; }
     visibility: visible !important;
   }
 }
+
+
+/* Make the illustrative nature of portfolio-generated project artwork explicit. */
+.project-art-caption {
+  margin: 8px 0 0;
+  color: #85877f;
+  font: 7px/1.5 var(--mono);
+  letter-spacing: .045em;
+}
+@media (max-width: 760px) {
+  .project-art-caption { font-size: 7px; }
+}
