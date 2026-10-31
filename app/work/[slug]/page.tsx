@@ -61,7 +61,7 @@ export default async function ProjectPage({ params }: PageProps) {
       </section>
 
       {slug === "local-discovery" && (
-        <section className="local-signal-field section-pad" aria-labelledby="local-signal-heading">
+        <section className="local-signal-field section-pad" aria-labelledby="local-signal-heading" data-local-signal-field>
           <div className="section-kicker"><span>LOCAL SIGNAL FIELD</span><span>GEOGRAPHY / INFORMATION / NEXT STEP</span></div>
           <div className="local-signal-field__grid">
             <div className="local-signal-field__copy">
