@@ -49,7 +49,7 @@ export default function ProjectArt({
   return (
     <div className={"project-art project-art--cafe" + (compact ? " is-compact" : "")} aria-hidden="true">
       <div className="cafe-panel">
-        <div className="cafe-panel__nav"><b>morrow<span>.</span></b><i>MENU&nbsp;&nbsp; STORY&nbsp;&nbsp; VISIT</i><small>↗</small></div>
+        <div className="cafe-panel__nav"><b>neswef<span>.</span></b><i>MENU&nbsp;&nbsp; STORY&nbsp;&nbsp; VISIT</i><small>↗</small></div>
         <div className="cafe-panel__hero">
           <div><small>A LITTLE PLACE TO PAUSE</small><strong>Stay for<br /><em>a little</em><br />longer.</strong><span>Good coffee. Fresh bakes. A softer kind of everyday.</span></div>
           <div className="cafe-cup"><span /><i /></div>

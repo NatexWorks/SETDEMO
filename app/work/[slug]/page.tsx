@@ -2,6 +2,8 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ProjectArt from "@/components/project-art";
+import InventoryCaseStudy from "@/components/inventory-case-study";
+import CafeCaseStudy from "@/components/cafe-case-study";
 import { projects } from "@/content/site";
 
 type PageProps = { params: Promise<{ slug: string }> };
@@ -26,6 +28,8 @@ export default async function ProjectPage({ params }: PageProps) {
   const { slug } = await params;
   const project = projects.find((item) => item.slug === slug);
   if (!project) notFound();
+  if (slug === "inventory-management") return <InventoryCaseStudy project={project} />;
+  if (slug === "cafe-presence") return <CafeCaseStudy project={project} />;
 
   return (
     <>

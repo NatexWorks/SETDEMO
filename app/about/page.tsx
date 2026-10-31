@@ -20,7 +20,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="about-statement section-pad">
+      <section className="about-statement section-pad" data-mobile-reveal>
         <div className="section-kicker"><span>THE BELIEF</span><span>USEFULNESS BEFORE COMPLEXITY</span></div>
         <div className="about-statement__grid">
           <h2>A good interface<br />is not the whole<br /><em>answer.</em></h2>
@@ -42,7 +42,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="about-method section-pad">
+      <section className="about-method section-pad" data-mobile-reveal>
         <div className="section-kicker"><span>THE METHOD</span><span>FOUR CLEAR MOVES</span></div>
         <div className="about-method__list">
           <article><span>01</span><div><h3>Understand before proposing.</h3><p>Start with the goal, audience, current process, and the problem that needs attention.</p></div></article>
@@ -52,7 +52,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="about-last section-pad">
+      <section className="about-last section-pad" data-mobile-reveal>
         <p className="eyebrow">NO INFLATED PROMISES</p>
         <h2>Good work should<br /><em>hold up in use.</em></h2>
         <p>That means useful content, accessible interactions, responsive layouts, and a clear understanding of what is—and is not—included.</p>

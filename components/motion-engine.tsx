@@ -91,5 +91,127 @@ export default function MotionEngine() {
     });
     return () => { cancelled = true; dispose(); };
   }, [pathname]);
+
+  useEffect(() => {
+    let cancelled = false;
+    let starting = false;
+    let cleanup = () => {};
+    const query = window.matchMedia("(max-width: 700px) and (prefers-reduced-motion: no-preference)");
+
+    const initialise = async () => {
+      if (!query.matches || cancelled || starting || !document.querySelector("[data-mobile-workflow-story]")) return;
+      starting = true;
+      const [{ gsap }, { ScrollTrigger }] = await Promise.all([import("gsap"), import("gsap/ScrollTrigger")]);
+      if (cancelled || !query.matches) {
+        starting = false;
+        return;
+      }
+      gsap.registerPlugin(ScrollTrigger);
+      const context = gsap.context(() => {
+        document.documentElement.classList.add("mobile-story-motion-ready");
+        const section = document.querySelector<HTMLElement>("[data-mobile-workflow-story]");
+        const stage = section?.querySelector<HTMLElement>("[data-mobile-workflow-stage]");
+        const stack = section?.querySelector<HTMLElement>("[data-mobile-workflow-stack]");
+        const cards = stack ? gsap.utils.toArray<HTMLElement>("[data-workflow-card]", stack) : [];
+        const nextPanel = section?.nextElementSibling instanceof HTMLElement ? section.nextElementSibling : null;
+
+        if (stage && stack && cards.length === 4) {
+          cards.forEach((card, index) => {
+            gsap.set(card, {
+              zIndex: index + 1,
+              opacity: 0,
+              x: index % 2 === 0 ? -66 : 66,
+              y: 38,
+              rotation: index % 2 === 0 ? -6 : 6,
+              scale: 0.965,
+              transformOrigin: "50% 50%",
+              clipPath: "inset(0% 0% 100% 0% round 18px)",
+            });
+          });
+
+          const timeline = gsap.timeline({
+            scrollTrigger: {
+              trigger: stage,
+              start: "top top+=78",
+              end: () => "+=" + Math.max(window.innerHeight * 1.7, stage.offsetHeight - window.innerHeight * 0.15),
+              scrub: 0.72,
+              invalidateOnRefresh: true,
+            },
+          });
+
+          cards.forEach((current, index) => {
+            const at = index * 0.78;
+            if (index > 0) {
+              const previous = cards[index - 1];
+              timeline.to(previous, {
+                y: index * 13,
+                scale: 0.985,
+                opacity: 0.84,
+                clipPath: "inset(0% 0% 0% 0% round 18px)",
+                duration: 0.34,
+                ease: "none",
+              }, at);
+            }
+            timeline.to(current, {
+              x: 0,
+              y: 0,
+              rotation: 0,
+              scale: 1,
+              opacity: 1,
+              clipPath: "inset(0% 0% 0% 0% round 18px)",
+              duration: 0.64,
+              ease: "power2.out",
+            }, at + (index === 0 ? 0 : 0.06));
+          });
+
+          const transitionAt = cards.length * 0.78 + 0.05;
+          timeline.to(stack, { rotateX: -5, scale: 0.955, y: -12, duration: 0.5, ease: "none" }, transitionAt);
+          if (nextPanel) {
+            gsap.set(nextPanel, { y: 64, scale: 0.985, transformOrigin: "50% 0%" });
+            timeline.to(nextPanel, { y: 0, scale: 1, duration: 0.62, ease: "none" }, transitionAt + 0.05);
+          }
+        }
+
+        gsap.utils.toArray<HTMLElement>("[data-mobile-reveal]").forEach((element) => {
+          gsap.fromTo(element, { opacity: 0.72, y: 18 }, {
+            opacity: 1,
+            y: 0,
+            ease: "none",
+            scrollTrigger: { trigger: element, start: "top 88%", end: "top 60%", scrub: 0.5, invalidateOnRefresh: true },
+          });
+        });
+        return () => document.documentElement.classList.remove("mobile-story-motion-ready");
+      }, document.body);
+      ScrollTrigger.refresh();
+      cleanup = () => context.revert();
+      starting = false;
+    };
+
+    const onChange = () => {
+      if (query.matches) void initialise().catch(() => {
+        starting = false;
+        document.documentElement.classList.remove("mobile-story-motion-ready");
+      });
+      else {
+        cleanup();
+        cleanup = () => {};
+        document.documentElement.classList.remove("mobile-story-motion-ready");
+        starting = false;
+      }
+    };
+
+    query.addEventListener("change", onChange);
+    if (query.matches) void initialise().catch(() => {
+      starting = false;
+      document.documentElement.classList.remove("mobile-story-motion-ready");
+    });
+    return () => {
+      cancelled = true;
+      query.removeEventListener("change", onChange);
+      cleanup();
+      document.documentElement.classList.remove("mobile-story-motion-ready");
+    };
+  }, [pathname]);
+
   return null;
 }

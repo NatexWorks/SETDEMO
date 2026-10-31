@@ -3,7 +3,7 @@ export type Project = {
   number: string;
   title: string;
   category: string;
-  status: "Working product" | "Concept";
+  status: "Working product" | "Website preview" | "Concept";
   summary: string;
   challenge: string;
   approach: string;
@@ -48,15 +48,21 @@ export const projects: Project[] = [
   {
     slug: "inventory-management",
     number: "01",
-    title: "Inventory management system",
-    category: "Product build",
+    title: "Inventory Management System",
+    category: "Business application",
     status: "Working product",
-    summary: "A MERN-stack business app bringing product records, stock visibility, and inventory insights into one workspace.",
-    challenge: "Small retailers can lose time when product details, stock counts, and billing-related tasks sit in separate places. This project explores a more connected workspace for repeatable day-to-day work.",
-    approach: "The experience brings product and category records, inventory visibility, billing-related workflows, and reporting concepts closer together. Barcode-assisted lookup is included as a supported workflow where compatible scanner setup is available.",
-    deliverables: ["Product and category records", "Stock-level visibility and low-stock cues", "Billing-related workflows", "Barcode-assisted product lookup", "Inventory insight and reporting concepts"],
-    technology: ["MERN stack"],
-    note: "The live demo is the source of truth for currently enabled flows. Some business-specific features may require configuration or further implementation before production use. No sales, time-saving, or financial outcome is claimed here.",
+    summary: "An inventory and point-of-sale application connecting product records, stock visibility, barcode-assisted lookup, orders, returns, and reporting workflows.",
+    challenge: "Retail work connects several small but important tasks: organising products, checking quantities, finding an item, and recording a sale. When those tasks are separated, it becomes harder to keep the catalogue, stock, and order history in step.",
+    approach: "The public source uses a Next.js App Router interface with authenticated API routes and service modules. Product and category records provide the catalogue; stock levels, barcode records, orders, returns, and reporting connect the wider workflow.",
+    deliverables: [
+      "Create, edit, search, and organise product records by category, SKU, description, and barcode",
+      "Review quantities and low-stock products; the current dashboard query treats five units or fewer as low stock",
+      "Use camera-assisted barcode scanning for supported formats, subject to browser camera support and permission",
+      "Create orders for approval, complete or cancel them, and process returns through the order workflow",
+      "Review dashboard summaries, recent orders, completed-order revenue, top products, and category analytics"
+    ],
+    technology: ["Next.js", "React 19", "MongoDB", "Mongoose", "ZXing"],
+    note: "These capabilities are present in the public source repository. The linked live deployment may differ by commit, environment, or configuration, so verify the exact enabled flows in the demo before relying on them operationally. The portfolio interface artwork is illustrative, not a captured application screenshot. No adoption, revenue, time-saved, or production-impact metric is claimed.",
     art: "inventory",
   },
   {
@@ -76,15 +82,20 @@ export const projects: Project[] = [
   {
     slug: "cafe-presence",
     number: "03",
-    title: "Café digital presence",
-    category: "Website concept",
-    status: "Concept",
-    summary: "A warm, mobile-friendly website concept with clear menu, location, contact paths, and a foundation for local discovery.",
-    challenge: "A café website should help a visitor quickly answer the practical questions: what is served, where the café is, and how to visit.",
-    approach: "The concept uses an editorial visual direction and a simple information hierarchy, with menu, story, and visit paths kept easy to find.",
-    deliverables: ["Responsive homepage direction", "Menu and visit information structure", "Contact and location pathways", "Local-discovery foundations"],
-    technology: [],
-    note: "Visual concept only. It is not a commissioned client project or a claim about a real café's results.",
+    title: "Neswef Café",
+    category: "Business website",
+    status: "Website preview",
+    summary: "A warm, café-led website preview built around atmosphere, menu discovery, and clear visit information.",
+    challenge: "A café website needs to do more than display a logo. Visitors should be able to get a feel for the place, explore the menu, and find the information needed for a visit without searching through an unstructured page.",
+    approach: "The source website uses an editorial, photo-led direction with a warm paper, forest-green, and terracotta palette. The homepage connects the story, ambience, menu highlights, and visit information; a separate menu page supports category browsing and search.",
+    deliverables: [
+      "Photo-led homepage with café identity, story, ambience, menu highlights, and visit-oriented sections",
+      "Separate menu page with 25 sample entries, category navigation, and live search",
+      "Responsive layouts and mobile navigation with keyboard Escape support",
+      "Reservation request form with native validation and an email-draft handoff"
+    ],
+    technology: ["HTML", "CSS", "Vanilla JavaScript"],
+    note: "This is a website preview, not a connected restaurant booking system. The source README identifies menu items, prices, address, opening hours, email, and social details as sample content to replace. The reservation form opens an email draft; it does not store a request or confirm a booking. No customer or commercial outcome is claimed.",
     art: "cafe",
   },
 ];

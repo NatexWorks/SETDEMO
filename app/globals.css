@@ -829,3 +829,332 @@ main { display: block; overflow: clip; }
     transition-duration: .01ms !important;
   }
 }
+
+
+/* Service-to-project evidence links and project-enquiry page. */
+.service-proof-link {
+  display: inline-flex;
+  width: fit-content;
+  margin-top: 15px;
+  color: var(--blue);
+  font-size: 11px;
+  font-weight: 600;
+  text-underline-offset: 4px;
+}
+.service-proof-link:hover { text-decoration: underline; }
+
+/* Four equal inventory cards: a natural grid on larger screens, a vertical fallback on mobile. */
+.workflow-showcase { position: relative; overflow: clip; background: var(--paper-deep); }
+.workflow-showcase__heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 35px;
+  margin: 45px 0 38px;
+}
+.workflow-showcase__heading h2 {
+  margin: 0;
+  font-size: clamp(42px,5.5vw,76px);
+  font-weight: 500;
+  line-height: .98;
+  letter-spacing: -.075em;
+}
+.workflow-showcase__heading h2 em { color: var(--blue); }
+.workflow-showcase__heading p {
+  max-width: 390px;
+  margin: 0 0 5px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.8;
+}
+.workflow-stack {
+  display: grid;
+  grid-template-columns: repeat(4,minmax(0,1fr));
+  gap: 13px;
+  perspective: 1000px;
+}
+.workflow-card {
+  min-width: 0;
+  min-height: 340px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 22px 20px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--paper-light);
+  box-shadow: 0 18px 38px rgba(24,27,35,.09), 0 2px 5px rgba(24,27,35,.04);
+  transform-style: preserve-3d;
+}
+.workflow-card--stock { background: #e2e6f4; }
+.workflow-card--checkout { color: var(--paper-light); background: var(--ink); border-color: #343a49; }
+.workflow-card--barcode { background: #f1e2d7; }
+.workflow-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--muted);
+  font: 8px var(--mono);
+  letter-spacing: .1em;
+}
+.workflow-card--checkout .workflow-card__top { color: #c6cbd8; }
+.workflow-card__top b {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  color: var(--blue);
+  font-size: 18px;
+  font-weight: 400;
+}
+.workflow-card--checkout .workflow-card__top b { color: #aeb8ff; }
+.workflow-card h3 {
+  margin: 0 0 13px;
+  font-size: clamp(25px,2.6vw,37px);
+  font-weight: 500;
+  line-height: .98;
+  letter-spacing: -.07em;
+}
+.workflow-card p {
+  max-width: 270px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.8;
+}
+.workflow-card--checkout p { color: #cbd0db; }
+.workflow-card__detail {
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font: 7px/1.5 var(--mono);
+  letter-spacing: .07em;
+}
+.workflow-card--checkout .workflow-card__detail { border-color: #454c5b; color: #bac2d6; }
+.workflow-showcase__foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 20px;
+  color: var(--muted);
+  font: 8px var(--mono);
+  letter-spacing: .07em;
+}
+
+/* Independent inventory and café project narratives. */
+.case-deep { --case-accent: var(--blue); }
+.case-deep--inventory { --case-accent: #aeb9ff; }
+.case-deep--cafe { --case-accent: #e4b18d; }
+.case-deep__hero { background: #191d27; color: var(--paper-light); }
+.case-deep--cafe .case-deep__hero { background: #2d3b32; }
+.case-deep__hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0,1.05fr) minmax(340px,.95fr);
+  gap: clamp(35px,6vw,85px);
+  align-items: center;
+  margin-top: 58px;
+}
+.case-deep__hero .eyebrow { color: #c2c7d3; }
+.case-deep__hero h1 {
+  max-width: 760px;
+  margin: 22px 0;
+  font-size: clamp(49px,6.4vw,86px);
+  font-weight: 500;
+  line-height: .94;
+  letter-spacing: -.08em;
+}
+.case-deep__hero h1 em { color: var(--case-accent); font-style: normal; }
+.case-deep__summary { max-width: 570px; color: #c9ced8; font-size: 13px; line-height: 1.9; }
+.case-deep__meta { display: flex; flex-wrap: wrap; gap: 8px; margin: 25px 0; }
+.case-deep__meta span {
+  padding: 7px 10px;
+  border: 1px solid #ffffff35;
+  color: #d0d4de;
+  font: 8px var(--mono);
+  letter-spacing: .04em;
+}
+.case-deep__hero .button { background: var(--paper-light); color: var(--ink); }
+.case-deep__hero .button:hover { background: #e9e7f8; }
+.case-deep__art { min-width: 0; }
+.case-deep__art .project-art { min-height: 390px; }
+.case-deep__art > p { margin: 10px 0 0; color: #bfc4d1; font: 7px/1.5 var(--mono); letter-spacing: .06em; }
+.case-deep__intro {
+  display: grid;
+  grid-template-columns: .55fr 1.45fr;
+  gap: 7vw;
+  align-items: start;
+}
+.case-deep__intro > div { max-width: 850px; }
+.case-deep__intro h2 {
+  margin: 0 0 20px;
+  font-size: clamp(38px,5vw,68px);
+  font-weight: 500;
+  line-height: .98;
+  letter-spacing: -.075em;
+}
+.case-deep__intro p:not(.section-kicker) { max-width: 730px; color: var(--muted); font-size: 14px; line-height: 1.9; }
+.case-deep__chapters { background: var(--paper-deep); }
+.case-deep--cafe .case-deep__chapters { background: #efe5d9; }
+.case-deep__chapters > h2 {
+  margin: 45px 0 38px;
+  font-size: clamp(44px,5.7vw,76px);
+  font-weight: 500;
+  line-height: .96;
+  letter-spacing: -.08em;
+}
+.case-deep__chapters > h2 em { color: var(--blue); }
+.case-deep--cafe .case-deep__chapters > h2 em { color: #9b5c3f; }
+.case-deep__grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 13px; }
+.case-deep__grid article {
+  min-height: 265px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 24px;
+  border: 1px solid var(--line);
+  background: var(--paper-light);
+}
+.case-deep__grid article > span { color: var(--muted); font: 8px var(--mono); letter-spacing: .09em; }
+.case-deep__grid h3 {
+  max-width: 470px;
+  margin: 31px 0 12px;
+  font-size: clamp(23px,2.5vw,34px);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -.06em;
+}
+.case-deep__grid p { max-width: 570px; margin: 0 0 24px; color: var(--muted); font-size: 11px; line-height: 1.85; }
+.case-deep__grid b { margin-top: auto; padding-top: 13px; color: var(--muted); font: 7px/1.5 var(--mono); letter-spacing: .07em; }
+.case-deep__grid article.is-dark { background: #191d27; border-color: #343a49; color: var(--paper-light); }
+.case-deep__grid article.is-dark > span, .case-deep__grid article.is-dark b { color: #c2c8d9; }
+.case-deep__grid article.is-dark p { color: #ccd1dc; }
+.case-deep__grid article.is-cafe-dark { background: #2e4035; border-color: #40594b; color: var(--paper-light); }
+.case-deep__grid article.is-cafe-dark > span, .case-deep__grid article.is-cafe-dark b { color: #e5c9ad; }
+.case-deep__grid article.is-cafe-dark p { color: #e2e4dc; }
+.case-deep__inline-link { margin-top: 14px; color: var(--blue); font-size: 10px; font-weight: 600; }
+.case-deep__technical { display: grid; grid-template-columns: 1fr 1fr; gap: 8vw; align-items: center; }
+.case-deep__technical h2 { margin: 16px 0; font-size: clamp(42px,5vw,67px); font-weight: 500; line-height: .98; letter-spacing: -.075em; }
+.case-deep__technical h2 em { color: var(--blue); }
+.case-deep__technical p:not(.eyebrow) { max-width: 600px; color: var(--muted); font-size: 12px; line-height: 1.9; }
+.case-deep__tech-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+.case-deep__tech-grid span { display: flex; align-items: center; min-height: 54px; padding: 12px; border: 1px solid var(--line); background: var(--paper-light); font-size: 10px; }
+.case-deep__evidence { display: grid; grid-template-columns: 40px 1fr; gap: 20px; background: #e2e6df; }
+.case-deep__evidence--cafe { background: #eee2d4; }
+.case-deep__evidence-mark { width: 32px; height: 32px; display: grid; place-items: center; border: 1px solid var(--blue); border-radius: 50%; color: var(--blue); font-family: var(--serif); }
+.case-deep__evidence h2 { margin: 14px 0; font-size: clamp(32px,4vw,56px); font-weight: 500; line-height: .98; letter-spacing: -.07em; }
+.case-deep__evidence p:not(.eyebrow) { max-width: 850px; color: var(--muted); font-size: 12px; line-height: 1.9; }
+.case-deep__links { display: flex; flex-wrap: wrap; gap: 20px 28px; margin-top: 20px; }
+.case-deep__links a { color: var(--blue); font-size: 11px; font-weight: 600; }
+.case-deep__next { display: flex; align-items: end; justify-content: space-between; gap: 36px; background: var(--blue); color: white; }
+.case-deep__next--cafe { background: #2e4035; }
+.case-deep__next .eyebrow { color: #e3e6ff; }
+.case-deep__next h2 { margin: 14px 0; font-size: clamp(41px,5vw,66px); font-weight: 500; letter-spacing: -.075em; }
+.case-deep__next p:not(.eyebrow) { max-width: 520px; color: #e0e3ff; font-size: 12px; line-height: 1.8; }
+.case-deep__next > div:last-child { display: grid; gap: 14px; justify-items: start; }
+.case-deep__next .button--light { background: var(--paper-light); color: var(--ink); }
+.case-deep__next .text-link { color: white; }
+.case-deep__next .text-link::after { border-color: #ffb18f; }
+
+/* The project brief page reuses the accessible mail-draft form and makes its behaviour explicit. */
+.project-enquiry-form { display: grid; }
+.project-form-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; }
+.project-enquiry-form label span { color: var(--muted); font-size: 10px; font-weight: 400; }
+.project-enquiry-form .enquiry-form__privacy { margin-top: 12px; }
+
+/* Progress-linked mobile storytelling. Desktop/tablet layout above remains in its own grid. */
+@media (max-width: 700px) {
+  .workflow-showcase { padding-top: 72px; padding-bottom: 80px; }
+  .workflow-showcase__heading { display: block; margin: 36px 0 26px; }
+  .workflow-showcase__heading h2 { font-size: clamp(40px,10vw,55px); }
+  .workflow-showcase__heading p { margin-top: 20px; font-size: 11px; }
+  .workflow-stack { grid-template-columns: 1fr; gap: 12px; }
+  .workflow-card { min-height: 258px; padding: 19px; }
+  .workflow-card h3 { font-size: 32px; }
+  .workflow-card p { max-width: 340px; font-size: 11px; }
+  .workflow-showcase__foot { display: grid; gap: 7px; font-size: 7px; }
+  .service-proof-link { margin-top: 12px; }
+  .case-deep__hero { padding-top: 45px; padding-bottom: 60px; }
+  .case-deep__hero-grid { grid-template-columns: 1fr; gap: 28px; margin-top: 42px; }
+  .case-deep__hero h1 { font-size: clamp(43px,11vw,67px); }
+  .case-deep__summary { font-size: 12px; }
+  .case-deep__art .project-art { min-height: 285px; }
+  .case-deep__intro { display: block; }
+  .case-deep__intro > div { margin-top: 25px; }
+  .case-deep__intro h2 { font-size: clamp(37px,9.6vw,52px); }
+  .case-deep__intro p:not(.section-kicker) { font-size: 12px; }
+  .case-deep__chapters > h2 { margin: 35px 0 28px; font-size: 47px; }
+  .case-deep__grid { grid-template-columns: 1fr; gap: 10px; }
+  .case-deep__grid article { min-height: 250px; padding: 20px; }
+  .case-deep__grid h3 { margin-top: 26px; font-size: 27px; }
+  .case-deep__grid p { font-size: 11px; }
+  .case-deep__technical { grid-template-columns: 1fr; gap: 25px; }
+  .case-deep__technical h2 { font-size: 44px; }
+  .case-deep__technical p:not(.eyebrow) { font-size: 11px; }
+  .case-deep__tech-grid { gap: 7px; }
+  .case-deep__tech-grid span { min-height: 50px; padding: 10px; font-size: 9px; }
+  .case-deep__evidence { grid-template-columns: 32px 1fr; gap: 12px; }
+  .case-deep__evidence h2 { font-size: 35px; }
+  .case-deep__evidence p:not(.eyebrow) { font-size: 11px; }
+  .case-deep__links { display: grid; gap: 13px; }
+  .case-deep__next { display: block; }
+  .case-deep__next h2 { font-size: 43px; }
+  .case-deep__next > div:last-child { margin-top: 26px; }
+  .project-form-grid { grid-template-columns: 1fr; gap: 0; }
+  .start-project-page { padding-top: 45px; }
+}
+
+/* Sticky stack is only activated after GSAP is ready; static cards remain visible otherwise. */
+@media (max-width: 700px) {
+  html.mobile-story-motion-ready .workflow-stage {
+    position: relative;
+    height: 220svh;
+    margin-top: 18px;
+  }
+  html.mobile-story-motion-ready .workflow-stack {
+    position: sticky;
+    top: 78px;
+    display: block;
+    height: calc(100svh - 102px);
+    min-height: 360px;
+    perspective: 1000px;
+  }
+  html.mobile-story-motion-ready .workflow-card {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    left: 0;
+    height: min(54svh,405px);
+    min-height: 275px;
+    max-height: calc(100svh - 128px);
+    transform-origin: 50% 50%;
+  }
+  html.mobile-story-motion-ready [data-workflow-next-panel] {
+    position: relative;
+    z-index: 4;
+    margin-top: -70px;
+    border-radius: 24px 24px 0 0;
+    background: var(--paper);
+    box-shadow: 0 -22px 48px rgba(24,27,35,.12);
+  }
+}
+@media (max-width: 390px) {
+  .case-deep__hero h1 { font-size: 42px; }
+  .workflow-card { min-height: 250px; padding: 17px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .workflow-stage, .workflow-stack, .workflow-card, [data-workflow-next-panel] {
+    height: auto !important;
+    min-height: 0 !important;
+    position: relative !important;
+    top: auto !important;
+    inset: auto !important;
+    margin-top: 0 !important;
+    transform: none !important;
+    clip-path: none !important;
+  }
+  .workflow-stack { display: grid !important; grid-template-columns: 1fr !important; }
+  .workflow-card { display: flex !important; opacity: 1 !important; visibility: visible !important; }
+}
