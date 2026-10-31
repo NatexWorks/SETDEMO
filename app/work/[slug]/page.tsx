@@ -112,7 +112,7 @@ export default async function ProjectPage({ params }: PageProps) {
       </section>
 
       <section className="case-next section-pad">
-        <div><p className="eyebrow">HAVE A RELATED PROBLEM?</p><h2>Let&apos;s shape a<br /><em>useful solution.</em></h2></div>
+        <div><p className="eyebrow">HAVE A RELATED PROBLEM?</p><h2>{slug === "local-discovery" ? <>Make the next<br /><em>step clearer.</em></> : <>Let&apos;s shape a<br /><em>useful solution.</em></>}</h2></div>
         <div><p>Start with the workflow, the goal, and the constraints. The right scope comes before the build.</p><Link className="button button--dark" href="/contact">Discuss a project <span aria-hidden="true">↗</span></Link><Link className="text-link" href="/work">Back to all work <span aria-hidden="true">←</span></Link></div>
       </section>
     </>
