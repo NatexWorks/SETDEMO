@@ -43,7 +43,7 @@ export default function HeroScene() {
 
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const compact = window.matchMedia("(max-width: 760px)").matches;
+    const compact = window.matchMedia("(max-width: 900px)").matches;
     if (reduced || compact || !("IntersectionObserver" in window)) return;
 
     setEnabled(true);
