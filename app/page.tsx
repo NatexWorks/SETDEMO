@@ -26,7 +26,7 @@ export default function HomePage() {
               Digital work<br />that makes business<br /><em>work better.</em>
             </h1>
             <p className="hero-lede">
-              NatexWorks builds clear websites and practical digital tools around the way your business actually works.
+              I build custom websites and practical digital tools around the way a business actually works.
             </p>
             <div className="hero-actions">
               <Link className="button button--dark" href="/work">Explore selected work <span aria-hidden="true">↗</span></Link>
