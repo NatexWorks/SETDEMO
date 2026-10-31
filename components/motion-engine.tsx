@@ -7,7 +7,7 @@ export default function MotionEngine() {
   useEffect(() => {
     let cancelled = false;
     let dispose: () => void = () => {};
-    const hasMotionTargets = document.querySelector(".hero-story, .service-transform, .work-gallery, [data-parallax], .case-study__visual, [data-reveal]");
+    const hasMotionTargets = document.querySelector(".hero-story, .service-transform, .work-gallery, .about-hero-visual, [data-workflow-desktop], [data-process-story], [data-local-signal-field], [data-parallax], .case-study__visual, [data-reveal]");
     if (!hasMotionTargets) return;
     if (!window.matchMedia("(min-width: 900px) and (prefers-reduced-motion: no-preference)").matches) return;
     Promise.all([import("gsap"), import("gsap/ScrollTrigger")]).then(([gsapModule, triggerModule]) => {
@@ -20,12 +20,105 @@ export default function MotionEngine() {
         const context = gsap.context(() => {
           const hero = document.querySelector<HTMLElement>(".hero-story");
           if (hero) {
+            const introTargets = gsap.utils.toArray<HTMLElement>(
+              ".hero-story .hero-topline > span, .hero-story .hero-story__copy > .eyebrow, .hero-story__heading, .hero-lede, .hero-actions, .hero-story__visual",
+            );
+            gsap.fromTo(introTargets, { y: 24, autoAlpha: 0 }, {
+              y: 0, autoAlpha: 1, duration: 0.85, stagger: 0.09, ease: "power3.out",
+              clearProps: "transform,opacity,visibility",
+            });
             gsap.timeline({
               scrollTrigger: { trigger: hero, start: "top top", end: "+=72%", pin: true, scrub: 0.85, anticipatePin: 1, invalidateOnRefresh: true },
             })
               .to(".hero-story__visual", { scale: 1.1, rotate: 7, yPercent: -4, ease: "none" }, 0)
               .to(".hero-story__heading", { yPercent: -13, ease: "none" }, 0)
               .to(".hero-story__note", { opacity: 0.35, y: -18, ease: "none" }, 0);
+          }
+          const pageHeading = document.querySelector<HTMLElement>(".page-hero h1");
+          if (pageHeading && !hero) {
+            gsap.fromTo(pageHeading, { clipPath: "inset(0 0 100% 0)", y: 24 }, {
+              clipPath: "inset(0 0 0% 0)", y: 0, duration: 0.95, ease: "power3.out",
+              clearProps: "clipPath,transform",
+            });
+          }
+          const aboutVisual = document.querySelector<HTMLElement>(".about-hero-visual");
+          if (aboutVisual) {
+            gsap.fromTo(aboutVisual, { autoAlpha: 0, scale: 0.88, y: 24 }, {
+              autoAlpha: 1, scale: 1, y: 0, duration: 1.1, delay: 0.18, ease: "power3.out",
+              clearProps: "transform,opacity,visibility",
+            });
+          }
+          const workflow = document.querySelector<HTMLElement>("[data-workflow-desktop]");
+          if (workflow && getComputedStyle(workflow).display !== "none") {
+            const steps = gsap.utils.toArray<HTMLElement>("[data-workflow-step]", workflow);
+            const panels = gsap.utils.toArray<HTMLElement>("[data-workflow-visual]", workflow);
+            const counter = workflow.querySelector<HTMLElement>("[data-workflow-count]");
+            const progress = workflow.querySelector<HTMLElement>("[data-workflow-progress]");
+            if (steps.length === 4 && panels.length === 4) {
+              gsap.set(panels, { autoAlpha: 0, scale: 0.975, y: 14 });
+              gsap.set(panels[0], { autoAlpha: 1, scale: 1, y: 0 });
+              if (progress) gsap.set(progress, { scaleX: 0.25, transformOrigin: "left center" });
+              const updateActive = (progressValue: number) => {
+                const active = Math.min(steps.length - 1, Math.floor(progressValue * steps.length));
+                steps.forEach((step, index) => step.classList.toggle("is-active", index === active));
+                if (counter) counter.textContent = String(active + 1).padStart(2, "0") + " / 04";
+              };
+              gsap.timeline({
+                scrollTrigger: {
+                  trigger: workflow,
+                  start: "top top+=96",
+                  end: () => "+=" + Math.max(window.innerHeight * 2.1, 1500),
+                  pin: true,
+                  scrub: 0.85,
+                  anticipatePin: 1,
+                  invalidateOnRefresh: true,
+                  onUpdate: (self) => updateActive(self.progress),
+                },
+              }).to(progress || workflow, progress ? { scaleX: 1, duration: 3.15, ease: "none" } : { duration: 3.15, ease: "none" }, 0)
+                .to(panels[0], { autoAlpha: 0, scale: 0.985, y: -12, duration: 0.58, ease: "none" }, 0.72)
+                .to(panels[1], { autoAlpha: 1, scale: 1, y: 0, duration: 0.58, ease: "none" }, 0.78)
+                .to(panels[1], { autoAlpha: 0, scale: 0.985, y: -12, duration: 0.58, ease: "none" }, 1.48)
+                .to(panels[2], { autoAlpha: 1, scale: 1, y: 0, duration: 0.58, ease: "none" }, 1.54)
+                .to(panels[2], { autoAlpha: 0, scale: 0.985, y: -12, duration: 0.58, ease: "none" }, 2.24)
+                .to(panels[3], { autoAlpha: 1, scale: 1, y: 0, duration: 0.58, ease: "none" }, 2.3);
+              updateActive(0);
+            }
+          }
+          const processStory = document.querySelector<HTMLElement>("[data-process-story]");
+          if (processStory) {
+            const processItems = gsap.utils.toArray<HTMLElement>("[data-process-item]", processStory);
+            gsap.set(processStory, { "--process-progress": 0 });
+            ScrollTrigger.create({
+              trigger: processStory,
+              start: "top 72%",
+              end: "bottom 48%",
+              scrub: 0.7,
+              onUpdate: (self) => {
+                gsap.set(processStory, { "--process-progress": self.progress });
+                const active = Math.min(processItems.length - 1, Math.floor(self.progress * processItems.length));
+                processItems.forEach((item, index) => item.classList.toggle("is-active", index === active));
+              },
+            });
+          }
+          const localSignal = document.querySelector<HTMLElement>("[data-local-signal-field]");
+          if (localSignal) {
+            const routePaths = gsap.utils.toArray<SVGPathElement>(".local-signal-field__routes path", localSignal);
+            routePaths.forEach((path, index) => {
+              const length = path.getTotalLength();
+              gsap.set(path, { strokeDasharray: length, strokeDashoffset: length });
+              gsap.to(path, {
+                strokeDashoffset: 0,
+                ease: "none",
+                scrollTrigger: {
+                  trigger: localSignal,
+                  start: "top 72%",
+                  end: "center 45%",
+                  scrub: 0.7,
+                  invalidateOnRefresh: true,
+                },
+                delay: index * 0.04,
+              });
+            });
           }
           const transformation = document.querySelector<HTMLElement>(".service-transform");
           if (transformation) {
