@@ -32,7 +32,7 @@ export default function ProjectArt({
       <div className={"project-art project-art--discovery" + (compact ? " is-compact" : "")} aria-hidden="true">
         <div className="discovery-panel">
           <div className="discovery-panel__top"><b>LOCAL / FINDER</b><span>SEARCH PREVIEW</span></div>
-          <div className="discovery-panel__copy"><small>DISCOVER WHAT'S NEAR</small><strong>Closer than<br />you think.</strong><span>Clear details. Useful directions. A simple next step.</span></div>
+          <div className="discovery-panel__copy"><small>DISCOVER WHAT&apos;S NEAR</small><strong>Closer than<br />you think.</strong><span>Clear details. Useful directions. A simple next step.</span></div>
           <svg viewBox="0 0 600 360" preserveAspectRatio="xMidYMid slice">
             <path d="M-20 80 120 50 220 105 340 60 460 105 630 35M-20 180 115 155 220 205 340 156 460 195 630 130M-20 285 112 245 220 295 340 250 460 292 630 220" />
             <path d="M70 -10 115 90 90 180 155 280 140 390M230 -10 265 85 248 190 300 280 282 390M400 -10 365 90 418 180 390 280 435 390M550 -10 500 80 540 180 495 280 550 390" />
