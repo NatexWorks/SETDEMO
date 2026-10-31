@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { process, services } from "@/content/site";
+import ServiceArt from "@/components/service-art";
 
 export const metadata: Metadata = {
   title: "Services — Websites, applications & local visibility",
@@ -67,6 +68,7 @@ export default function ServicesPage() {
               <p className="eyebrow">{service.kicker}</p>
               <h2>{service.title}</h2>
               <p className="service-detail__description">{service.description}</p>
+              <ServiceArt number={service.number} />
             </div>
             <div>
               <ul className="service-detail__points">
