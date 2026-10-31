@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { services } from "@/lib/projects";
+import { absoluteSiteUrl } from "@/lib/site";
 
 const siteUrl = (process.env.SITE_URL || "https://natexworks.github.io/SETDEMO").replace(/\/+$/, "");
 
 export const metadata: Metadata = {
   title: "Services",
   description: "Business websites, custom web applications, interface refinement, and practical local SEO foundations from NatexWorks.",
-  alternates: { canonical: siteUrl + "/services" },
-  openGraph: { url: siteUrl + "/services" }
+  alternates: { canonical: absoluteSiteUrl("/services") },
+  openGraph: { url: absoluteSiteUrl("/services") }
 };
 
 const journey = [
