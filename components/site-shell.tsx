@@ -52,7 +52,7 @@ export default function SiteShell({ children }: { children: ReactNode }) {
             ))}
           </nav>
 
-          <Link className="header-cta" href="/contact">
+          <Link className="header-cta" href="/start-project">
             <span>Start a project</span>
             <span aria-hidden="true">↗</span>
           </Link>
