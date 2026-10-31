@@ -1,67 +1,89 @@
-# NatexWorks Portfolio
+# NatexWorks — new portfolio
 
-A responsive, dark portfolio website for NatexWorks, built with semantic HTML, CSS, and vanilla JavaScript.
+A new Next.js App Router portfolio direction built independently from the legacy HTML site. The legacy markup is not used as the new page structure or design system.
 
-## Preview
+## Stack
 
-Open the live site after enabling GitHub Pages:
-**Settings → Pages → Deploy from a branch → main → /(root) → Save**
+- Next.js 16 App Router
+- React 19 and TypeScript
+- GSAP + ScrollTrigger for desktop scroll-linked sequences
+- React Three Fiber / Three.js for one optional hero visual
+- CSS design tokens, responsive layouts, and reduced-motion fallbacks
 
-The staging preview URL is: https://natexworks.github.io/SETDEMO/ (GitHub Pages URLs may be case-sensitive; confirm deployment status in Actions).
+No new runtime dependency was added for this implementation.
 
-## Features
+## Routes
 
-- Responsive layout for mobile, tablet, and desktop
-- Dark olive/charcoal palette with lime accents
-- Animated hover states and subtle scroll-reveal effects
-- Mobile navigation with keyboard Escape support
-- Respects the operating system's `prefers-reduced-motion` setting
-- Semantic sections, skip link, focus-visible styles, and labelled navigation
-- No framework or build step required
+- `/` — Home
+- `/services` — Services and process
+- `/work` — Selected work
+- `/work/inventory-management` — Inventory management project
+- `/work/local-discovery` — Local discovery concept
+- `/work/cafe-presence` — Café website concept
+- `/about` — Approach and principles
+- `/contact` — Project enquiry
+- `/inventory.html` and `/services.html` — Legacy-path redirects
 
-## Files
+## Content accuracy
 
-- `index.html` — main portfolio, services, and featured projects
-- `style.css` — responsive layout, glass navigation, visual system, and motion
-- `script.js` — menu interactions, typewriter effect, and reveal effects
-- `inventory.html` — dedicated Inventory Management System case study
-- `inventory.css` — responsive product preview, comparison table, and case-study styling
-- `inventory.js` — glass menu, scroll reveals, and editable cost/time estimate calculator
+The portfolio currently presents four service areas: business websites, custom web applications, SEO and Google Maps visibility, and responsive interface improvements.
 
-## Before publishing
+The inventory management system is the only project described as a working product. It is described as a MERN-stack application with product and category records, stock visibility, billing-related workflows, barcode-assisted lookup, and reporting concepts. The live demo remains the source of truth for currently enabled functionality; some business-specific workflows may need configuration or further implementation.
 
-1. Verify every project link and demo capability.
-2. Replace illustrative inventory metrics and sample café branding with verified product screenshots/details when available. The inventory case-study dashboard is a code-built preview, not a captured screenshot of the live app.
-3. Add real case studies and only publish outcomes you can substantiate.
-4. Test navigation, email link, keyboard focus, reduced motion, and layouts at 320px, 375px, 768px, and 1280px widths.
-5. Check contrast and run Lighthouse or another accessibility/performance audit.
-6. Enable GitHub Pages using the steps above.
+The local discovery and café website entries are explicitly marked as concepts. No fabricated clients, testimonials, certifications, rankings, revenue, time savings, or performance outcomes are published.
 
-## Motion and usability
+Contact address retained from the existing project: `natexworks@gmail.com`.
 
-Motion is intentionally subtle and used to support feedback and hierarchy—not to pressure visitors or hide information. Scroll reveals are disabled when reduced motion is requested. Important content remains in the document without JavaScript.
+## Motion architecture
 
-## Contact
+- Home: desktop pinned hero with scroll-progress-driven visual and typography movement.
+- Services: pinned, three-stage transformation narrative; the visual composition responds to each stage.
+- Work: desktop pinned horizontal editorial gallery. At mobile widths, projects return to a natural vertical list.
+- About: restrained parallax on a static visual composition.
+- Case studies: scroll-linked image-frame reveal.
+- Shared: small optional reveal transitions; all essential content is rendered independently of animation.
 
-natexworks@gmail.com
+GSAP owns scroll-linked transforms. React Three Fiber owns the isolated hero scene. CSS owns layout, focus, responsive behaviour, and reduced-motion fallbacks. Motion is disabled for reduced-motion preferences; pinned and horizontal interactions are restricted to wider screens.
 
+The WebGL hero scene pauses outside its viewport and uses an inline SVG visual fallback on compact screens, reduced-motion devices, or when WebGL is unavailable.
 
-## Experimental motion stack (SETDEMO)
+## Environment
 
-- GSAP 3.15.0 + ScrollTrigger: scroll-linked workflow card entrances and the section handoff on the inventory case study; libraries load only on eligible mobile devices.
-- Lenis 1.3.27: mobile-only smooth scrolling, synchronized with the GSAP ticker; native desktop/tablet scrolling is preserved.
-- Three.js 0.186.1: a decorative 3D wireframe accent in the homepage preview, loaded only after desktop pointer or keyboard focus intent. Mobile and reduced-motion visitors retain a lightweight inline SVG fallback.
-- Lucide icon artwork: the selected icons are embedded as inline SVGs, avoiding the full icon-library runtime on every page.
-- Open Graph and Twitter preview metadata use the shared `og-image.svg` artwork. SETDEMO pages carry `noindex` metadata and retain Portfolio canonicals so the staging copy is not intended for search indexing.
+Set `NEXT_PUBLIC_SITE_URL` (or `SITE_URL`) to the canonical production origin before deployment. This value is used for canonical metadata, sitemap, and robots sitemap references. Without it, the sitemap intentionally returns no URLs rather than emitting a guessed production domain.
 
-All third-party scripts are CDN-loaded; the project still has no build step. When a CDN is unavailable, existing CSS/native-scroll fallbacks remain available.
+Example:
 
+```bash
+NEXT_PUBLIC_SITE_URL=https://your-production-domain.example
+```
 
-## Lighthouse-focused refinements (staging)
+Do not deploy with the example domain. Replace it with the verified canonical host.
 
-- Kept the existing page layouts and card order; contrast fixes adjust only secondary-label colors.
-- Replaced typewriter `aria-label` attributes on non-interactive spans/paragraphs with visually hidden full text plus an `aria-hidden` animated visual copy.
-- Removed unnecessary animation libraries from the homepage and services page; inventory motion dependencies are requested only on eligible mobile devices, with a native-scroll fallback.
-- Reduced the featured café image payload using responsive `srcset` sizes and a smaller encoded rendition.
-- Deferred the optional 3D accent until desktop pointer/focus intent; mobile keeps a static SVG fallback.
-- The staging site intentionally remains `noindex,nofollow`; Lighthouse's crawlability/SEO check therefore stays flagged until the staging copy is promoted to the canonical production host.
+## Local development
+
+```bash
+npm ci
+npm run dev
+```
+
+## Verification commands
+
+```bash
+npm run lint
+npm run typecheck
+npm run build
+```
+
+Responsive browser checks should cover 320, 360, 390, 430, 768, 900, 1024, 1280, and 1440+ CSS pixels, plus keyboard-only navigation and reduced-motion settings.
+
+## Contact form behaviour
+
+The contact form validates required fields client-side and prepares a message in the visitor's default email application using a `mailto:` link. It does not send email from the server or store enquiry data. A backend delivery provider would be a separate, explicitly configured integration.
+
+## Reference analysis and limitations
+
+See [docs/reference-analysis.md](docs/reference-analysis.md) for the seven-site research matrix. Some reference sites limit automated inspection or do not expose readable content; such observations are marked as unverified rather than inferred.
+
+## Deployment
+
+No deployment is performed by this repository change. Configure the canonical URL, review the final production content and project demo, run the verification commands, and deploy only through the project's authorised hosting workflow.

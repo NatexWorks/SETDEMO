@@ -1,0 +1,110 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
+
+const navigation = [
+  { href: "/services", label: "Services" },
+  { href: "/work", label: "Selected work" },
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
+];
+
+export default function SiteShell({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
+
+  return (
+    <>
+      <a className="skip-link" href="#main-content">Skip to content</a>
+      <header className="site-header">
+        <div className="site-header__inner">
+          <Link className="wordmark" href="/" aria-label="NatexWorks home">
+            <span className="wordmark__mark" aria-hidden="true">N<span>×</span></span>
+            <span className="wordmark__name">NatexWorks</span>
+          </Link>
+
+          <nav className="desktop-nav" aria-label="Main navigation">
+            {navigation.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                aria-current={pathname === item.href || pathname.startsWith(item.href + "/") ? "page" : undefined}
+                className="nav-link"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+
+          <Link className="header-cta" href="/contact">
+            <span>Start a project</span>
+            <span aria-hidden="true">↗</span>
+          </Link>
+
+          <button
+            className="menu-toggle"
+            type="button"
+            aria-expanded={menuOpen}
+            aria-controls="mobile-navigation"
+            aria-label={menuOpen ? "Close navigation" : "Open navigation"}
+            onClick={() => setMenuOpen((open) => !open)}
+          >
+            <span />
+            <span />
+          </button>
+        </div>
+
+        <nav
+          id="mobile-navigation"
+          className={"mobile-nav" + (menuOpen ? " is-open" : "")}
+          aria-label="Mobile navigation"
+          aria-hidden={!menuOpen}
+        >
+          {navigation.map((item, index) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              tabIndex={menuOpen ? 0 : -1}
+              aria-current={pathname === item.href || pathname.startsWith(item.href + "/") ? "page" : undefined}
+              onClick={() => setMenuOpen(false)}
+            >
+              <span className="mobile-nav__number">0{index + 1}</span>
+              <span>{item.label}</span>
+              <span aria-hidden="true">↗</span>
+            </Link>
+          ))}
+        </nav>
+      </header>
+
+      <main id="main-content">{children}</main>
+
+      <footer className="site-footer">
+        <div className="site-footer__top">
+          <div>
+            <p className="eyebrow">A practical next step</p>
+            <h2>Have a useful problem<br /><em>worth solving?</em></h2>
+          </div>
+          <Link className="round-link" href="/contact" aria-label="Start a project enquiry">
+            <span aria-hidden="true">↗</span>
+          </Link>
+        </div>
+        <div className="site-footer__bottom">
+          <Link className="wordmark wordmark--footer" href="/">
+            <span className="wordmark__mark" aria-hidden="true">N<span>×</span></span>
+            <span className="wordmark__name">NatexWorks</span>
+          </Link>
+          <p>Thoughtful websites. Useful digital tools.</p>
+          <a href="mailto:natexworks@gmail.com">natexworks@gmail.com</a>
+          <span className="footer-copyright">© {new Date().getFullYear()} NatexWorks</span>
+        </div>
+      </footer>
+    </>
+  );
+}
