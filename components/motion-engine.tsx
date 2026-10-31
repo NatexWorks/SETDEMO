@@ -7,7 +7,7 @@ export default function MotionEngine() {
   useEffect(() => {
     let cancelled = false;
     let dispose: () => void = () => {};
-    const hasMotionTargets = document.querySelector(".hero-story, .service-transform, .work-gallery, .about-hero-visual, [data-workflow-desktop], [data-process-story], [data-local-signal-field], [data-parallax], .case-study__visual, [data-reveal]");
+    const hasMotionTargets = document.querySelector(".hero-story, .service-transform, .work-gallery, .about-hero-visual, [data-workflow-desktop], [data-process-story], [data-local-signal-field], [data-parallax], .case-study__visual, [data-reveal], [data-mobile-reveal]");
     if (!hasMotionTargets) return;
     if (!window.matchMedia("(min-width: 900px) and (prefers-reduced-motion: no-preference)").matches) return;
     Promise.all([import("gsap"), import("gsap/ScrollTrigger")]).then(([gsapModule, triggerModule]) => {
