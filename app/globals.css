@@ -1158,3 +1158,8 @@ main { display: block; overflow: clip; }
   .workflow-stack { display: grid !important; grid-template-columns: 1fr !important; }
   .workflow-card { display: flex !important; opacity: 1 !important; visibility: visible !important; }
 }
+
+
+/* High-contrast metadata labels on the dark case-study hero panels. */
+.case-deep__hero .section-kicker { color: #c2c7d3; }
+.case-deep--cafe .case-deep__hero .section-kicker { color: #e2e5d8; }
