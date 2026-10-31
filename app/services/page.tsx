@@ -54,13 +54,36 @@ export default function ServicesPage() {
             <div className="journey-progress" aria-hidden="true"><span className="journey-progress-fill" /></div>
           </div>
           <div className="journey-stage">
-            {journey.map((item, index) => (
-              <article className="journey-card" data-journey-card key={item.stage}>
-                <div className="journey-card-top"><span>{item.stage}</span><b>0{index + 1} / 03</b></div>
-                <h3>{item.title}</h3><p>{item.copy}</p>
-                <div className="journey-tags">{item.tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
-              </article>
-            ))}
+            <div className="journey-artwork" aria-hidden="true">
+              <div className="journey-object journey-object-brief" data-journey-brief>
+                <span>PROJECT BRIEF / 01</span>
+                <strong>Start with<br /><em>the real need.</em></strong>
+                <i /><i /><i />
+                <small>LISTEN · MAP · PRIORITISE</small>
+              </div>
+              <div className="journey-object journey-object-interface" data-journey-interface>
+                <div className="journey-ui-head"><b>N×</b><span>WORKSPACE / DESIGN SYSTEM</span><i>↗</i></div>
+                <div className="journey-ui-title">Make the next step<br /><em>obvious.</em></div>
+                <div className="journey-ui-grid"><i /><i /><i /><i /></div>
+                <small>STRUCTURE · HIERARCHY · FLOW</small>
+              </div>
+              <div className="journey-object journey-object-system" data-journey-system>
+                <div className="journey-system-top"><span>CONNECTED WORKFLOW</span><b>03 / BUILD</b></div>
+                <div className="journey-system-flow">
+                  <span className="journey-system-node">INPUT</span><i /><span className="journey-system-node is-core">PROCESS</span><i /><span className="journey-system-node">OUTCOME</span>
+                </div>
+                <small>DEVELOP · TEST · REFINE</small>
+              </div>
+            </div>
+            <div className="journey-steps">
+              {journey.map((item, index) => (
+                <article className="journey-card" data-journey-card key={item.stage}>
+                  <div className="journey-card-top"><span>{item.stage}</span><b>0{index + 1} / 03</b></div>
+                  <h3>{item.title}</h3><p>{item.copy}</p>
+                  <div className="journey-tags">{item.tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
+                </article>
+              ))}
+            </div>
           </div>
         </div>
       </section>
