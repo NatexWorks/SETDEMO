@@ -1570,3 +1570,20 @@ main { display: block; overflow: clip; }
 @media (prefers-reduced-motion: reduce) {
   .about-method__list article { transition: none; }
 }
+
+
+@keyframes natexEditorialArrive {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (max-width: 899px) and (prefers-reduced-motion: no-preference) {
+  .hero-story .hero-story__copy > .eyebrow { animation: natexEditorialArrive .58s .02s both cubic-bezier(.2,.75,.2,1); }
+  .hero-story__heading { animation: natexEditorialArrive .7s .09s both cubic-bezier(.2,.75,.2,1); }
+  .hero-lede { animation: natexEditorialArrive .62s .18s both cubic-bezier(.2,.75,.2,1); }
+  .hero-actions { animation: natexEditorialArrive .62s .25s both cubic-bezier(.2,.75,.2,1); }
+  .hero-story__visual { animation: natexEditorialArrive .78s .31s both cubic-bezier(.2,.75,.2,1); }
+  .page-hero h1, .case-hero h1, .case-deep__hero h1 {
+    animation: natexEditorialArrive .78s .05s both cubic-bezier(.2,.75,.2,1);
+  }
+  .page-hero__bottom { animation: natexEditorialArrive .66s .16s both cubic-bezier(.2,.75,.2,1); }
+}
