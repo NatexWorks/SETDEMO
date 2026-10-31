@@ -36,11 +36,11 @@ export default function AboutPage() {
 
       <section className="about-method section-pad" data-mobile-reveal>
         <div className="section-kicker"><span>HOW I WORK</span><span>FOUR CLEAR MOVES</span></div>
-        <div className="about-method__list">
-          <article><span>01</span><div><h3>Understand the real problem.</h3><p>Start with the goal, the people the solution is for, the way things work today, and where the friction actually sits. This gives the project a clear problem to solve instead of relying on assumptions.</p></div></article>
-          <article><span>02</span><div><h3>Agree on the right direction.</h3><p>Turn that understanding into a practical plan covering structure, content, essential features, priorities, constraints, and visual direction. Confirm the scope and expectations before development begins.</p></div></article>
-          <article><span>03</span><div><h3>Build and test what matters.</h3><p>Develop the agreed solution, then test its important interactions, data flows, and behaviour across screen sizes. Refine the details that affect usability, clarity, and reliability.</p></div></article>
-          <article><span>04</span><div><h3>Review and hand over clearly.</h3><p>Check the key journeys, accessibility, and responsive behaviour; complete the agreed refinements; and explain what has been delivered, how it works, and what sits outside the agreed scope.</p></div></article>
+        <div className="about-method__list" data-about-process>
+          <article data-about-step><span>01</span><div><h3>Understand the real problem.</h3><p>Start with the goal, the people the solution is for, the way things work today, and where the friction actually sits. This gives the project a clear problem to solve instead of relying on assumptions.</p></div></article>
+          <article data-about-step><span>02</span><div><h3>Agree on the right direction.</h3><p>Turn that understanding into a practical plan covering structure, content, essential features, priorities, constraints, and visual direction. Confirm the scope and expectations before development begins.</p></div></article>
+          <article data-about-step><span>03</span><div><h3>Build and test what matters.</h3><p>Develop the agreed solution, then test its important interactions, data flows, and behaviour across screen sizes. Refine the details that affect usability, clarity, and reliability.</p></div></article>
+          <article data-about-step><span>04</span><div><h3>Review and hand over clearly.</h3><p>Check the key journeys, accessibility, and responsive behaviour; complete the agreed refinements; and explain what has been delivered, how it works, and what sits outside the agreed scope.</p></div></article>
         </div>
       </section>
 
