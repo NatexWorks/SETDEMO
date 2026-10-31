@@ -37,7 +37,7 @@ const DeferredHeroCanvas = dynamic(() => import("./hero-canvas"), {
 
 export default function HeroScene() {
   const frame = useRef<HTMLDivElement>(null);
-  const [enabled, setEnabled] = useState(false);
+  const [hasEntered, setHasEntered] = useState(false);
   const [visible, setVisible] = useState(false);
   const fallback: ReactNode = <div className="hero-scene__fallback"><StaticOrbit /></div>;
 
@@ -46,12 +46,15 @@ export default function HeroScene() {
     const compact = window.matchMedia("(max-width: 900px)").matches;
     if (reduced || compact || !("IntersectionObserver" in window)) return;
 
-    setEnabled(true);
     const node = frame.current;
     if (!node) return;
 
     const observer = new IntersectionObserver(
-      (entries) => setVisible(entries[0]?.isIntersecting ?? false),
+      (entries) => {
+        const isVisible = entries[0]?.isIntersecting ?? false;
+        setVisible(isVisible);
+        if (isVisible) setHasEntered(true);
+      },
       { rootMargin: "180px 0px" },
     );
     observer.observe(node);
@@ -60,7 +63,7 @@ export default function HeroScene() {
 
   return (
     <div className="hero-scene" ref={frame} aria-hidden="true">
-      {enabled ? <DeferredHeroCanvas visible={visible} fallback={fallback} /> : fallback}
+      {hasEntered ? <DeferredHeroCanvas visible={visible} fallback={fallback} /> : fallback}
       <span className="hero-scene__halo" />
     </div>
   );
