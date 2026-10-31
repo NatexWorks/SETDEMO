@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 
-type FormState = "idle" | "ready";
+type FormState = "idle" | "ready" | "error";
 
 export default function ContactForm() {
   const [state, setState] = useState<FormState>("idle");
@@ -18,13 +18,17 @@ export default function ContactForm() {
     const email = String(data.get("email") || "").trim();
     const projectType = String(data.get("projectType") || "Not specified");
     const message = String(data.get("message") || "").trim();
-    const subject = encodeURIComponent(`Project enquiry from ${name}`);
-    const body = encodeURIComponent(
-      `Name: ${name}\nEmail: ${email}\nProject type: ${projectType}\n\nProject details:\n${message}`
-    );
+    try {
+      const subject = encodeURIComponent(`Project enquiry from ${name}`);
+      const body = encodeURIComponent(
+        `Name: ${name}\nEmail: ${email}\nProject type: ${projectType}\n\nProject details:\n${message}`
+      );
 
-    window.location.href = `mailto:natexworks@gmail.com?subject=${subject}&body=${body}`;
-    setState("ready");
+      window.location.href = `mailto:natexworks@gmail.com?subject=${subject}&body=${body}`;
+      setState("ready");
+    } catch {
+      setState("error");
+    }
   }
 
   return (
@@ -58,8 +62,10 @@ export default function ContactForm() {
         <button className="button button-dark" type="submit">Prepare email <span aria-hidden="true">↗</span></button>
         <p role="status" aria-live="polite">
           {state === "ready"
-            ? "Your email app should open with the enquiry drafted. Send it there to complete the message."
-            : "This form opens your email app; it does not send or store your message."}
+            ? "The email draft was requested. Send it from your email app to complete the enquiry."
+            : state === "error"
+              ? "The draft could not be prepared. Please email natexworks@gmail.com directly."
+              : "This form opens your email app; it does not send or store your message."}
         </p>
       </div>
     </form>
