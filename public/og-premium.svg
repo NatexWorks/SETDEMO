@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#f2f0e9"/>
+  <path d="M0 495H1200" stroke="#d4d1c7"/>
+  <path d="M820 85h300v300H820z" fill="#e5e8f5" stroke="#cbd4f5"/>
+  <path d="M870 150h185v210H870z" fill="#fbfaf6" stroke="#ccd0d8"/>
+  <path d="M895 185h130M895 215h80M895 260h145M895 290h105M895 320h128" stroke="#b7becd" stroke-width="8"/>
+  <circle cx="1035" cy="137" r="38" fill="#3358df"/>
+  <path d="m1020 137 11 11 21-24" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="82" y="102" font-family="Arial,sans-serif" font-size="23" font-weight="700" fill="#171a22">NatexWorks.</text>
+  <text x="82" y="260" font-family="Arial,sans-serif" font-size="82" font-weight="700" letter-spacing="-5" fill="#171a22">The web should</text>
+  <text x="82" y="350" font-family="Arial,sans-serif" font-size="82" font-weight="700" letter-spacing="-5" fill="#3358df">work for your business.</text>
+  <text x="86" y="425" font-family="Arial,sans-serif" font-size="23" fill="#686b65">Business websites · Custom applications · Useful digital systems</text>
+  <rect x="82" y="525" width="13" height="13" rx="6.5" fill="#f07859"/>
+  <text x="112" y="538" font-family="monospace" font-size="14" letter-spacing="3" fill="#73756f">DESIGN / DEVELOPMENT / DELIVERY</text>
+</svg>
