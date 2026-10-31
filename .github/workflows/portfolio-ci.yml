@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: portfolio-ci-${{ github.ref }}
@@ -29,6 +29,9 @@ jobs:
           node-version: 22
           cache: npm
 
+      - name: Reconcile the pre-existing incomplete lockfile
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+
       - name: Install locked dependencies
         run: npm ci
 
@@ -43,3 +46,14 @@ jobs:
         env:
           SITE_URL: https://preview.invalid
           SITE_INDEXABLE: "false"
+
+      - name: Commit repaired lockfile to rebuild branch
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/rebuild/')
+        run: |
+          if ! git diff --quiet -- package-lock.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add package-lock.json
+            git commit -m "chore: reconcile npm lockfile"
+            git push
+          fi
