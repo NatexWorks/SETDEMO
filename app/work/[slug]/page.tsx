@@ -57,6 +57,7 @@ export default async function ProjectPage({ params }: PageProps) {
             <article className="case-panel" data-reveal><p className="eyebrow">01 / THE CHALLENGE</p><h3>What needed attention?</h3><p>{project.challenge}</p></article>
             <article className="case-panel" data-reveal><p className="eyebrow">02 / THE APPROACH</p><h3>How the experience was shaped.</h3><p>{project.approach}</p></article>
             <article className="case-panel" data-reveal><p className="eyebrow">03 / WORK INCLUDED</p><h3>What this project explores.</h3><ul className="case-detail-list">{project.details.map((detail) => <li key={detail}>{detail}</li>)}</ul></article>
+            <article className="case-panel case-outcome-panel" data-reveal><p className="eyebrow">04 / OUTCOME & EVIDENCE</p><h3>What can be verified?</h3><p>{project.outcome}</p></article>
           </div>
         </div>
         {project.note && <p className="case-note">{project.note}</p>}
