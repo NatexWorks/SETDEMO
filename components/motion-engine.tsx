@@ -132,21 +132,19 @@ export default function MotionEngine() {
           const localSignal = document.querySelector<HTMLElement>("[data-local-signal-field]");
           if (localSignal) {
             const routePaths = gsap.utils.toArray<SVGPathElement>(".local-signal-field__routes path", localSignal);
+            const routeTimeline = gsap.timeline({
+              scrollTrigger: {
+                trigger: localSignal,
+                start: "top 72%",
+                end: "center 45%",
+                scrub: 0.7,
+                invalidateOnRefresh: true,
+              },
+            });
             routePaths.forEach((path, index) => {
               const length = path.getTotalLength();
               gsap.set(path, { strokeDasharray: length, strokeDashoffset: length });
-              gsap.to(path, {
-                strokeDashoffset: 0,
-                ease: "none",
-                scrollTrigger: {
-                  trigger: localSignal,
-                  start: "top 72%",
-                  end: "center 45%",
-                  scrub: 0.7,
-                  invalidateOnRefresh: true,
-                },
-                delay: index * 0.04,
-              });
+              routeTimeline.to(path, { strokeDashoffset: 0, duration: 0.7, ease: "none" }, index * 0.22);
             });
           }
           const transformation = document.querySelector<HTMLElement>(".service-transform");
