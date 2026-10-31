@@ -1,10 +1,9 @@
 import type { MetadataRoute } from "next";
-
-const siteUrl = (process.env.SITE_URL || "https://natexworks.github.io/SETDEMO").replace(/\/$/, "");
+import { absoluteSiteUrl, isIndexable } from "@/lib/site";
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: [{ userAgent: "*", allow: "/" }],
-    sitemap: siteUrl + "/sitemap.xml"
+    rules: [{ userAgent: "*", ...(isIndexable ? { allow: "/" } : { disallow: "/" }) }],
+    ...(isIndexable ? { sitemap: absoluteSiteUrl("/sitemap.xml") } : {})
   };
 }
