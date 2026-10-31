@@ -34,7 +34,7 @@ export default function SiteShell({ children }: { children: ReactNode }) {
       <a className="skip-link" href="#main-content">Skip to content</a>
       <header className="site-header">
         <div className="site-header__inner">
-          <Link className="wordmark" href="/" aria-label="NatexWorks">
+          <Link className="wordmark" href="/">
             <span className="wordmark__mark" aria-hidden="true">N<span>×</span></span>
             <span className="wordmark__name">NatexWorks</span>
           </Link>
