@@ -31,7 +31,7 @@ const structuredData = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase: new URL(siteUrl + "/"),
   title: {
     default: "NatexWorks — Websites & custom digital systems",
     template: "%s — NatexWorks"
@@ -40,6 +40,7 @@ export const metadata: Metadata = {
   applicationName: "NatexWorks",
   alternates: { canonical: absoluteSiteUrl("/") },
   robots: { index: isIndexable, follow: isIndexable },
+  ...(process.env.GOOGLE_SITE_VERIFICATION ? { verification: { google: process.env.GOOGLE_SITE_VERIFICATION } } : {}),
   openGraph: {
     type: "website",
     siteName: "NatexWorks",
