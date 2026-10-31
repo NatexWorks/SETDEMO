@@ -14,23 +14,20 @@ const navigation = [
 
 export default function SiteShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [openAtPath, setOpenAtPath] = useState<string | null>(null);
+  const menuOpen = openAtPath === pathname;
   const toggleRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    setMenuOpen(false);
-  }, [pathname]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape" && menuOpen) {
-        setMenuOpen(false);
+        setOpenAtPath(null);
         toggleRef.current?.focus();
       }
     }
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [menuOpen]);
+  }, [menuOpen, pathname]);
 
   return (
     <>
@@ -67,7 +64,7 @@ export default function SiteShell({ children }: { children: ReactNode }) {
             aria-expanded={menuOpen}
             aria-controls="mobile-navigation"
             aria-label={menuOpen ? "Close navigation" : "Open navigation"}
-            onClick={() => setMenuOpen((open) => !open)}
+            onClick={() => setOpenAtPath(menuOpen ? null : pathname)}
           >
             <span />
             <span />
@@ -86,7 +83,7 @@ export default function SiteShell({ children }: { children: ReactNode }) {
               href={item.href}
               tabIndex={menuOpen ? 0 : -1}
               aria-current={pathname === item.href || pathname.startsWith(item.href + "/") ? "page" : undefined}
-              onClick={() => setMenuOpen(false)}
+              onClick={() => setOpenAtPath(null)}
             >
               <span className="mobile-nav__number">0{index + 1}</span>
               <span>{item.label}</span>
