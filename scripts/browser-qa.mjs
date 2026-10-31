@@ -117,6 +117,68 @@ try {
   }
   await reducedContext.close();
 
+
+  const scrollProgressResults = [];
+  const scrollSequences = [
+    { route: "/", section: ".hero-story", target: ".hero-story__visual", delta: 320 },
+    { route: "/services", section: ".service-transform", target: ".service-transform__art", delta: 320 },
+    { route: "/work", section: ".work-gallery", target: ".work-gallery__track", delta: 320 },
+  ];
+
+  for (const sequence of scrollSequences) {
+    const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const page = await context.newPage();
+    page.on("pageerror", (error) => browserErrors.push(sequence.route + " scroll test: " + error.message));
+    await page.goto(baseURL + sequence.route, { waitUntil: "domcontentloaded" });
+    await page.waitForTimeout(1200);
+
+    const section = page.locator(sequence.section);
+    const target = page.locator(sequence.target);
+    if (!(await section.count()) || !(await target.count())) {
+      failures.push(sequence.route + ": scroll system target not found");
+      await context.close();
+      continue;
+    }
+
+    const sectionTop = await section.evaluate((element) =>
+      element.getBoundingClientRect().top + window.scrollY,
+    );
+    await page.evaluate((top) => {
+      document.documentElement.style.scrollBehavior = "auto";
+      window.scrollTo({ top, behavior: "instant" });
+    }, sectionTop);
+    await page.waitForTimeout(450);
+
+    const before = await target.evaluate((element) => ({
+      transform: getComputedStyle(element).transform,
+      top: element.getBoundingClientRect().top,
+    }));
+
+    await page.evaluate((delta) =>
+      window.scrollTo({ top: window.scrollY + delta, behavior: "instant" }),
+    sequence.delta);
+    await page.waitForTimeout(500);
+
+    const after = await target.evaluate((element) => ({
+      transform: getComputedStyle(element).transform,
+      top: element.getBoundingClientRect().top,
+    }));
+    const sectionTopAfter = await section.evaluate((element) => element.getBoundingClientRect().top);
+    const moved = before.transform !== after.transform;
+    const pinned = Math.abs(sectionTopAfter) <= 3;
+
+    scrollProgressResults.push({
+      route: sequence.route,
+      transformChanged: moved,
+      pinnedAtTop: pinned,
+      before: before.transform,
+      after: after.transform,
+    });
+    if (!moved) failures.push(sequence.route + ": scroll progress did not change the target transform");
+    if (!pinned) failures.push(sequence.route + ": pinned section did not remain at the viewport top");
+    await context.close();
+  }
+
   if (browserErrors.length) failures.push(...browserErrors.map((entry) => "Browser error: " + entry));
 
   const summary = {
@@ -126,6 +188,7 @@ try {
     axeViewports: [390, 1440],
     reducedMotion: "checked",
     mobileMenuKeyboard: "checked",
+    scrollProgressResults,
     failures,
     results,
   };
