@@ -6,8 +6,6 @@ import { projects } from "@/lib/projects";
 import { absoluteSiteUrl } from "@/lib/site";
 
 type PageProps = { params: Promise<{ slug: string }> };
-const siteUrl = (process.env.SITE_URL || "https://natexworks.github.io/SETDEMO").replace(/\/+$/, "");
-
 export function generateStaticParams() {
   return projects.map((project) => ({ slug: project.slug }));
 }
