@@ -7,6 +7,8 @@ export default function MotionEngine() {
   useEffect(() => {
     let cancelled = false;
     let dispose: () => void = () => {};
+    const hasMotionTargets = document.querySelector(".hero-story, .service-transform, .work-gallery, [data-parallax], .case-study__visual, [data-reveal]");
+    if (!hasMotionTargets) return;
     Promise.all([import("gsap"), import("gsap/ScrollTrigger")]).then(([gsapModule, triggerModule]) => {
       if (cancelled) return;
       const gsap = gsapModule.gsap;
