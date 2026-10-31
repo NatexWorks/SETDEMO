@@ -100,6 +100,26 @@ export default function MotionEngine() {
               },
             });
           }
+          const aboutProcess = document.querySelector<HTMLElement>("[data-about-process]");
+          if (aboutProcess) {
+            const aboutSteps = gsap.utils.toArray<HTMLElement>("[data-about-step]", aboutProcess);
+            aboutSteps.forEach((step, index) => {
+              gsap.fromTo(step, { y: 20, autoAlpha: 0.62 }, {
+                y: 0, autoAlpha: 1, ease: "none",
+                scrollTrigger: {
+                  trigger: step,
+                  start: "top 82%",
+                  end: "top 55%",
+                  scrub: 0.55,
+                  onEnter: () => step.classList.add("is-active"),
+                  onEnterBack: () => step.classList.add("is-active"),
+                  onLeave: () => step.classList.remove("is-active"),
+                  onLeaveBack: () => step.classList.remove("is-active"),
+                },
+              });
+              if (index === 0) step.classList.add("is-active");
+            });
+          }
           const localSignal = document.querySelector<HTMLElement>("[data-local-signal-field]");
           if (localSignal) {
             const routePaths = gsap.utils.toArray<SVGPathElement>(".local-signal-field__routes path", localSignal);
