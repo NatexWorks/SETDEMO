@@ -81,6 +81,23 @@ export default function MotionEngine() {
                 .to(panels[2], { autoAlpha: 1, scale: 1, y: 0, duration: 0.58, ease: "none" }, 1.54)
                 .to(panels[2], { autoAlpha: 0, scale: 0.985, y: -12, duration: 0.58, ease: "none" }, 2.24)
                 .to(panels[3], { autoAlpha: 1, scale: 1, y: 0, duration: 0.58, ease: "none" }, 2.3);
+              const scanLine = panels[3].querySelector<HTMLElement>(".workflow-barcode__line");
+              const scanResult = panels[3].querySelector<HTMLElement>(".workflow-barcode__result");
+              if (scanLine && scanResult) {
+                gsap.set(scanLine, { x: -65 });
+                gsap.set(scanResult, { autoAlpha: 0, y: 8 });
+                const scanTimeline = gsap.timeline({
+                  scrollTrigger: {
+                    trigger: workflow,
+                    start: "top top+=96",
+                    end: () => "+=" + Math.max(window.innerHeight * 2.1, 1500),
+                    scrub: 0.85,
+                    invalidateOnRefresh: true,
+                  },
+                });
+                scanTimeline.to(scanLine, { x: 65, duration: 0.65, ease: "none" }, 2.45)
+                  .to(scanResult, { autoAlpha: 1, y: 0, duration: 0.2, ease: "none" }, 2.92);
+              }
               updateActive(0);
             }
           }
