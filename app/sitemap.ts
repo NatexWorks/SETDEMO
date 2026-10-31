@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 const routes = [
   "/", "/services", "/work", "/work/inventory-management",
-  "/work/local-discovery", "/work/cafe-presence", "/about", "/contact",
+  "/work/local-discovery", "/work/cafe-presence", "/about", "/contact", "/start-project",
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

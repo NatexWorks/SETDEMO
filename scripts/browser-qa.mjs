@@ -12,6 +12,7 @@ const routes = [
   "/work/cafe-presence",
   "/about",
   "/contact",
+  "/start-project",
 ];
 const widths = [320, 360, 390, 430, 768, 1024, 1280, 1440];
 const failures = [];
@@ -35,6 +36,13 @@ try {
     const response = await page.goto(baseURL + route, { waitUntil: "domcontentloaded" });
     if (!response || response.status() !== 200) {
       failures.push(route + ": expected HTTP 200, got " + (response?.status() ?? "no response"));
+    }
+
+    if (route === "/") {
+      const labels = await page.locator("[data-workflow-card] h3").allTextContents();
+      if (labels.join("|") !== "Catalog|Stock|Checkout|Barcode") {
+        failures.push("Homepage workflow cards are missing or not in Catalog → Stock → Checkout → Barcode order");
+      }
     }
 
     const title = await page.title();

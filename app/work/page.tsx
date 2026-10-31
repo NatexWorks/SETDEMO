@@ -5,7 +5,7 @@ import { projects } from "@/content/site";
 
 export const metadata: Metadata = {
   title: "Selected work — Product build & concept explorations",
-  description: "Explore the NatexWorks inventory-management product and concept work for local discovery and café websites.",
+  description: "Explore the NatexWorks inventory application, Neswef Café website preview, and local-discovery concept.",
   alternates: { canonical: "/work" },
 };
 
@@ -17,7 +17,7 @@ export default function WorkPage() {
         <p className="eyebrow"><span className="eyebrow__dot" /> THE WORK</p>
         <h1>Ideas deserve<br /><em>good execution.</em></h1>
         <div className="page-hero__bottom">
-          <p>One working product and two concept explorations. Each project is labelled clearly, with the problem and the work explained without inflated claims.</p>
+          <p>One working application, one café website preview, and one local-discovery concept. Each project is labelled clearly, with the work and its limitations explained without inflated claims.</p>
           <span>MOVE THROUGH THE WORK ↘</span>
         </div>
       </section>
@@ -41,8 +41,8 @@ export default function WorkPage() {
       <section className="work-note section-pad">
         <p className="eyebrow">A NOTE ON THE PORTFOLIO</p>
         <h2>Clear labels are part<br />of <em>good work.</em></h2>
-        <p>The inventory system is presented as a working product. Local discovery and café website visuals are concept work—not client case studies, testimonials, or evidence of business results.</p>
-        <Link className="text-link" href="/contact">Discuss a project like these <span aria-hidden="true">→</span></Link>
+        <p>The inventory application is documented from its public source repository and linked demo. Neswef Café is a website preview with sample business details clearly identified. Local discovery is concept work. Portfolio artwork is illustrative, not captured product photography.</p>
+        <Link className="text-link" href="/start-project">Discuss a project like these <span aria-hidden="true">→</span></Link>
       </section>
     </>
   );

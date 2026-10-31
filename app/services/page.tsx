@@ -8,6 +8,13 @@ export const metadata: Metadata = {
   alternates: { canonical: "/services" },
 };
 
+const serviceProof: Record<string, { href: string; label: string }> = {
+  "Business websites": { href: "/work/cafe-presence", label: "See the Neswef Café website preview ↗" },
+  "Custom web applications": { href: "/work/inventory-management", label: "See the Inventory Management build ↗" },
+  "SEO & Google Maps visibility": { href: "/work/local-discovery", label: "See the local discovery concept ↗" },
+  "Interface fixes & responsive polish": { href: "/work/inventory-management", label: "Explore the product workflow example ↗" },
+};
+
 export default function ServicesPage() {
   return (
     <>
@@ -21,7 +28,7 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      <section className="service-transform section-pad" aria-labelledby="service-transform-heading">
+      <section className="service-transform section-pad" aria-labelledby="service-transform-heading" data-mobile-reveal>
         <div className="service-transform__copy">
           <div className="section-kicker"><span>THE BUILDING PROCESS</span><span>01 / 03</span></div>
           <h2 id="service-transform-heading">From scattered<br />to <em>connected.</em></h2>
@@ -54,16 +61,19 @@ export default function ServicesPage() {
       <section className="service-detail-list section-pad">
         <div className="section-kicker"><span>WHAT I CAN HELP WITH</span><span>FOUR PRACTICAL DISCIPLINES</span></div>
         {services.map((service) => (
-          <article className="service-detail" id={"service-" + service.number} key={service.number}>
+          <article className="service-detail" id={"service-" + service.number} key={service.number} data-mobile-reveal>
             <div className="service-detail__number">{service.number}</div>
             <div className="service-detail__main">
               <p className="eyebrow">{service.kicker}</p>
               <h2>{service.title}</h2>
               <p className="service-detail__description">{service.description}</p>
             </div>
-            <ul className="service-detail__points">
-              {service.details.map((detail) => <li key={detail}>{detail}</li>)}
-            </ul>
+            <div>
+              <ul className="service-detail__points">
+                {service.details.map((detail) => <li key={detail}>{detail}</li>)}
+              </ul>
+              <Link className="service-proof-link" href={serviceProof[service.title].href}>{serviceProof[service.title].label}</Link>
+            </div>
           </article>
         ))}
       </section>
@@ -83,7 +93,7 @@ export default function ServicesPage() {
 
       <section className="page-cta section-pad">
         <div><p className="eyebrow">YOUR NEXT STEP</p><h2>What needs to<br /><em>work better?</em></h2></div>
-        <div><p>Share the goal, what you already have, and the main obstacle. We can define a practical scope before committing to a build.</p><Link className="button button--dark" href="/contact">Talk through the problem <span aria-hidden="true">↗</span></Link></div>
+        <div><p>Share the goal, what you already have, and the main obstacle. We can define a practical scope before committing to a build.</p><Link className="button button--dark" href="/start-project">Start a project <span aria-hidden="true">↗</span></Link></div>
       </section>
     </>
   );

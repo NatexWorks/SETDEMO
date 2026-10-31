@@ -52,7 +52,7 @@ export default function SiteShell({ children }: { children: ReactNode }) {
             ))}
           </nav>
 
-          <Link className="header-cta" href="/contact">
+          <Link className="header-cta" href="/start-project">
             <span>Start a project</span>
             <span aria-hidden="true">↗</span>
           </Link>
@@ -90,6 +90,11 @@ export default function SiteShell({ children }: { children: ReactNode }) {
               <span aria-hidden="true">↗</span>
             </Link>
           ))}
+          <Link className="mobile-nav__project" href="/start-project" tabIndex={menuOpen ? 0 : -1} onClick={() => setOpenAtPath(null)}>
+            <span className="mobile-nav__number">↗</span>
+            <span>Start a project</span>
+            <span aria-hidden="true">↗</span>
+          </Link>
         </nav>
       </header>
 
@@ -101,7 +106,7 @@ export default function SiteShell({ children }: { children: ReactNode }) {
             <p className="eyebrow">A practical next step</p>
             <h2>Have a useful problem<br /><em>worth solving?</em></h2>
           </div>
-          <Link className="round-link" href="/contact" aria-label="Start a project enquiry">
+          <Link className="round-link" href="/start-project" aria-label="Start a project enquiry">
             <span aria-hidden="true">↗</span>
           </Link>
         </div>

@@ -82,10 +82,10 @@ export default function HomePage() {
       </section>
 
       <section className="featured-work section-pad">
-        <div className="section-kicker"><span>03 / SELECTED WORK</span><span>ONE PRODUCT · TWO CONCEPTS</span></div>
+        <div className="section-kicker"><span>03 / SELECTED WORK</span><span>ONE PRODUCT · ONE WEBSITE PREVIEW · ONE CONCEPT</span></div>
         <div className="section-heading-row">
           <h2>Ideas made<br /><em>tangible.</em></h2>
-          <p>A working inventory product, alongside clearly labelled concept explorations for local discovery and hospitality.</p>
+          <p>A working inventory application, a café website preview, and a clearly labelled local-discovery concept.</p>
         </div>
         <Link href={"/work/" + featured.slug} className="featured-project">
           <div className="featured-project__art"><ProjectArt variant="inventory" /></div>
@@ -109,8 +109,41 @@ export default function HomePage() {
         <div className="section-end-link"><Link className="text-link" href="/work">See all selected work <span aria-hidden="true">→</span></Link></div>
       </section>
 
-      <section className="process-overview section-pad">
-        <div className="section-kicker"><span>04 / HOW IT COMES TOGETHER</span><span>FROM PROBLEM TO PRODUCT</span></div>
+      <section className="workflow-showcase section-pad" data-mobile-workflow-story>
+        <div className="section-kicker"><span>04 / INVENTORY MANAGEMENT</span><span>CATALOGUE TO CHECKOUT</span></div>
+        <div className="workflow-showcase__heading">
+          <h2>Useful workflows.<br /><em>One workspace.</em></h2>
+          <p>Four connected jobs from the inventory application: organise products, review stock, move an order through its lifecycle, and find an item using its barcode.</p>
+        </div>
+        <div className="workflow-stage" data-mobile-workflow-stage>
+          <div className="workflow-stack" data-mobile-workflow-stack aria-label="Four inventory application workflows">
+            <article className="workflow-card workflow-card--catalog" data-workflow-card>
+              <div className="workflow-card__top"><span>01 / WORKFLOW</span><b aria-hidden="true">▦</b></div>
+              <div><h3>Catalog</h3><p>Create and update product records, organise categories, and search by product name, description, category, SKU, or barcode.</p></div>
+              <span className="workflow-card__detail">PRODUCTS · CATEGORIES · SEARCH</span>
+            </article>
+            <article className="workflow-card workflow-card--stock" data-workflow-card>
+              <div className="workflow-card__top"><span>02 / WORKFLOW</span><b aria-hidden="true">◷</b></div>
+              <div><h3>Stock</h3><p>Keep quantities visible and review products that need attention. The current dashboard query flags stock at five units or fewer.</p></div>
+              <span className="workflow-card__detail">QUANTITY · LOW-STOCK REVIEW</span>
+            </article>
+            <article className="workflow-card workflow-card--checkout" data-workflow-card>
+              <div className="workflow-card__top"><span>03 / WORKFLOW</span><b aria-hidden="true">↗</b></div>
+              <div><h3>Checkout</h3><p>Create an order for approval, complete or cancel it, and process returns. Completing an order updates product stock.</p></div>
+              <span className="workflow-card__detail">ORDERS · APPROVAL · RETURNS</span>
+            </article>
+            <article className="workflow-card workflow-card--barcode" data-workflow-card>
+              <div className="workflow-card__top"><span>04 / WORKFLOW</span><b aria-hidden="true">▥</b></div>
+              <div><h3>Barcode</h3><p>Look up products with barcode records and camera-assisted scanning when the browser supports it and the visitor grants camera permission.</p></div>
+              <span className="workflow-card__detail">BARCODE RECORDS · CAMERA SCAN</span>
+            </article>
+          </div>
+        </div>
+        <div className="workflow-showcase__foot"><span>SCROLL TO MOVE THROUGH THE WORKFLOWS</span><span>CATALOG → STOCK → CHECKOUT → BARCODE</span></div>
+      </section>
+
+      <section className="process-overview section-pad" data-workflow-next-panel>
+        <div className="section-kicker"><span>05 / HOW IT COMES TOGETHER</span><span>FROM PROBLEM TO PRODUCT</span></div>
         <div className="section-heading-row">
           <h2>Clear steps.<br /><em>No guesswork.</em></h2>
           <p>Good work starts with understanding the problem—not jumping straight into code.</p>
@@ -129,7 +162,7 @@ export default function HomePage() {
           <p className="eyebrow">HAVE SOMETHING IN MIND?</p>
           <h2>Let&apos;s make it<br /><em>work better.</em></h2>
           <p>Tell me what you are building, what is slowing you down, or what you would like to improve.</p>
-          <Link className="button button--light" href="/contact">Start a conversation <span aria-hidden="true">↗</span></Link>
+          <Link className="button button--light" href="/start-project">Start a project <span aria-hidden="true">↗</span></Link>
           <span className="closing-invite__index">NATEXWORKS / 2026</span>
         </div>
       </section>
