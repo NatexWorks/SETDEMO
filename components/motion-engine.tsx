@@ -32,15 +32,15 @@ export default function MotionEngine() {
             const steps = gsap.utils.toArray<HTMLElement>(".service-transform__step");
             const artwork = document.querySelector<HTMLElement>(".service-transform__art");
             if (steps.length) {
-              gsap.set(steps, { opacity: 0.22, y: 14 });
-              gsap.set(steps[0], { opacity: 1, y: 0 });
+              gsap.set(steps, { y: 14 });
+              gsap.set(steps[0], { y: 0 });
             }
             const timeline = gsap.timeline({
               scrollTrigger: { trigger: transformation, start: "top top", end: "+=145%", pin: true, scrub: 0.8, anticipatePin: 1, invalidateOnRefresh: true },
             });
             steps.forEach((step, index) => {
-              timeline.to(step, { opacity: 1, y: 0, duration: 0.35, ease: "none" }, index);
-              if (index < steps.length - 1) timeline.to(step, { opacity: 0.24, y: -14, duration: 0.3, ease: "none" }, index + 0.7);
+              timeline.to(step, { y: 0, duration: 0.35, ease: "none" }, index);
+              if (index < steps.length - 1) timeline.to(step, { y: -14, duration: 0.3, ease: "none" }, index + 0.7);
               if (artwork) timeline.to(artwork, {
                 rotate: index % 2 === 0 ? 5 : -5,
                 scale: 1 + index * 0.035,
