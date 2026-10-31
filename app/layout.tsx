@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import SiteHeader from "@/components/site-header";
 import SiteFooter from "@/components/site-footer";
 import MotionLayer from "@/components/motion-layer";
+import { absoluteSiteUrl, isIndexable, siteUrl } from "@/lib/site";
 import "./globals.css";
 
 const siteUrl = (process.env.SITE_URL || "https://natexworks.github.io/SETDEMO").replace(/\/+$/, "");
@@ -37,23 +38,23 @@ export const metadata: Metadata = {
   },
   description: "NatexWorks designs and builds business websites, custom web applications, and practical digital systems for clearer everyday work.",
   applicationName: "NatexWorks",
-  alternates: { canonical: siteUrl + "/" },
-  robots: { index: true, follow: true },
+  alternates: { canonical: absoluteSiteUrl("/") },
+  robots: { index: isIndexable, follow: isIndexable },
   openGraph: {
     type: "website",
     siteName: "NatexWorks",
     title: "NatexWorks — Websites & custom digital systems",
     description: "Business websites, custom web applications, and practical digital systems built around real needs.",
-    url: siteUrl + "/",
-    images: [{ url: siteUrl + "/og-premium.svg", width: 1200, height: 630, alt: "NatexWorks — digital work, made useful" }]
+    url: absoluteSiteUrl("/"),
+    images: [{ url: absoluteSiteUrl("/og-premium.svg"), width: 1200, height: 630, alt: "NatexWorks — digital work, made useful" }]
   },
   twitter: {
     card: "summary_large_image",
     title: "NatexWorks — Websites & custom digital systems",
     description: "Business websites, custom web applications, and practical digital systems built around real needs.",
-    images: [siteUrl + "/og-premium.svg"]
+    images: [absoluteSiteUrl("/og-premium.svg")]
   },
-  icons: { icon: siteUrl + "/icon.svg" }
+  icons: { icon: absoluteSiteUrl("/icon.svg") }
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
