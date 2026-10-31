@@ -63,7 +63,7 @@ export default function MotionEngine() {
                 steps.forEach((step, index) => step.classList.toggle("is-active", index === active));
                 if (counter) counter.textContent = String(active + 1).padStart(2, "0") + " / 04";
               };
-              gsap.timeline({
+              const workflowTimeline = gsap.timeline({
                 scrollTrigger: {
                   trigger: workflow,
                   start: "top top+=96",
@@ -74,7 +74,8 @@ export default function MotionEngine() {
                   invalidateOnRefresh: true,
                   onUpdate: (self) => updateActive(self.progress),
                 },
-              }).to(progress || workflow, progress ? { scaleX: 1, duration: 3.15, ease: "none" } : { duration: 3.15, ease: "none" }, 0)
+              });
+              workflowTimeline.to(progress || workflow, progress ? { scaleX: 1, duration: 3.15, ease: "none" } : { duration: 3.15, ease: "none" }, 0)
                 .to(panels[0], { autoAlpha: 0, scale: 0.985, y: -12, duration: 0.58, ease: "none" }, 0.72)
                 .to(panels[1], { autoAlpha: 1, scale: 1, y: 0, duration: 0.58, ease: "none" }, 0.78)
                 .to(panels[1], { autoAlpha: 0, scale: 0.985, y: -12, duration: 0.58, ease: "none" }, 1.48)
@@ -86,16 +87,7 @@ export default function MotionEngine() {
               if (scanLine && scanResult) {
                 gsap.set(scanLine, { x: -65 });
                 gsap.set(scanResult, { autoAlpha: 0, y: 8 });
-                const scanTimeline = gsap.timeline({
-                  scrollTrigger: {
-                    trigger: workflow,
-                    start: "top top+=96",
-                    end: () => "+=" + Math.max(window.innerHeight * 2.1, 1500),
-                    scrub: 0.85,
-                    invalidateOnRefresh: true,
-                  },
-                });
-                scanTimeline.to(scanLine, { x: 65, duration: 0.65, ease: "none" }, 2.45)
+                workflowTimeline.to(scanLine, { x: 65, duration: 0.65, ease: "none" }, 2.45)
                   .to(scanResult, { autoAlpha: 1, y: 0, duration: 0.2, ease: "none" }, 2.92);
               }
               updateActive(0);
