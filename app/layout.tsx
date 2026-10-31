@@ -7,6 +7,28 @@ import "./globals.css";
 
 const siteUrl = (process.env.SITE_URL || "https://natexworks.github.io/SETDEMO").replace(/\/+$/, "");
 
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": siteUrl + "/#organization",
+      name: "NatexWorks",
+      url: siteUrl,
+      email: "natexworks@gmail.com",
+      description: "Websites, custom web applications, and practical digital solutions for businesses."
+    },
+    {
+      "@type": "WebSite",
+      "@id": siteUrl + "/#website",
+      url: siteUrl,
+      name: "NatexWorks",
+      publisher: { "@id": siteUrl + "/#organization" },
+      inLanguage: "en"
+    }
+  ]
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
@@ -39,6 +61,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
     <html lang="en">
       <head>
         <meta name="theme-color" content="#f2f0e9" />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         {/* eslint-disable-next-line @next/next/no-page-custom-font */}
