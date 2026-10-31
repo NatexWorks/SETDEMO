@@ -57,7 +57,7 @@ export default function CafeCaseStudy({ project, nextProject }: { project: Proje
             <article className="case-study-chapter" data-case-story-step>
               <span className="case-study-chapter__number">03 / HOMEPAGE EXPERIENCE</span>
               <h3>Tell the story, then guide the visit.</h3>
-              <p>The homepage includes a photo-led hero, featured menu cards, story and ambience sections, visit information, and a footer that keeps the site's main paths available.</p>
+              <p>The homepage includes a photo-led hero, featured menu cards, story and ambience sections, visit information, and a footer that keeps the site&apos;s main paths available.</p>
               <span className="case-study-chapter__tag">HERO · STORY · AMBIENCE · VISIT</span>
             </article>
             <article className="case-study-chapter" data-case-story-step>
