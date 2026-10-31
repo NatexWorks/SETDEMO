@@ -4,8 +4,6 @@ import ProjectArt from "@/components/project-art";
 import { projects } from "@/lib/projects";
 import { absoluteSiteUrl } from "@/lib/site";
 
-const siteUrl = (process.env.SITE_URL || "https://natexworks.github.io/SETDEMO").replace(/\/+$/, "");
-
 export const metadata: Metadata = {
   title: "Selected work",
   description: "Explore NatexWorks projects: a MERN-stack inventory application, a café website preview, and a clearly labelled local-search concept.",
