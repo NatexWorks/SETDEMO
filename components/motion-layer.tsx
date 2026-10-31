@@ -5,15 +5,23 @@ import { useEffect } from "react";
 export default function MotionLayer() {
   useEffect(() => {
     let cancelled = false;
+    let started = false;
     let teardown = () => {};
+    const activationQuery = window.matchMedia("(min-width: 1024px) and (prefers-reduced-motion: no-preference)");
 
     const initialise = async () => {
+      if (cancelled || started || !activationQuery.matches) return;
+      started = true;
+
       const [{ gsap }, { ScrollTrigger }] = await Promise.all([
         import("gsap"),
         import("gsap/ScrollTrigger")
       ]);
 
-      if (cancelled) return;
+      if (cancelled || !activationQuery.matches) {
+        started = false;
+        return;
+      }
 
       gsap.registerPlugin(ScrollTrigger);
       const root = document.documentElement;
@@ -143,12 +151,24 @@ export default function MotionLayer() {
       };
     };
 
-    void initialise().catch(() => {
-      // Content remains readable and the browser keeps native scrolling if GSAP is unavailable.
-    });
+    const handleMediaChange = () => {
+      if (activationQuery.matches) {
+        void initialise().catch(() => {
+          started = false;
+        });
+      }
+    };
+
+    activationQuery.addEventListener("change", handleMediaChange);
+    if (activationQuery.matches) {
+      void initialise().catch(() => {
+        started = false;
+      });
+    }
 
     return () => {
       cancelled = true;
+      activationQuery.removeEventListener("change", handleMediaChange);
       teardown();
     };
   }, []);
