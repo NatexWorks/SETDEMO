@@ -54,9 +54,16 @@ export default function MotionLayer() {
 
           const servicesJourney = document.querySelector<HTMLElement>("[data-services-journey]");
           if (servicesJourney) {
+            const brief = servicesJourney.querySelector<HTMLElement>("[data-journey-brief]");
+            const interfaceObject = servicesJourney.querySelector<HTMLElement>("[data-journey-interface]");
+            const systemObject = servicesJourney.querySelector<HTMLElement>("[data-journey-system]");
             const cards = gsap.utils.toArray<HTMLElement>("[data-journey-card]", servicesJourney);
-            if (cards.length > 1) {
-              gsap.set(cards.slice(1), { autoAlpha: 0, y: 28, scale: 0.975 });
+
+            if (brief && interfaceObject && systemObject && cards.length === 3) {
+              gsap.set(interfaceObject, { autoAlpha: 0, x: 70, y: 28, rotateY: -16, scale: 0.82 });
+              gsap.set(systemObject, { autoAlpha: 0, x: 45, y: 34, rotateZ: -13, scale: 0.72 });
+              gsap.set(cards, { autoAlpha: 0.58, y: 10, scale: 0.985 });
+
               const timeline = gsap.timeline({
                 scrollTrigger: {
                   trigger: servicesJourney,
@@ -70,13 +77,20 @@ export default function MotionLayer() {
                 }
               });
 
+              timeline
+                .to(brief, { x: -72, y: 26, rotateZ: -11, scale: 0.76, autoAlpha: 0.52, duration: 1 }, 0)
+                .to(interfaceObject, { autoAlpha: 1, x: 0, y: 0, rotateY: 0, scale: 1, duration: 1.05 }, 0.32)
+                .to(interfaceObject, { x: -48, y: -18, rotateY: 12, scale: 0.78, autoAlpha: 0.58, duration: 1 }, 1.28)
+                .to(systemObject, { autoAlpha: 1, x: 0, y: 0, rotateZ: 0, scale: 1, duration: 1.1 }, 1.62)
+                .to(".journey-progress-fill", { scaleX: 1, ease: "none", duration: 3.1 }, 0);
+
               cards.forEach((card, index) => {
-                if (index === 0) return;
-                timeline
-                  .to(cards[index - 1], { autoAlpha: 0, y: -20, scale: 0.98, duration: 0.8 }, index - 1)
-                  .to(card, { autoAlpha: 1, y: 0, scale: 1, duration: 0.85 }, index - 1 + 0.1);
+                const at = index * 0.94;
+                timeline.to(card, { autoAlpha: 1, y: -5, scale: 1, duration: 0.32 }, at);
+                if (index < cards.length - 1) {
+                  timeline.to(card, { autoAlpha: 0.62, y: 0, scale: 0.985, duration: 0.32 }, at + 0.52);
+                }
               });
-              timeline.to(".journey-progress-fill", { scaleX: 1, ease: "none", duration: cards.length }, 0);
             }
           }
 
