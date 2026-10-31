@@ -1197,15 +1197,15 @@ main { display: block; overflow: clip; }
   gap: 16px;
   padding: 17px 0;
   border-top: 1px solid var(--line);
-  opacity: .52;
-  transition: opacity .25s ease;
+  opacity: 1;
+  transition: background-color .25s ease;
 }
 .workflow-desktop-story__step:first-child { border-top: 0; }
-.workflow-desktop-story__step.is-active { opacity: 1; }
+.workflow-desktop-story__step.is-active { background: rgba(255,255,255,.22); }
 .workflow-desktop-story__step > span { padding-top: 6px; color: var(--blue); font: 8px var(--mono); }
 .workflow-desktop-story__step h3 { margin: 0 0 5px; font-size: clamp(23px,2.3vw,34px); font-weight: 500; line-height: 1; letter-spacing: -.065em; }
 .workflow-desktop-story__step p { max-width: 420px; margin: 0; color: var(--muted); font-size: 10px; line-height: 1.65; }
-.workflow-desktop-story__step small { display: block; margin-top: 9px; color: #777f92; font: 7px/1.5 var(--mono); letter-spacing: .08em; }
+.workflow-desktop-story__step small { display: block; margin-top: 9px; color: #515c6b; font: 7px/1.5 var(--mono); letter-spacing: .08em; }
 .workflow-desktop-story__progress { height: 2px; margin-top: 17px; background: #d6d9df; overflow: hidden; }
 .workflow-desktop-story__progress span { display: block; width: 100%; height: 100%; background: var(--blue); transform: scaleX(.25); transform-origin: left; }
 .workflow-desktop-story__hint { margin: 13px 0 0; color: var(--muted); font: 7px var(--mono); letter-spacing: .12em; }
@@ -1243,7 +1243,7 @@ main { display: block; overflow: clip; }
 .workflow-table-row { display: grid; grid-template-columns: 1.2fr 1fr .7fr; gap: 10px; align-items: center; min-height: 44px; padding: 0 9px; border-bottom: 1px solid #303c4d; color: #aab4c5; font-size: 8px; }
 .workflow-table-row b { color: #edf0f6; font-weight: 500; }
 .workflow-table-row code { color: #8f9cb3; font: 7px var(--mono); }
-.workflow-table-row.is-heading { min-height: 30px; color: #75839b; font: 6px var(--mono); }
+.workflow-table-row.is-heading { min-height: 30px; color: #9aa8bd; font: 6px var(--mono); }
 .workflow-stock-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 22px 0 18px; }
 .workflow-stock-summary > div { display: grid; gap: 7px; padding: 13px; border: 1px solid #344154; border-radius: 7px; background: #1d2a3b; }
 .workflow-stock-summary small { color: #8492a8; font: 6px var(--mono); }
@@ -1296,12 +1296,13 @@ main { display: block; overflow: clip; }
   transform-origin: left center;
 }
 [data-process-story] .process-item { transition: opacity .25s ease, transform .25s ease; }
-[data-process-story] .process-item:not(.is-active) { opacity: .7; }
+[data-process-story] .process-item:not(.is-active) { opacity: 1; }
 [data-process-story] .process-item.is-active { opacity: 1; }
 [data-process-story] .process-item.is-active > span { color: var(--coral); }
 
 /* Geographic concept artwork. City markers remain attached to their illustrated land shapes. */
 .project-art--discovery { padding: 5%; background: #0b121c; }
+.project-art--discovery .art-label { color: #d3dde5; }
 .project-art--discovery .discovery-panel {
   border-color: #243345;
   background: radial-gradient(ellipse at 75% 40%, #1c3144 0, #0e1926 60%, #09111b 100%);
@@ -1390,6 +1391,7 @@ main { display: block; overflow: clip; }
   gap: clamp(35px,7vw,105px);
   margin-top: 65px;
 }
+.local-signal-field__copy .eyebrow { color: #c0cbd5; }
 .local-signal-field__copy h2 { margin: 0 0 24px; font-size: clamp(44px,5.4vw,76px); font-weight: 500; line-height: .94; letter-spacing: -.08em; }
 .local-signal-field__copy h2 em { color: #aab8f0; font-family: var(--serif); font-weight: 400; }
 .local-signal-field__copy > p:not(.eyebrow) { max-width: 440px; color: #b7c2ce; font-size: 12px; line-height: 1.9; }
@@ -1484,7 +1486,7 @@ main { display: block; overflow: clip; }
 .service-art__browser-bar i { width: 5px; height: 5px; border-radius: 50%; background: #c77d69; }
 .service-art__browser-bar i:nth-child(2) { background: #d7b46c; }
 .service-art__browser-bar i:nth-child(3) { background: #87a58f; }
-.service-art__browser-bar span { margin-left: auto; }
+.service-art__browser-bar span { margin-left: auto; color: #515d54; }
 .service-art__website { position: relative; padding: 10px 15px; }
 .service-art__website > b { color: #36473e; font: 7px var(--mono); letter-spacing: .08em; }
 .service-art__website-head { position: absolute; top: 11px; right: 14px; display: flex; gap: 9px; }
@@ -1547,7 +1549,7 @@ main { display: block; overflow: clip; }
 .service-art__phone i { height: 13px; background: #d6e0d7; }
 .service-art__phone i:nth-child(2) { height: 22px; background: #e0d1bd; }
 .service-art__phone i:nth-child(4) { height: 8px; background: #aabbb2; }
-.service-art__responsive small { position: absolute; top: 3px; right: 2%; color: #616e70; font: 6px var(--mono); letter-spacing: .08em; }
+.service-art__responsive small { position: absolute; top: 3px; right: 2%; color: #4c595b; font: 6px var(--mono); letter-spacing: .08em; }
 @media (max-width: 700px) {
   .service-art { height: 128px; margin-top: 18px; }
   .service-art__browser, .service-art__app { right: 12px; left: 12px; }
@@ -1573,8 +1575,8 @@ main { display: block; overflow: clip; }
 
 
 @keyframes natexEditorialArrive {
-  from { opacity: 0; transform: translateY(18px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { transform: translateY(18px); }
+  to { transform: translateY(0); }
 }
 @media (max-width: 899px) and (prefers-reduced-motion: no-preference) {
   .hero-story .hero-story__copy > .eyebrow { animation: natexEditorialArrive .58s .02s both cubic-bezier(.2,.75,.2,1); }
