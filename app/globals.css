@@ -1275,13 +1275,12 @@ main { display: block; overflow: clip; }
 .workflow-barcode { display: grid; grid-template-columns: 1fr .9fr; gap: 18px; align-items: center; min-height: 290px; }
 .workflow-barcode__scan { position: relative; display: grid; place-items: center; min-height: 150px; padding: 22px; border: 1px solid #39475c; border-radius: 7px; background: #111b2a; overflow: hidden; }
 .workflow-barcode__bars { width: 100%; height: 93px; background: repeating-linear-gradient(90deg,#edf0f5 0 2px,transparent 2px 5px,#edf0f5 5px 6px,transparent 6px 10px,#edf0f5 10px 14px,transparent 14px 18px); opacity: .9; }
-.workflow-barcode__line { position: absolute; z-index: 1; top: 0; bottom: 0; left: 50%; width: 2px; background: #f0a36c; box-shadow: 0 0 18px #f0a36c; animation: barcodeSweep 2.8s ease-in-out infinite alternate; }
+.workflow-barcode__line { position: absolute; z-index: 1; top: 0; bottom: 0; left: 50%; width: 2px; background: #f0a36c; box-shadow: 0 0 18px #f0a36c; animation: none; }
 .workflow-barcode__result { display: grid; gap: 9px; }
 .workflow-barcode__result small { color: #93a0b4; font: 7px var(--mono); letter-spacing: .09em; }
 .workflow-barcode__result b { font-size: 18px; font-weight: 500; }
 .workflow-barcode__result span { color: #b7c1d2; font: 8px var(--mono); }
 .workflow-barcode__result i { color: #8391a7; font-size: 7px; font-style: normal; line-height: 1.5; }
-@keyframes barcodeSweep { from { transform: translateX(-40px); } to { transform: translateX(40px); } }
 
 /* A scroll-linked line ties the four project stages together. */
 [data-process-story] .process-grid { position: relative; }
