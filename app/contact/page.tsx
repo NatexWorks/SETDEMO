@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import ContactForm from "@/components/contact-form";
+import { absoluteSiteUrl } from "@/lib/site";
 
 const siteUrl = (process.env.SITE_URL || "https://natexworks.github.io/SETDEMO").replace(/\/+$/, "");
 
 export const metadata: Metadata = {
   title: "Contact",
   description: "Start a project conversation with NatexWorks about a business website, custom web application, interface refinement, or local SEO.",
-  alternates: { canonical: siteUrl + "/contact" },
-  openGraph: { url: siteUrl + "/contact" }
+  alternates: { canonical: absoluteSiteUrl("/contact") },
+  openGraph: { url: absoluteSiteUrl("/contact") }
 };
 
 export default function ContactPage() {
