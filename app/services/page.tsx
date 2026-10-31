@@ -62,7 +62,7 @@ export default function ServicesPage() {
       <section className="service-detail-list section-pad">
         <div className="section-kicker"><span>WHAT I CAN HELP WITH</span><span>FOUR PRACTICAL DISCIPLINES</span></div>
         {services.map((service) => (
-          <article className="service-detail" id={"service-" + service.number} key={service.number} data-mobile-reveal>
+          <article className="service-detail" id={"service-" + service.number} key={service.number} data-mobile-reveal data-reveal>
             <div className="service-detail__number">{service.number}</div>
             <div className="service-detail__main">
               <p className="eyebrow">{service.kicker}</p>
