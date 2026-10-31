@@ -5,6 +5,7 @@ import ProjectArt from "@/components/project-art";
 import { projects } from "@/lib/projects";
 
 type PageProps = { params: Promise<{ slug: string }> };
+const siteUrl = (process.env.SITE_URL || "https://natexworks.github.io/SETDEMO").replace(/\/+$/, "");
 
 export function generateStaticParams() {
   return projects.map((project) => ({ slug: project.slug }));
@@ -17,8 +18,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: project.title,
     description: project.summary,
-    alternates: { canonical: "/work/" + project.slug },
-    openGraph: { title: project.title + " — NatexWorks", description: project.summary, type: "article" }
+    alternates: { canonical: siteUrl + "/work/" + project.slug },
+    openGraph: { title: project.title + " — NatexWorks", description: project.summary, type: "article", url: siteUrl + "/work/" + project.slug }
   };
 }
 
