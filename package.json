@@ -3,8 +3,6 @@
   "version": "2.0.0",
   "private": true,
   "scripts": {
-    "predev": "npm run content:extract && node scripts/prepare-public-assets.mjs",
-    "prebuild": "npm run content:extract && node scripts/prepare-public-assets.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
