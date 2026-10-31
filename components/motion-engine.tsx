@@ -9,6 +9,7 @@ export default function MotionEngine() {
     let dispose: () => void = () => {};
     const hasMotionTargets = document.querySelector(".hero-story, .service-transform, .work-gallery, [data-parallax], .case-study__visual, [data-reveal]");
     if (!hasMotionTargets) return;
+    if (!window.matchMedia("(min-width: 900px) and (prefers-reduced-motion: no-preference)").matches) return;
     Promise.all([import("gsap"), import("gsap/ScrollTrigger")]).then(([gsapModule, triggerModule]) => {
       if (cancelled) return;
       const gsap = gsapModule.gsap;
