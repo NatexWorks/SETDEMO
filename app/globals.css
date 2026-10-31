@@ -33,6 +33,8 @@ body {
 }
 body::selection, body *::selection { color: var(--paper-light); background: var(--blue); }
 a { color: inherit; text-decoration: none; }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline-offset: 2px; }
 button, input, select, textarea { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
 img, svg, canvas { display: block; max-width: 100%; }
