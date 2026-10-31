@@ -1,9 +1,9 @@
 "use client";
 
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useThree } from "@react-three/fiber";
 import { useRef } from "react";
-import { useThree } from "@react-three/fiber";
-import { Group, Quaternion, Vector3 } from "three";
+import { Quaternion, Vector3 } from "three";
+import type { Group } from "three";
 
 type Point = [number, number, number];
 
@@ -36,7 +36,7 @@ function Module({
 }) {
   return (
     <group position={position} scale={scale}>
-      <mesh castShadow>
+      <mesh>
         <boxGeometry args={[0.42, 0.34, 0.3]} />
         <meshStandardMaterial color={colour} roughness={0.28} metalness={0.16} />
       </mesh>
@@ -73,7 +73,7 @@ function Network() {
         group.rotation.y = event.pointer.x * 0.16;
         invalidate();
       }}
-      onPointerOut={() => {
+      onPointerLeave={() => {
         const group = groupRef.current;
         if (!group) return;
         group.rotation.set(0, 0, 0);
