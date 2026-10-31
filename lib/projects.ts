@@ -13,6 +13,7 @@ export type Project = {
   approach: string;
   details: string[];
   note?: string;
+  outcome: string;
   kind: "inventory" | "cafe" | "search";
 };
 
@@ -37,6 +38,7 @@ export const projects: Project[] = [
       "Barcode-assisted product lookup where scanner setup is supported"
     ],
     note: "The portfolio preview uses illustrative sample data. The live demo is the source of truth for currently enabled features; some business-specific flows may need configuration or further implementation before production use.",
+    outcome: "A live demo link is available. No adoption, revenue, time-saving, or production-impact metric is claimed; verify currently enabled workflows in the demo.",
     kind: "inventory"
   },
   {
@@ -58,6 +60,7 @@ export const projects: Project[] = [
       "Responsive presentation for smaller screens"
     ],
     note: "Presented as a website preview from the existing portfolio. No client name, commercial result, or business metric is claimed here.",
+    outcome: "A website preview link is included. No analytics, enquiries, footfall, or commercial results are claimed.",
     kind: "cafe"
   },
   {
@@ -77,6 +80,7 @@ export const projects: Project[] = [
       "Illustrative map and local-result presentation"
     ],
     note: "This is a concept, not a live SEO campaign. The map and listing artwork is illustrative; it does not represent a real search position or guaranteed ranking.",
+    outcome: "The deliverable shown here is a concept presentation only. No campaign, live listing improvement, or ranking result is claimed.",
     kind: "search"
   }
 ];
