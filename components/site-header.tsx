@@ -20,7 +20,7 @@ export default function SiteHeader() {
     if (!menuOpen) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") closeMenu();
+      if (event.key === "Escape") setMenuOpen(false);
     };
 
     window.addEventListener("keydown", handleKeyDown);
