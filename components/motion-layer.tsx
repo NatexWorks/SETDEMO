@@ -22,6 +22,7 @@ export default function MotionLayer() {
         const media = gsap.matchMedia();
 
         media.add("(min-width: 1024px) and (prefers-reduced-motion: no-preference)", () => {
+          root.classList.add("motion-ready");
           const homeStory = document.querySelector<HTMLElement>("[data-home-story]");
           if (homeStory) {
             const frames = gsap.utils.toArray<HTMLElement>("[data-story-frame]", homeStory);
@@ -112,13 +113,15 @@ export default function MotionLayer() {
             });
           });
 
-          return () => ScrollTrigger.refresh();
+          return () => {
+            root.classList.remove("motion-ready");
+            ScrollTrigger.refresh();
+          };
         });
 
         return () => media.revert();
       });
 
-      root.classList.add("motion-ready");
       ScrollTrigger.refresh();
       teardown = () => {
         context.revert();

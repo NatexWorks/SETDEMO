@@ -1,9 +1,10 @@
 import type { MetadataRoute } from "next";
 
+const siteUrl = (process.env.SITE_URL || "https://natexworks.github.io/SETDEMO").replace(/\/$/, "");
+
 export default function robots(): MetadataRoute.Robots {
-  const siteUrl = process.env.SITE_URL?.replace(/\/$/, "");
   return {
-    rules: { userAgent: "*", allow: "/" },
-    ...(siteUrl ? { sitemap: `${siteUrl}/sitemap.xml` } : {}),
+    rules: [{ userAgent: "*", allow: "/" }],
+    sitemap: siteUrl + "/sitemap.xml"
   };
 }
