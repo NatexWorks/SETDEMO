@@ -107,7 +107,7 @@ main { display: block; overflow: clip; }
 .section-pad { padding: 112px var(--side); }
 .section-kicker, .hero-topline, .hero-bottomline, .page-hero__bottom,
 .art-label, .project-number, .project-status, .work-card__meta, .enquiry-form__top,
-.about-visual-story__caption, .case-hero__meta {
+.case-hero__meta {
   font-family: var(--mono);
   font-size: 9px;
   line-height: 1.5;
@@ -1556,4 +1556,18 @@ main { display: block; overflow: clip; }
 }
 @media (prefers-reduced-motion: reduce) {
   .service-art * { animation: none !important; transition: none !important; }
+}
+
+
+.about-method__list article {
+  transition: border-color .25s ease, background .25s ease;
+}
+.about-method__list article.is-active > span {
+  color: var(--coral);
+}
+.about-method__list article.is-active h3 {
+  color: var(--ink);
+}
+@media (prefers-reduced-motion: reduce) {
+  .about-method__list article { transition: none; }
 }
