@@ -1,5 +1,4 @@
 import Link from "next/link";
-import ProjectArt from "@/components/project-art";
 import ProjectCard from "@/components/project-card";
 import { projects, services } from "@/lib/projects";
 
