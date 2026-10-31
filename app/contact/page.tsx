@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import ContactForm from "@/components/contact-form";
 import { absoluteSiteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Start a project conversation with NatexWorks about a business website, custom web application, interface refinement, or local SEO.",
+  description: "Contact NatexWorks about a business website, custom web application, interface refinement, or local SEO.",
   alternates: { canonical: absoluteSiteUrl("/contact") },
   openGraph: { url: absoluteSiteUrl("/contact") }
 };
@@ -14,9 +15,9 @@ export default function ContactPage() {
     <main id="main">
       <section className="inner-hero contact-page-hero">
         <div className="inner-hero-inner">
-          <p className="eyebrow"><span className="eyebrow-dot" /> CONTACT / START A PROJECT</p>
-          <h1>Tell me what<br />needs to <em>work better.</em></h1>
-          <p>Share the problem, the people it affects, and what you are hoping to make easier. A first conversation can help shape the right scope.</p>
+          <p className="eyebrow"><span className="eyebrow-dot" /> CONTACT / GET IN TOUCH</p>
+          <h1>Start with what<br />needs to <em>work better.</em></h1>
+          <p>Have a question or want to talk through an idea? Use the email form below, or share a little more detail through the dedicated project enquiry page.</p>
         </div>
       </section>
       <section className="contact-page-layout">
@@ -26,7 +27,8 @@ export default function ContactPage() {
           <p>There is no need to arrive with a complete technical brief. Explain what you are trying to do, what is getting in the way, or what you want to launch.</p>
           <div className="contact-detail"><small>EMAIL</small><a href="mailto:natexworks@gmail.com">natexworks@gmail.com ↗</a></div>
           <div className="contact-detail"><small>BASED IN</small><span>India</span></div>
-          <p className="contact-process-note">Submitting the form prepares an email in your default mail application. It does not send or store the enquiry on this website.</p>
+          <p className="contact-process-note">The form opens an email draft in your default mail application. It does not send or store your enquiry on this website.</p>
+          <Link className="arrow-link" href="/start-project">Use the project enquiry form <span aria-hidden="true">↗</span></Link>
         </div>
         <ContactForm />
       </section>

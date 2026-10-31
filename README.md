@@ -1,50 +1,36 @@
 # NatexWorks — premium portfolio rebuild
 
-This branch contains a new NatexWorks portfolio built from a fresh App Router page architecture. The existing website is treated as a separate legacy project and is not used as the layout or visual template.
-
-**Active rebuild branch:** `rebuild/premium-portfolio`  
-**Production branch:** `main` (left unchanged by this work)
-
-## Creative direction
-
-The new site uses an editorial warm-neutral canvas, ink typography, cobalt accents, and restrained coral details. It is intentionally separate from the previous olive/lime portfolio.
-
-The previous HTML/CSS remains in the repository as legacy source material only. Automatic `predev` and `prebuild` hooks have been removed so the new app no longer extracts or injects the old page markup during normal development or builds.
+This branch contains the Next.js App Router portfolio rebuild. The production `main` branch is not modified by the rebuild work.
 
 ## Routes
 
-- `/` — Home
-- `/services` — Services and process transformation
+- `/` — Home, selected work, mobile inventory workflow story, services preview, and About preview
+- `/services` — Service details, project process, and related work
 - `/work` — Selected projects
-- `/work/[slug]` — Individual case studies
-- `/about` — Practice and working approach
-- `/contact` — Project enquiry
-- `/inventory.html` — Redirects to the new inventory case study
+- `/work/inventory-management` — Inventory product case study
+- `/work/cafe-presence` — Neswef Café website-preview case study
+- `/work/local-search-concept` — Local-search concept
+- `/about` — Personal introduction and working approach
+- `/contact` — Contact details and email-draft form
+- `/start-project` — Structured project enquiry with optional project preselection
+- `/inventory.html` — Legacy route redirect to the Inventory Management case study
 
-## Motion and 3D systems
+## Motion and responsive behaviour
 
-- **Home:** pinned brief → interface → system story on wide screens.
-- **Hero 3D:** lazy-loaded React Three Fiber / Three.js network visual. It loads only near the hero on fine-pointer desktop screens when reduced motion is not requested. It uses demand-driven rendering and a CSS fallback.
-- **Services:** a pinned brief → interface → connected workflow assembly. The explanatory process cards remain readable; the visual changes with scroll progress.
-- **Work:** horizontal editorial gallery on wide screens; native touch scrolling on tablet and mobile.
-- **Case studies:** layered sticky panels on larger screens; normal document flow on small screens.
+- Wide-screen Home and Services stories, Work gallery, and case panels use the existing GSAP / ScrollTrigger stack.
+- The primary new mobile story uses four equal cards in the order Catalog → Stock → Checkout → Barcode. A short ScrollTrigger timeline maps the natural vertical scroll progress to diagonal card entrances, stacked card edges, and the transition into the next Services panel.
+- Reduced-motion and JavaScript fallbacks retain every card in normal document flow.
+- The R3F hero is loaded only near the viewport on supported fine-pointer desktop contexts; mobile and reduced-motion visitors receive the CSS fallback.
+- No additional animation library is installed.
 
-GSAP owns scroll-linked timelines and pins. CSS owns layout, typography, responsive behaviour, focus states, and fallback artwork. The existing GSAP and React Three Fiber dependencies are reused. Motion, Lenis, Drei, and a route-transition framework are not added.
+## Project facts
 
-Reduced-motion visitors receive normal document flow and do not load the decorative WebGL scene. Mobile and touch-first visitors keep natural scrolling.
-
-## Project facts retained
-
-- **Inventory Management System:** MERN-stack build with an existing live demo link. Portfolio preview data is illustrative; verify enabled features in the live demo. No adoption, revenue, time-saved, or production-impact metrics are claimed.
-- **Neswef Café:** existing website preview link, without invented commercial outcomes.
-- **Local Search & Maps:** concept presentation only, not a live SEO campaign or ranking result.
+- **Inventory Management System:** the public source repository contains product/category management, stock review, camera barcode scanning, order state transitions, returns, and reporting. The live demo may differ from the source. No adoption, revenue, time-saved, or production-impact metrics are claimed.
+- **Neswef Café:** a website preview with a separate menu page. Menu items, prices, address, hours, and contact details are sample content; the reservation form opens an email draft and does not confirm a booking.
+- **Local Search & Maps:** concept only, not a live campaign or ranking claim.
 - **Contact:** `natexworks@gmail.com`.
 
-Every case study includes challenge, approach, work included, and an outcome/evidence statement describing what can actually be claimed.
-
 ## Local development
-
-Use the repository's existing lockfile.
 
 ```bash
 cp .env.example .env.local
@@ -60,28 +46,8 @@ npm run typecheck
 npm run build
 ```
 
-The GitHub Actions workflow `.github/workflows/portfolio-ci.yml` is configured to run lint, type checking, and a production build on pushes to `rebuild/**` and on pull requests to `main`. Check the Actions run before promoting the branch.
+The GitHub Actions workflow runs lint, type checks, a production build, and production-server route smoke tests. Read `docs/implementation-audit.md`, `docs/reference-analysis.md`, and `docs/creative-direction.md` for the audit, reference mapping, and motion/content rules.
 
-## SEO and indexing controls
+## SEO and deployment
 
-Set `SITE_URL` to the full production origin before deployment. Set `SITE_INDEXABLE=true` only after the production host and content are approved. Until then, metadata remains noindex, robots disallows crawling, and the sitemap is empty.
-
-Optionally set `GOOGLE_SITE_VERIFICATION` to the verification token supplied by Search Console. Do not invent a token.
-
-## Deployment
-
-This is a Next.js App Router application intended for a Node-compatible host such as Vercel. GitHub Pages static hosting is not configured for this server-capable App Router build. No production deployment has been performed.
-
-Before deployment:
-1. Choose the canonical production host and set `SITE_URL`.
-2. Verify the host supports the Next.js App Router runtime.
-3. Review every project link and confirm live demo features.
-4. Test the full responsive matrix, keyboard flow, reduced motion, and WebGL fallback.
-5. Run lint, type checking, production build, and Lighthouse on the deployed preview.
-6. Set `SITE_INDEXABLE=true` only after approval.
-
-## Research and handoff
-
-- `docs/reference-analysis.md` — seven-reference evidence matrix and inspection limitations.
-- `docs/creative-direction.md` — visual system, architecture, motion systems, technology ownership, SEO, and content-truth rules.
-
+Set `SITE_URL` to the final production origin before deployment. Set `SITE_INDEXABLE=true` only after the canonical host and content are approved. Until then, the site remains noindex and its sitemap is empty. No production deployment has been performed.

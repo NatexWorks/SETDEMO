@@ -7,7 +7,8 @@ import { useEffect, useState } from "react";
 const navigation = [
   { href: "/services", label: "Services" },
   { href: "/work", label: "Work" },
-  { href: "/about", label: "About" }
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" }
 ];
 
 export default function SiteHeader() {
@@ -66,7 +67,7 @@ export default function SiteHeader() {
               </Link>
             );
           })}
-          <Link className="header-cta" href="/contact" onClick={closeMenu}>
+          <Link className="header-cta" href="/start-project" onClick={closeMenu}>
             Start a project <span aria-hidden="true">↗</span>
           </Link>
         </nav>

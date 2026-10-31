@@ -47,6 +47,15 @@ jobs:
           SITE_URL: https://preview.invalid
           SITE_INDEXABLE: "false"
 
+      - name: Smoke-test production routes
+        run: |
+          npm run start -- --hostname 127.0.0.1 > /tmp/setdemo-next.log 2>&1 &
+          node scripts/route-smoke.mjs
+        env:
+          SITE_URL: https://preview.invalid
+          SITE_INDEXABLE: "false"
+          BASE_URL: http://127.0.0.1:3000
+
       - name: Commit repaired lockfile to rebuild branch
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/rebuild/')
         run: |

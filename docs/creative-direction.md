@@ -1,4 +1,4 @@
-# NatexWorks — new creative direction
+# NatexWorks — premium portfolio creative direction
 
 ## Positioning
 
@@ -23,68 +23,51 @@ The experience communicates practical capability, considered design, and trustwo
 | Coral | #f07859 | Small contrast accent |
 | Mint | #b8d8c9 | Reserved secondary accent |
 
-Typography:
-- Space Grotesk for headlines, body, navigation, and interface labels.
-- IBM Plex Mono for small technical annotations and section indices.
-- Large headings use compact line-height and negative tracking; paragraphs stay comfortably readable.
+Typography uses Space Grotesk for display/body and IBM Plex Mono for technical labels. Composition uses an editorial grid, generous gutters, restrained borders, and asymmetric layouts only where they improve the story.
 
-Composition:
-- Editorial grid, generous gutters, restrained borders, and clear content hierarchy.
-- Asymmetric layouts only where they improve visual storytelling.
-- Project imagery is purpose-built HTML/CSS artwork until approved genuine project screenshots are supplied.
-- No stock image is presented as proof of client work.
+## Routes
 
-## Site architecture
+- `/` — Positioning, introduction, selected work, a four-card inventory workflow story, services preview, About preview, and project CTA.
+- `/services` — Four service descriptions, process transformation, related work, and a project CTA.
+- `/work` — Selected project index.
+- `/work/inventory-management` — Independent inventory product case study based on source-verified functionality.
+- `/work/cafe-presence` — Independent Neswef Café website-preview case study.
+- `/work/[slug]` — The remaining concept case study.
+- `/about` — Personal introduction and working approach based on existing portfolio content.
+- `/contact` — Contact details and an explicitly labelled email-draft handoff.
+- `/start-project` — Structured enquiry with project context preselection.
 
-- / — Positioning, transformation story, services, selected work, approach, contact invitation.
-- /services — Four service descriptions and a three-stage project process transformation.
-- /work — Selected project index with a horizontal editorial rail on large screens and natural touch scrolling on tablet/mobile.
-- /work/[slug] — Individual project notes: challenge, approach, work included, outcome/evidence, and grounded outbound link.
-- /about — Working approach and capabilities without invented biography, timeline, awards, or client roster.
-- /contact — Email-based enquiry form that prepares a message for the visitor's mail app. It does not transmit or store submissions.
+## Motion systems
 
-## Four motion systems
+1. **Home transformation story.** On wide screens, a GSAP ScrollTrigger timeline moves from brief to interface to connected system. Smaller screens preserve natural flow.
+2. **Services assembly.** A scroll-linked visual moves through brief, interface, and workflow stages. The supporting text stays available without animation.
+3. **Work index.** The horizontal editorial rail is reserved for wide screens; touch screens use natural horizontal swipe.
+4. **Mobile workflow narrative.** Corn Revolution's documented continuous-scroll storytelling is reinterpreted as a mobile-first sequence: Catalog → Stock → Checkout → Barcode. Four same-size cards enter alternately from the sides and stack with visible edge spacing. The progress-linked stack tilts and scales back as the following Services panel rises into the foreground. This uses a short native vertical scroll range, not forced horizontal scrolling or scroll-event counters.
+5. **Project details.** Inventory and Café Presence have different content structures and visual accents. Mobile project chapters reveal progressively while all content remains readable in normal flow.
 
-1. **Pinned transformation story — Home.** Three frames progress from brief to interface to system. GSAP ScrollTrigger maps the sequence to scroll progress. On smaller screens / reduced-motion preferences, every frame remains in normal document flow.
-2. **Scroll-driven assembly — Services.** A visual changes from project brief to interface to connected workflow. The text cards remain present; GSAP transforms the illustrative artwork and highlights the matching step. Mobile uses a normal-flow text sequence.
-3. **Horizontal editorial gallery — Work.** A horizontal project rail maps vertical scroll progress on wide screens. Tablet/mobile visitors can swipe it naturally.
-4. **Layered case-study panels — Project detail.** CSS sticky panels create a quiet sense of depth while reading challenge, approach, scope, and evidence. On small screens they return to normal flow.
+GSAP owns scroll-progress timelines. CSS owns layout, typography, card dimensions, shadows, focus states, and static fallbacks. No new animation library is introduced. The existing Three.js/R3F hero remains lazy-loaded only for fine-pointer desktop contexts; mobile and reduced-motion contexts use the CSS fallback.
 
-About is intentionally editorial and content-led. Contact is intentionally straightforward. Simple reveals and hover feedback are supporting motion, not the page's main interaction.
+## Mobile and accessibility rules
 
-## Technology ownership
-
-- Next.js App Router and React Server Components provide routes and essential content.
-- Client components are limited to the mobile navigation, contact form, motion coordinator, and lazy 3D loader.
-- GSAP owns pinned timelines and scroll-linked transformations. It is imported only when a wide viewport permits motion.
-- CSS owns layout, typography, panels, simple perspective artwork, hover, focus, and responsive fallbacks.
-- React Three Fiber / Three.js render one decorative network visual on the homepage. It loads only near the hero on fine-pointer desktops with motion permitted; it uses `frameloop="demand"`, modest DPR, no continuously animated loop, and a CSS fallback.
-- The existing React Three Fiber dependency is reused. Drei, Motion, and Lenis are not added.
-- Native scrolling remains the default; no routing-transition library is introduced.
-
-## Accessibility and performance rules
-
-- Respect prefers-reduced-motion; essential content never depends on animation.
-- Scroll pinning activates only at 1024px and above with motion permitted.
-- The 3D hero is disabled for touch-first and reduced-motion contexts; no text is rendered only in canvas.
-- Mobile navigation has expanded state and an Escape-key close behaviour.
-- Use semantic landmarks, labelled controls, visible focus, descriptive links, and native form validation.
-- R3F uses a demand-driven render mode and is loaded only near the visible hero.
-- Project previews are lightweight CSS compositions until approved genuine project media is available.
-- Verify actual Core Web Vitals and Lighthouse in the deployment environment. Targets are goals, not claimed measurements.
+- The dedicated four-card animation is limited to small viewports and `prefers-reduced-motion: no-preference`.
+- The scroll range is progress-linked and uses a sticky visual stage while the document continues to scroll naturally.
+- Every card remains in the HTML and is shown in normal flow if JavaScript, GSAP, or motion preference disables the animation.
+- No essential copy, route, or action depends on the animated state.
+- Mobile does not load the 3D hero canvas. No device rotation, long-press, or horizontal scroll requirement is introduced.
+- Animation contexts and ScrollTriggers are reverted on teardown and media-query changes.
+- Preserve the existing desktop/tablet layout and interaction systems outside the newly requested page content.
 
 ## SEO and deployment
 
-- Page metadata, canonical URLs, Open Graph, Twitter cards, organization/website JSON-LD, robots, and sitemap are implemented.
+- Each route has a distinct title, description, and canonical URL.
+- Open Graph and Twitter metadata, Organization/WebSite structured data, robots, and sitemap are provided.
 - `SITE_URL` must be set to the final canonical origin before deployment.
 - `SITE_INDEXABLE` defaults to false. Until explicitly enabled, metadata is noindex, robots disallow crawling, and the sitemap is empty.
-- `GOOGLE_SITE_VERIFICATION` is optional and should contain only a token issued by Search Console.
-- This is a Next.js App Router application intended for a Node-compatible host (for example Vercel). GitHub Pages static hosting is not configured for this App Router build.
-- No deployment has been performed.
+- No production deployment or Lighthouse/Core Web Vitals measurement is claimed.
 
 ## Content truth
 
-- Inventory Management System: the existing portfolio identifies a MERN-stack build and links to a live demo. Preview numbers are illustrative; the demo is the source of truth for currently enabled features. No adoption, revenue, time-saved, or production impact is claimed.
-- Neswef Café: an existing website preview link is included. No analytics or commercial results are claimed.
-- Local Search & Maps: explicitly labelled as a concept. Map pins and result layout are illustrative and do not claim rankings or campaign outcomes.
-- Email: natexworks@gmail.com.
+- Inventory Management: capabilities are checked against its public source repository. The live deployment may differ; the project reports no business outcome metrics. CSS portfolio artwork is illustrative.
+- Neswef Café: the website preview is based on the source repository. Menu, price, address, opening-hour, and contact fields are sample details; the reservation form opens an email draft and is not a booking backend.
+- Local Search & Maps: concept only. Illustrative map pins do not represent live rankings or campaign results.
+- Contact: `natexworks@gmail.com`. Forms open a mail draft; no server-side submission or storage is configured.

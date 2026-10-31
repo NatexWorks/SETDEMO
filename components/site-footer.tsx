@@ -8,12 +8,12 @@ export default function SiteFooter() {
           <p className="eyebrow">HAVE A REAL PROBLEM TO SOLVE?</p>
           <h2>Let’s make the<br /><em>next step</em> clearer.</h2>
         </div>
-        <Link className="footer-action" href="/contact">
-          Start a conversation <span aria-hidden="true">↗</span>
+        <Link className="footer-action" href="/start-project">
+          Start a project <span aria-hidden="true">↗</span>
         </Link>
       </div>
       <div className="footer-bottom">
-        <Link className="wordmark footer-wordmark" href="/">
+        <Link className="wordmark footer-wordmark" href="/" aria-label="NatexWorks home">
           <span className="wordmark-symbol" aria-hidden="true">N<span>×</span></span>
           <span>NatexWorks<span className="wordmark-period">.</span></span>
         </Link>

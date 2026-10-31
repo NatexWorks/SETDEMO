@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { services } from "@/lib/projects";
+import ProjectArt from "@/components/project-art";
+import { projects, services } from "@/lib/projects";
 import { absoluteSiteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -17,6 +18,8 @@ const journey = [
 ];
 
 export default function ServicesPage() {
+  const relevantProjects = projects.filter((project) => project.kind === "inventory" || project.kind === "cafe");
+
   return (
     <main id="main">
       <section className="inner-hero services-page-hero">
@@ -87,12 +90,33 @@ export default function ServicesPage() {
           </div>
         </div>
       </section>
+      <section className="services-related">
+        <div className="services-related-inner">
+          <div className="services-list-heading">
+            <p className="eyebrow">RELATED PROJECTS</p>
+            <h2>Capabilities, <em>in context.</em></h2>
+          </div>
+          <div className="services-related-grid">
+            {relevantProjects.map((project) => (
+              <article className="services-related-card" key={project.slug}>
+                <Link className="services-related-art" href={"/work/" + project.slug} aria-label={"Read the " + project.title + " case study"}>
+                  <ProjectArt kind={project.kind} compact />
+                </Link>
+                <p className="eyebrow">{project.category} · {project.status}</p>
+                <h3><Link href={"/work/" + project.slug}>{project.title}</Link></h3>
+                <p>{project.summary}</p>
+                <Link className="arrow-link" href={"/work/" + project.slug}>Read project notes <span aria-hidden="true">↗</span></Link>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
       <section className="services-bottom-cta">
         <div className="services-bottom-inner">
           <p className="eyebrow">NOT SURE WHICH SERVICE FITS?</p>
           <h2>Describe the problem.<br /><em>We can shape the scope.</em></h2>
           <p>Start with what is not working, what needs to be easier, or what you are planning to launch.</p>
-          <Link className="button button-dark" href="/contact">Discuss a project <span aria-hidden="true">↗</span></Link>
+          <Link className="button button-dark" href="/start-project">Start a project <span aria-hidden="true">↗</span></Link>
         </div>
       </section>
     </main>

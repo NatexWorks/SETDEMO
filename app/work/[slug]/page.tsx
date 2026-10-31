@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import CafeCaseStudy from "@/components/cafe-case-study";
+import InventoryCaseStudy from "@/components/inventory-case-study";
 import ProjectArt from "@/components/project-art";
 import { projects } from "@/lib/projects";
 import { absoluteSiteUrl } from "@/lib/site";
@@ -29,6 +31,14 @@ export default async function ProjectPage({ params }: PageProps) {
   const currentIndex = projects.findIndex((item) => item.slug === slug);
   const nextProject = projects[(currentIndex + 1) % projects.length];
 
+  if (project.kind === "inventory") {
+    return <InventoryCaseStudy project={project} nextProject={nextProject} />;
+  }
+
+  if (project.kind === "cafe") {
+    return <CafeCaseStudy project={project} nextProject={nextProject} />;
+  }
+
   return (
     <main id="main">
       <section className="case-hero">
@@ -41,7 +51,6 @@ export default async function ProjectPage({ params }: PageProps) {
               <span>{project.category}</span><span>{project.status}</span>
               {project.stack.map((item) => <span key={item}>{item}</span>)}
             </div>
-            {project.url && <a className="button button-primary case-outbound" href={project.url} target="_blank" rel="noopener noreferrer">{project.urlLabel || "Open project"} <span aria-hidden="true">↗</span></a>}
           </div>
           <div className="case-visual"><ProjectArt kind={project.kind} /></div>
         </div>
@@ -63,6 +72,7 @@ export default async function ProjectPage({ params }: PageProps) {
         {project.note && <p className="case-note">{project.note}</p>}
       </section>
       <section className="case-next"><div className="case-next-inner"><span>NEXT / EXPLORE ANOTHER PROJECT</span><Link href={"/work/" + nextProject.slug}>{nextProject.title} ↗</Link></div></section>
+      <section className="case-generic-cta page-gutter"><div className="page-width"><p className="eyebrow">HAVE A RELATED CHALLENGE?</p><Link className="button button-primary" href="/start-project?project=local-search-concept">Discuss a project <span aria-hidden="true">↗</span></Link></div></section>
     </main>
   );
 }

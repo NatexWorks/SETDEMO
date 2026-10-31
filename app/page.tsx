@@ -3,6 +3,37 @@ import ProjectCard from "@/components/project-card";
 import HeroSystemCanvas from "@/components/hero-system-canvas";
 import { projects, services } from "@/lib/projects";
 
+const workflowCards = [
+  {
+    number: "01",
+    title: "Catalog",
+    symbol: "▦",
+    description: "Create product records, organise categories, and search by name, SKU, description, or barcode.",
+    detail: "PRODUCTS · CATEGORIES · SEARCH"
+  },
+  {
+    number: "02",
+    title: "Stock",
+    symbol: "◷",
+    description: "Keep quantities visible and identify items that need attention. The current dashboard flags stock at five units or fewer.",
+    detail: "QUANTITIES · LOW-STOCK REVIEW"
+  },
+  {
+    number: "03",
+    title: "Checkout",
+    symbol: "↗",
+    description: "Create an order for approval, complete or cancel it, and update stock through the order workflow.",
+    detail: "ORDERS · APPROVAL · RETURNS"
+  },
+  {
+    number: "04",
+    title: "Barcode",
+    symbol: "▥",
+    description: "Look up products with barcode records and camera-assisted scanning when the browser and camera permissions allow it.",
+    detail: "BARCODE RECORDS · CAMERA SCAN"
+  }
+];
+
 export default function HomePage() {
   return (
     <main id="main">
@@ -11,10 +42,10 @@ export default function HomePage() {
           <div className="hero-copy">
             <p className="eyebrow"><span className="eyebrow-dot" /> INDEPENDENT WEB DEVELOPMENT <span className="eyebrow-divider" /> INDIA</p>
             <h1>The web should<br />work <em>for</em> your<br /><span className="headline-accent">business.</span></h1>
-            <p className="hero-intro">Websites, custom applications, and practical digital systems—designed around real work, not generic templates.</p>
+            <p className="hero-intro">I build more than websites. I create custom-built digital solutions that help businesses work smarter, serve customers better, and grow their online presence.</p>
             <div className="hero-actions">
               <Link className="button button-primary" href="/work">Explore selected work <span aria-hidden="true">↘</span></Link>
-              <Link className="text-action" href="/contact">Have a project in mind? <span aria-hidden="true">↗</span></Link>
+              <Link className="text-action" href="/start-project">Have a project in mind? <span aria-hidden="true">↗</span></Link>
             </div>
             <div className="hero-footnote"><span>01 / DIGITAL CRAFT</span><span>DESIGN · DEVELOPMENT · DELIVERY</span></div>
           </div>
@@ -57,7 +88,7 @@ export default function HomePage() {
             <p className="eyebrow">01 / FROM IDEA TO SYSTEM</p>
             <h2>A better digital<br />experience starts<br /><em>with the problem.</em></h2>
             <p>Good work connects the need, the interface, and the underlying system. Each layer should make the next step easier—not add another thing to manage.</p>
-            <Link className="arrow-link" href="/about">How the work gets done <span aria-hidden="true">↗</span></Link>
+            <Link className="arrow-link" href="/about">How I approach the work <span aria-hidden="true">↗</span></Link>
             <div className="story-count"><span>01</span><i /><span>03</span></div>
           </div>
           <div className="story-stage">
@@ -91,10 +122,44 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="home-services page-gutter">
+      <section className="home-work page-gutter">
         <div className="page-width">
           <div className="section-intro" data-reveal>
-            <div><p className="eyebrow">02 / WHAT I BUILD</p><h2>Useful work.<br /><em>Thoughtfully made.</em></h2></div>
+            <div><p className="eyebrow">02 / SELECTED WORK</p><h2>Real builds.<br /><em>Honest context.</em></h2></div>
+            <p>A working application, a café website preview, and a clearly labelled concept. Each project is presented for what it is—without invented client claims or results.</p>
+          </div>
+          <div className="home-project-grid">
+            {projects.map((project, index) => <ProjectCard key={project.slug} project={project} index={index} />)}
+          </div>
+          <div className="section-end-link"><span>MORE ABOUT THE APPROACH AND DETAILS</span><Link href="/work">Explore the work index ↗</Link></div>
+        </div>
+      </section>
+
+      <section className="home-workflow page-gutter" data-mobile-workflow-story>
+        <div className="page-width">
+          <div className="section-intro workflow-intro" data-reveal>
+            <div><p className="eyebrow">03 / INVENTORY MANAGEMENT</p><h2>Useful workflows.<br /><em>One workspace.</em></h2></div>
+            <p>Follow the connected tasks in the inventory application: organise products, review stock, move through an order, and identify an item with a barcode.</p>
+          </div>
+          <div className="mobile-workflow-stage" data-mobile-workflow-stage>
+            <div className="mobile-workflow-stack" data-mobile-workflow-stack aria-label="Four inventory workflows">
+              {workflowCards.map((card, index) => (
+                <article className={`mobile-workflow-card mobile-workflow-card--${index + 1}`} data-workflow-card key={card.number} style={{ zIndex: index + 1 }}>
+                  <div className="workflow-card-top"><span>{card.number} / WORKFLOW</span><span className="workflow-card-symbol" aria-hidden="true">{card.symbol}</span></div>
+                  <div className="workflow-card-copy"><h3>{card.title}</h3><p>{card.description}</p></div>
+                  <span className="workflow-card-detail">{card.detail}</span>
+                </article>
+              ))}
+            </div>
+          </div>
+          <div className="workflow-footnote"><span>SCROLL TO MOVE THROUGH THE WORKFLOWS</span><span>CATALOG → STOCK → CHECKOUT → BARCODE</span></div>
+        </div>
+      </section>
+
+      <section className="home-services page-gutter" data-workflow-next-panel>
+        <div className="page-width">
+          <div className="section-intro" data-reveal>
+            <div><p className="eyebrow">04 / WHAT I BUILD</p><h2>Useful work.<br /><em>Thoughtfully made.</em></h2></div>
             <p>Choose the right level of digital support—from a focused website to a system that handles a more involved workflow.</p>
           </div>
           <div className="service-preview-grid">
@@ -112,26 +177,18 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="home-work page-gutter">
-        <div className="page-width">
-          <div className="section-intro" data-reveal>
-            <div><p className="eyebrow">03 / SELECTED WORK</p><h2>Real builds.<br /><em>Honest context.</em></h2></div>
-            <p>A featured application, a business website preview, and a clearly labelled concept. Each project is presented for what it is—without invented client claims or results.</p>
-          </div>
-          <div className="home-project-grid">
-            {projects.map((project, index) => <ProjectCard key={project.slug} project={project} index={index} />)}
-          </div>
-          <div className="section-end-link"><span>MORE ABOUT THE APPROACH AND DETAILS</span><Link href="/work">Explore the work index ↗</Link></div>
-        </div>
-      </section>
-
-      <section className="home-approach page-gutter">
+      <section className="home-approach home-about-preview page-gutter">
         <div className="page-width approach-layout">
-          <div data-reveal><p className="eyebrow">04 / A PRACTICAL APPROACH</p><h2>Less theatre.<br /><em>More intention.</em></h2></div>
+          <div data-reveal>
+            <p className="eyebrow">05 / A LITTLE ABOUT ME</p>
+            <h2>Curious by nature.<br /><em>Practical by design.</em></h2>
+            <p className="home-about-lead">I’m Manish, an independent web developer in India. I build custom websites and digital tools that solve real business problems.</p>
+            <Link className="arrow-link" href="/about">Read the full story <span aria-hidden="true">↗</span></Link>
+          </div>
           <div className="approach-list">
-            <article data-reveal><span>01</span><div><h3>Understand before building</h3><p>Clarify the audience, the problem, and what the work needs to make easier.</p></div></article>
-            <article data-reveal><span>02</span><div><h3>Make complexity legible</h3><p>Use structure, content, and interface design to reduce unnecessary decisions.</p></div></article>
-            <article data-reveal><span>03</span><div><h3>Refine what matters</h3><p>Test responsive behaviour, accessibility, and performance—not just the first impression.</p></div></article>
+            <article data-reveal><span>01</span><div><h3>Build complete products</h3><p>I enjoy working through the interface, data flow, and the logic behind the scenes.</p></div></article>
+            <article data-reveal><span>02</span><div><h3>Connect design with usefulness</h3><p>From inventory systems to business websites and local discovery, the work starts with a real need.</p></div></article>
+            <article data-reveal><span>03</span><div><h3>Keep learning and refining</h3><p>My interests include frontend engineering, practical product design, and thoughtful interaction.</p></div></article>
           </div>
         </div>
       </section>
@@ -139,7 +196,7 @@ export default function HomePage() {
       <section className="home-contact page-gutter">
         <div className="page-width contact-ribbon" data-reveal>
           <div><p className="eyebrow">HAVE A PROJECT IN MIND?</p><h2>Let’s make something<br /><em>work better.</em></h2></div>
-          <Link className="button button-dark" href="/contact">Tell me what you need <span aria-hidden="true">↗</span></Link>
+          <Link className="button button-dark" href="/start-project">Start a project <span aria-hidden="true">↗</span></Link>
           <span className="contact-ribbon-mark" aria-hidden="true">N×</span>
         </div>
       </section>
