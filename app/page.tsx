@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ProjectCard from "@/components/project-card";
+import HeroSystemCanvas from "@/components/hero-system-canvas";
 import { projects, services } from "@/lib/projects";
 
 export default function HomePage() {
@@ -22,6 +23,7 @@ export default function HomePage() {
             <div className="hero-art-grid" aria-hidden="true" />
             <div className="hero-orbit orbit-one" aria-hidden="true" />
             <div className="hero-orbit orbit-two" aria-hidden="true" />
+            <HeroSystemCanvas />
             <div className="hero-interface">
               <div className="interface-topbar"><span>NW / WORKSPACE</span><span className="interface-live"><i /> SYSTEM VIEW</span></div>
               <div className="interface-body">
