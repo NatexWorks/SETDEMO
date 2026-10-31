@@ -183,13 +183,13 @@ export default function MotionLayer() {
           cards.forEach((card, index) => {
             gsap.set(card, {
               zIndex: index + 1,
-              autoAlpha: index === 0 ? 1 : 0,
-              x: index === 0 ? 0 : (index % 2 === 0 ? 74 : -74),
+              autoAlpha: 0,
+              x: index % 2 === 0 ? -74 : 74,
               yPercent: -50,
-              y: index === 0 ? 0 : 42,
-              rotation: index === 0 ? 0 : (index % 2 === 0 ? 7 : -7),
-              scale: index === 0 ? 1 : 0.96,
-              clipPath: index === 0 ? "inset(0% 0% 0% 0% round 18px)" : "inset(0% 0% 100% 0% round 18px)",
+              y: 42,
+              rotation: index % 2 === 0 ? -7 : 7,
+              scale: 0.96,
+              clipPath: "inset(0% 0% 100% 0% round 18px)",
               transformOrigin: "50% 50%"
             });
           });
@@ -204,34 +204,35 @@ export default function MotionLayer() {
             }
           });
 
-          for (let index = 1; index < cards.length; index += 1) {
-            const previous = cards[index - 1];
-            const current = cards[index];
-            const at = (index - 1) * 0.74;
-            timeline
-              .to(previous, {
+          cards.forEach((current, index) => {
+            const at = index * 0.74;
+            if (index > 0) {
+              const previous = cards[index - 1];
+              timeline.to(previous, {
                 yPercent: -50,
-                y: 13,
+                y: index * 13,
                 scale: 0.985,
                 autoAlpha: 0.82,
                 clipPath: "inset(calc(100% - 14px) 0 0 0 round 18px)",
                 duration: 0.34,
                 ease: "none"
-              }, at)
-              .to(current, {
-                x: 0,
-                yPercent: -50,
-                y: 0,
-                rotation: 0,
-                scale: 1,
-                autoAlpha: 1,
-                clipPath: "inset(0% 0% 0% 0% round 18px)",
-                duration: 0.64,
-                ease: "power2.out"
-              }, at + 0.06);
-          }
+              }, at);
+            }
 
-          const transitionAt = cards.length * 0.63;
+            timeline.to(current, {
+              x: 0,
+              yPercent: -50,
+              y: 0,
+              rotation: 0,
+              scale: 1,
+              autoAlpha: 1,
+              clipPath: "inset(0% 0% 0% 0% round 18px)",
+              duration: 0.64,
+              ease: "power2.out"
+            }, at + (index === 0 ? 0 : 0.06));
+          });
+
+          const transitionAt = cards.length * 0.74 + 0.04;
           timeline.to(stack, {
             rotateX: -5,
             scale: 0.955,
