@@ -39,7 +39,7 @@ export default function MotionLayer() {
           if (homeStory) {
             const frames = gsap.utils.toArray<HTMLElement>("[data-story-frame]", homeStory);
             if (frames.length > 1) {
-              gsap.set(frames.slice(1), { autoAlpha: 0, y: 26, rotateY: 7 });
+              gsap.set(frames.slice(1), { opacity: 0, y: 26, rotateY: 7 });
               const timeline = gsap.timeline({
                 scrollTrigger: {
                   trigger: homeStory,
@@ -56,8 +56,8 @@ export default function MotionLayer() {
               frames.forEach((frame, index) => {
                 if (index === 0) return;
                 timeline
-                  .to(frames[index - 1], { autoAlpha: 0, y: -22, rotateY: -5, duration: 0.75 }, index - 1)
-                  .to(frame, { autoAlpha: 1, y: 0, rotateY: 0, duration: 0.85 }, index - 1 + 0.12);
+                  .to(frames[index - 1], { opacity: 0, y: -22, rotateY: -5, duration: 0.75 }, index - 1)
+                  .to(frame, { opacity: 1, y: 0, rotateY: 0, duration: 0.85 }, index - 1 + 0.12);
               });
 
               timeline.to(".story-orbit", { rotate: 155, scale: 1.08, duration: 2.4, ease: "none" }, 0);
@@ -72,8 +72,8 @@ export default function MotionLayer() {
             const cards = gsap.utils.toArray<HTMLElement>("[data-journey-card]", servicesJourney);
 
             if (brief && interfaceObject && systemObject && cards.length === 3) {
-              gsap.set(interfaceObject, { autoAlpha: 0, x: 70, y: 28, rotateY: -16, scale: 0.82 });
-              gsap.set(systemObject, { autoAlpha: 0, x: 45, y: 34, rotateZ: -13, scale: 0.72 });
+              gsap.set(interfaceObject, { opacity: 0, x: 70, y: 28, rotateY: -16, scale: 0.82 });
+              gsap.set(systemObject, { opacity: 0, x: 45, y: 34, rotateZ: -13, scale: 0.72 });
               gsap.set(cards, { autoAlpha: 0.58, y: 10, scale: 0.985 });
 
               const timeline = gsap.timeline({
@@ -91,14 +91,14 @@ export default function MotionLayer() {
 
               timeline
                 .to(brief, { x: -72, y: 26, rotateZ: -11, scale: 0.76, autoAlpha: 0.52, duration: 1 }, 0)
-                .to(interfaceObject, { autoAlpha: 1, x: 0, y: 0, rotateY: 0, scale: 1, duration: 1.05 }, 0.32)
+                .to(interfaceObject, { opacity: 1, x: 0, y: 0, rotateY: 0, scale: 1, duration: 1.05 }, 0.32)
                 .to(interfaceObject, { x: -48, y: -18, rotateY: 12, scale: 0.78, autoAlpha: 0.58, duration: 1 }, 1.28)
-                .to(systemObject, { autoAlpha: 1, x: 0, y: 0, rotateZ: 0, scale: 1, duration: 1.1 }, 1.62)
+                .to(systemObject, { opacity: 1, x: 0, y: 0, rotateZ: 0, scale: 1, duration: 1.1 }, 1.62)
                 .to(".journey-progress-fill", { scaleX: 1, ease: "none", duration: 3.1 }, 0);
 
               cards.forEach((card, index) => {
                 const at = index * 0.94;
-                timeline.to(card, { autoAlpha: 1, y: -5, scale: 1, duration: 0.32 }, at);
+                timeline.to(card, { opacity: 1, y: -5, scale: 1, duration: 0.32 }, at);
                 if (index < cards.length - 1) {
                   timeline.to(card, { autoAlpha: 0.62, y: 0, scale: 0.985, duration: 0.32 }, at + 0.52);
                 }
@@ -183,7 +183,7 @@ export default function MotionLayer() {
           cards.forEach((card, index) => {
             gsap.set(card, {
               zIndex: index + 1,
-              autoAlpha: 0,
+              opacity: 0,
               x: index % 2 === 0 ? -74 : 74,
               yPercent: -50,
               y: 42,
@@ -212,7 +212,7 @@ export default function MotionLayer() {
                 yPercent: -50,
                 y: index * 13,
                 scale: 0.985,
-                autoAlpha: 0.82,
+                opacity: 0.82,
                 clipPath: "inset(calc(100% - 14px) 0 0 0 round 18px)",
                 duration: 0.34,
                 ease: "none"
@@ -225,7 +225,7 @@ export default function MotionLayer() {
               y: 0,
               rotation: 0,
               scale: 1,
-              autoAlpha: 1,
+              opacity: 1,
               clipPath: "inset(0% 0% 0% 0% round 18px)",
               duration: 0.64,
               ease: "power2.out"
@@ -255,9 +255,9 @@ export default function MotionLayer() {
         gsap.utils.toArray<HTMLElement>("[data-case-story-step]").forEach((element) => {
           gsap.fromTo(
             element,
-            { autoAlpha: 0.72, y: 22 },
+            { opacity: 0.72, y: 22 },
             {
-              autoAlpha: 1,
+              opacity: 1,
               y: 0,
               ease: "none",
               scrollTrigger: {
