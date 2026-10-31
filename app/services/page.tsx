@@ -11,6 +11,13 @@ export const metadata: Metadata = {
   openGraph: { url: absoluteSiteUrl("/services") }
 };
 
+const serviceProof: Record<string, { href: string; label: string }> = {
+  "Business websites": { href: "/work/cafe-presence", label: "See the Neswef Café website preview ↗" },
+  "Custom web applications": { href: "/work/inventory-management", label: "See the Inventory Management build ↗" },
+  "Interface refinement": { href: "/work/inventory-management", label: "Explore product interface and workflow decisions ↗" },
+  "Local SEO foundations": { href: "/work/local-search-concept", label: "See the local discovery concept ↗" }
+};
+
 const journey = [
   { stage: "01 / UNDERSTAND", title: "Start with the actual work.", copy: "Clarify who the product or website is for, what currently feels difficult, and what a useful next step should look like.", tags: ["Audience", "Problem", "Priorities"] },
   { stage: "02 / SHAPE", title: "Give the solution a clear structure.", copy: "Turn the requirements into an understandable page flow, interface, or workflow before adding visual complexity.", tags: ["Content", "Interface", "System"] },
@@ -37,12 +44,13 @@ export default function ServicesPage() {
             <h2 id="services-list-title">Choose the work<br /><em>you actually need.</em></h2>
           </div>
           {services.map((service) => (
-            <article className="service-row" key={service.number} data-reveal>
+            <article className="service-row" key={service.number} data-reveal data-case-story-step>
               <span className="service-row-number">{service.number}</span>
               <div><h2>{service.title}</h2><p className="service-row-lead">{service.lead}</p></div>
               <div className="service-row-detail">
                 <p>{service.description}</p>
                 <ul>{service.outcomes.map((item) => <li key={item}>{item}</li>)}</ul>
+                <Link className="service-proof-link" href={serviceProof[service.title].href}>{serviceProof[service.title].label}</Link>
               </div>
             </article>
           ))}
@@ -80,7 +88,7 @@ export default function ServicesPage() {
             </div>
             <div className="journey-steps">
               {journey.map((item, index) => (
-                <article className="journey-card" data-journey-card key={item.stage}>
+                <article className="journey-card" data-journey-card data-case-story-step key={item.stage}>
                   <div className="journey-card-top"><span>{item.stage}</span><b>0{index + 1} / 03</b></div>
                   <h3>{item.title}</h3><p>{item.copy}</p>
                   <div className="journey-tags">{item.tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
@@ -98,7 +106,7 @@ export default function ServicesPage() {
           </div>
           <div className="services-related-grid">
             {relevantProjects.map((project) => (
-              <article className="services-related-card" key={project.slug}>
+              <article className="services-related-card" data-case-story-step key={project.slug}>
                 <Link className="services-related-art" href={"/work/" + project.slug} aria-label={"Read the " + project.title + " case study"}>
                   <ProjectArt kind={project.kind} compact />
                 </Link>

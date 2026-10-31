@@ -32,7 +32,7 @@ export default function AboutPage() {
       <section className="about-intro">
         <div className="about-intro-inner">
           <div className="about-marker">THE POINT OF VIEW / 001</div>
-          <div className="about-statement">
+          <div className="about-statement" data-case-story-step>
             <h2>More than websites. <em>Useful digital solutions.</em></h2>
             <p>I enjoy the challenge of building complete products—from the interface and data flow to the logic behind the scenes. A useful experience should make work clearer for the person using it, not simply add another screen to manage.</p>
             <p>My work spans business websites, custom web applications, and practical search-visibility foundations. The problems are different, but the aim stays consistent: understand what needs to happen, shape a clear experience, and build the right functionality around it.</p>
@@ -45,7 +45,7 @@ export default function AboutPage() {
           <div><p className="eyebrow">HOW I APPROACH THE WORK</p><h2>Clear thinking.<br /><em>Useful execution.</em></h2></div>
           <div className="principle-list">
             {principles.map(([number, title, description]) => (
-              <article key={number} data-reveal><span>{number}</span><div><h3>{title}</h3><p>{description}</p></div></article>
+              <article key={number} data-reveal data-case-story-step><span>{number}</span><div><h3>{title}</h3><p>{description}</p></div></article>
             ))}
           </div>
         </div>
@@ -55,7 +55,7 @@ export default function AboutPage() {
           <p className="eyebrow">TOOLS & AREAS OF WORK</p>
           <h2 className="capabilities-heading">A practical toolkit.<br /><em>Chosen for the job.</em></h2>
         </div>
-        <div className="capability-grid">{capabilities.map((item) => <span key={item}>{item}</span>)}</div>
+        <div className="capability-grid" data-case-story-step>{capabilities.map((item) => <span key={item}>{item}</span>)}</div>
         <p className="capabilities-note">The technology used on a project depends on its requirements; this list describes areas of work and experience, not a claim that every tool is used on every build.</p>
       </section>
       <section className="about-bottom-cta">
