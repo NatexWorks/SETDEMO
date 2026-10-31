@@ -127,7 +127,7 @@ export default function HomePage() {
       <section className="closing-invite">
         <div className="closing-invite__inner">
           <p className="eyebrow">HAVE SOMETHING IN MIND?</p>
-          <h2>Let's make it<br /><em>work better.</em></h2>
+          <h2>Let&apos;s make it<br /><em>work better.</em></h2>
           <p>Tell me what you are building, what is slowing you down, or what you would like to improve.</p>
           <Link className="button button--light" href="/contact">Start a conversation <span aria-hidden="true">↗</span></Link>
           <span className="closing-invite__index">NATEXWORKS / 2026</span>
