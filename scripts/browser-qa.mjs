@@ -72,7 +72,14 @@ try {
         .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
         .analyze();
       for (const violation of axe.violations) {
-        failures.push(route + " at " + width + "px: axe " + violation.id + " (" + violation.impact + "): " + violation.help);
+        for (const node of violation.nodes) {
+          failures.push(
+            route + " at " + width + "px: axe " + violation.id +
+            " on " + node.target.join(", ") + ": " +
+            (node.failureSummary || violation.help) +
+            " | " + node.html.slice(0, 320),
+          );
+        }
       }
     }
 
