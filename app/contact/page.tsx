@@ -11,7 +11,7 @@ export default function ContactPage() {
   return (
     <>
       <section className="contact-page section-pad">
-        <div className="section-kicker"><span>CONTACT / LET'S BEGIN</span><span>GOOD WORK STARTS WITH A CONVERSATION</span></div>
+        <div className="section-kicker"><span>CONTACT / LET&apos;S BEGIN</span><span>GOOD WORK STARTS WITH A CONVERSATION</span></div>
         <div className="contact-page__grid">
           <div className="contact-page__intro">
             <p className="eyebrow"><span className="eyebrow__dot" /> START A PROJECT</p>
