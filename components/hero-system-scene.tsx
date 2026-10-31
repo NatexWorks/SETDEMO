@@ -1,8 +1,9 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
-import { useState } from "react";
-import { Quaternion, Vector3 } from "three";
+import { useRef } from "react";
+import { useThree } from "@react-three/fiber";
+import { Group, Quaternion, Vector3 } from "three";
 
 type Point = [number, number, number];
 
@@ -51,22 +52,36 @@ function Module({
   );
 }
 
-function Network() {
-  const [tilt, setTilt] = useState<[number, number]>([0, 0]);
-  const points: Point[] = [
-    [0, 0, 0],
-    [-1.08, 0.62, 0],
-    [1.08, 0.62, 0],
-    [-1.08, -0.62, 0],
-    [1.08, -0.62, 0]
-  ];
+const points: Point[] = [
+  [0, 0, 0],
+  [-1.08, 0.62, 0],
+  [1.08, 0.62, 0],
+  [-1.08, -0.62, 0],
+  [1.08, -0.62, 0]
+];
 
+function Network() {
+  const groupRef = useRef<Group>(null);
+  const invalidate = useThree((state) => state.invalidate);
   return (
     <group
-      rotation={[tilt[0], tilt[1], 0]}
-      onPointerMove={(event) => setTilt([-event.pointer.y * 0.12, event.pointer.x * 0.16])}
-      onPointerOut={() => setTilt([0, 0])}
+      ref={groupRef}
+      onPointerMove={(event) => {
+        const group = groupRef.current;
+        if (!group) return;
+        group.rotation.x = -event.pointer.y * 0.12;
+        group.rotation.y = event.pointer.x * 0.16;
+        invalidate();
+      }}
+      onPointerOut={() => {
+        const group = groupRef.current;
+        if (!group) return;
+        group.rotation.set(0, 0, 0);
+        invalidate();
+      }}
     >
+
+
       <mesh rotation={[Math.PI / 2.7, 0.18, -0.2]}>
         <torusGeometry args={[1.65, 0.009, 6, 100]} />
         <meshBasicMaterial color="#3358df" transparent opacity={0.55} />
