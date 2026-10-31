@@ -22,10 +22,11 @@ await mkdir("artifacts/browser-qa", { recursive: true });
 const browser = await chromium.launch({ headless: true });
 try {
   for (const route of routes) {
-    const page = await browser.newPage({
+    const context = await browser.newContext({
       viewport: { width: 1440, height: 1000 },
       deviceScaleFactor: 1,
     });
+    const page = await context.newPage();
     page.on("pageerror", (error) => browserErrors.push(route + ": " + error.message));
     page.on("console", (message) => {
       if (message.type() === "error") browserErrors.push(route + ": " + message.text());
@@ -83,10 +84,11 @@ try {
     }
 
     results.push({ route, title, viewports: viewportResults });
-    await page.close();
+    await context.close();
   }
 
-  const menuPage = await browser.newPage({ viewport: { width: 390, height: 820 } });
+  const menuContext = await browser.newContext({ viewport: { width: 390, height: 820 } });
+  const menuPage = await menuContext.newPage();
   await menuPage.goto(baseURL + "/about", { waitUntil: "domcontentloaded" });
   const toggle = menuPage.locator(".menu-toggle");
   await toggle.click();
@@ -94,18 +96,19 @@ try {
   await menuPage.keyboard.press("Escape");
   if (await toggle.getAttribute("aria-expanded") !== "false") failures.push("Escape did not close the mobile menu");
   if (!(await toggle.evaluate((element) => element === document.activeElement))) failures.push("Escape did not return focus to the menu toggle");
-  await menuPage.close();
+  await menuContext.close();
 
-  const reducedPage = await browser.newPage({
+  const reducedContext = await browser.newContext({
     viewport: { width: 1440, height: 900 },
     reducedMotion: "reduce",
   });
+  const reducedPage = await reducedContext.newPage();
   await reducedPage.goto(baseURL + "/", { waitUntil: "domcontentloaded" });
   await reducedPage.waitForTimeout(150);
   if (await reducedPage.locator(".hero-scene canvas").count() !== 0) {
     failures.push("Reduced-motion mode should use the static hero fallback");
   }
-  await reducedPage.close();
+  await reducedContext.close();
 
   if (browserErrors.length) failures.push(...browserErrors.map((entry) => "Browser error: " + entry));
 
