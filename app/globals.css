@@ -426,7 +426,7 @@ h1 em, h2 em { color: var(--blue); font-style: normal; }
 .case-sections-title h2 { margin: 20px 0; font-size: clamp(39px,4.6vw,65px); line-height: .95; }
 .case-panels { display: grid; gap: 13px; }
 .case-panel { position: sticky; top: 105px; min-height: 245px; padding: 27px; background: #e9e6dc; border: 1px solid #d5d2c8; }
-.case-panel:nth-child(2) { top: 120px; background: #f8f7f1; }.case-panel:nth-child(3) { top: 135px; background: #e2e7f8; }
+.case-panel:nth-child(2) { top: 120px; background: #f8f7f1; }.case-panel:nth-child(3) { top: 135px; background: #e2e7f8; }.case-panel:nth-child(4) { top: 150px; background: #fbfaf6; }
 .case-panel .eyebrow { color: #878980; }
 .case-panel h3 { margin: 23px 0 10px; font-size: 27px; letter-spacing: -.06em; }
 .case-panel p { max-width: 650px; margin: 0; color: #62665f; font-size: 13px; line-height: 1.85; }
