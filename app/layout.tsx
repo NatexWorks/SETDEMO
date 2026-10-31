@@ -6,8 +6,6 @@ import MotionLayer from "@/components/motion-layer";
 import { absoluteSiteUrl, isIndexable, siteUrl } from "@/lib/site";
 import "./globals.css";
 
-const siteUrl = (process.env.SITE_URL || "https://natexworks.github.io/SETDEMO").replace(/\/+$/, "");
-
 const structuredData = {
   "@context": "https://schema.org",
   "@graph": [
