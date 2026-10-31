@@ -23,9 +23,9 @@ export default function MotionEngine() {
             const introTargets = gsap.utils.toArray<HTMLElement>(
               ".hero-story .hero-topline > span, .hero-story .hero-story__copy > .eyebrow, .hero-story__heading, .hero-lede, .hero-actions, .hero-story__visual",
             );
-            gsap.fromTo(introTargets, { y: 24, autoAlpha: 0 }, {
-              y: 0, autoAlpha: 1, duration: 0.85, stagger: 0.09, ease: "power3.out",
-              clearProps: "transform,opacity,visibility",
+            gsap.fromTo(introTargets, { y: 24 }, {
+              y: 0, duration: 0.85, stagger: 0.09, ease: "power3.out",
+              clearProps: "transform",
             });
             gsap.timeline({
               scrollTrigger: { trigger: hero, start: "top top", end: "+=72%", pin: true, scrub: 0.85, anticipatePin: 1, invalidateOnRefresh: true },
@@ -113,8 +113,8 @@ export default function MotionEngine() {
           if (aboutProcess) {
             const aboutSteps = gsap.utils.toArray<HTMLElement>("[data-about-step]", aboutProcess);
             aboutSteps.forEach((step, index) => {
-              gsap.fromTo(step, { y: 20, autoAlpha: 0.62 }, {
-                y: 0, autoAlpha: 1, ease: "none",
+              gsap.fromTo(step, { y: 20 }, {
+                y: 0, ease: "none",
                 scrollTrigger: {
                   trigger: step,
                   start: "top 82%",
@@ -198,8 +198,8 @@ export default function MotionEngine() {
               scrollTrigger: { trigger: caseVisual, start: "top 82%", end: "top 25%", scrub: 0.7 } },
           );
           gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((element) => {
-            gsap.fromTo(element, { y: 28, opacity: 0 }, {
-              y: 0, opacity: 1, duration: 0.8, ease: "power3.out",
+            gsap.fromTo(element, { y: 28 }, {
+              y: 0, duration: 0.8, ease: "power3.out",
               scrollTrigger: { trigger: element, start: "top 90%", once: true },
             });
           });
@@ -295,8 +295,7 @@ export default function MotionEngine() {
         }
 
         gsap.utils.toArray<HTMLElement>("[data-mobile-reveal]").forEach((element) => {
-          gsap.fromTo(element, { opacity: 0.72, y: 18 }, {
-            opacity: 1,
+          gsap.fromTo(element, { y: 18 }, {
             y: 0,
             ease: "none",
             scrollTrigger: { trigger: element, start: "top 88%", end: "top 60%", scrub: 0.5, invalidateOnRefresh: true },
