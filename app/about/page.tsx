@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+const siteUrl = (process.env.SITE_URL || "https://natexworks.github.io/SETDEMO").replace(/\/+$/, "");
+
 export const metadata: Metadata = {
   title: "About",
   description: "Learn about the practical approach behind NatexWorks: understanding the problem, making complexity clear, and building useful digital experiences.",
-  alternates: { canonical: "/about" }
+  alternates: { canonical: siteUrl + "/about" },
+  openGraph: { url: siteUrl + "/about" }
 };
 
 const principles = [
