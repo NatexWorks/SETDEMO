@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import ProjectArt from "@/components/project-art";
 import { projects } from "@/lib/projects";
+import { absoluteSiteUrl } from "@/lib/site";
 
 type PageProps = { params: Promise<{ slug: string }> };
 const siteUrl = (process.env.SITE_URL || "https://natexworks.github.io/SETDEMO").replace(/\/+$/, "");
@@ -18,8 +19,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: project.title,
     description: project.summary,
-    alternates: { canonical: siteUrl + "/work/" + project.slug },
-    openGraph: { title: project.title + " — NatexWorks", description: project.summary, type: "article", url: siteUrl + "/work/" + project.slug }
+    alternates: { canonical: absoluteSiteUrl("/work/" + project.slug) },
+    openGraph: { title: project.title + " — NatexWorks", description: project.summary, type: "article", url: absoluteSiteUrl("/work/" + project.slug) }
   };
 }
 
