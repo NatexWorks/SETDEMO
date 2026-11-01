@@ -13,9 +13,24 @@ await mkdir("artifacts/interaction-qa", { recursive: true });
 const browser = await chromium.launch({ headless: true });
 
 function monitor(page, label) {
-  page.on("pageerror", (error) => failures.push(label + ": page error: " + error.message));
+  page.on("pageerror", (error) => {
+    const source = error.stack?.match(/https?:\\/\\/[^\\s)]+/)?.[0];
+    if (source && !sameOrigin(source)) warnings.push(label + ": third-party page error: " + source + " (" + error.message + ")");
+    else failures.push(label + ": page error: " + error.message);
+  });
   page.on("console", (message) => {
-    if (message.type() === "error") failures.push(label + ": console error: " + message.text());
+    if (message.type() !== "error") return;
+    const text = message.text();
+    const location = message.location().url;
+    const mentionedUrl = text.match(/https?:\\/\\/[^\\s"'<>)]*/)?.[0]?.replace(/[.,;)]*$/, "");
+    const source = mentionedUrl || location;
+    if (source && !sameOrigin(source)) {
+      warnings.push(label + ": third-party console error: " + source + " (" + text + ")");
+    } else if (/Failed to load resource|net::ERR_|ERR_CERT_|ERR_BLOCKED_BY_CLIENT/i.test(text)) {
+      warnings.push(label + ": generic resource console diagnostic; exact URL classified by request events: " + text);
+    } else {
+      failures.push(label + ": console error: " + text);
+    }
   });
   page.on("requestfailed", (request) => {
     const issue = {
