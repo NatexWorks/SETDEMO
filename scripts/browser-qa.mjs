@@ -3,6 +3,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { mkdir } from "node:fs/promises";
 
 const baseURL = process.env.BASE_URL || "http://127.0.0.1:3000";
+const baseOrigin = new URL(baseURL).origin;
 const routes = [
   "/",
   "/services",
@@ -18,6 +19,7 @@ const widths = [320, 360, 390, 430, 768, 1024, 1280, 1440];
 const failures = [];
 const results = [];
 const browserErrors = [];
+const linkChecks = [];
 await mkdir("artifacts/browser-qa", { recursive: true });
 
 const browser = await chromium.launch({ headless: true });
@@ -55,8 +57,17 @@ try {
     );
     for (const href of uniqueInternal) {
       if (href.startsWith("//") || href.startsWith("/#")) continue;
-      const check = await page.request.get(new URL(href, baseURL).toString(), { maxRedirects: 5 });
-      if (!check.ok()) failures.push(route + ": internal link " + href + " returned " + check.status());
+      try {
+        const check = await page.request.get(new URL(href, baseURL).toString(), { maxRedirects: 5 });
+        const finalUrl = new URL(check.url());
+        linkChecks.push({ source: route, href, status: check.status(), finalUrl: check.url() });
+        if (!check.ok()) failures.push(route + ": internal link " + href + " returned " + check.status());
+        if (finalUrl.origin !== baseOrigin) {
+          failures.push(route + ": internal link " + href + " redirected outside the site to " + check.url());
+        }
+      } catch (error) {
+        failures.push(route + ": internal link " + href + " exceeded redirect limit or failed: " + (error instanceof Error ? error.message : String(error)));
+      }
     }
 
     const viewportResults = [];
@@ -197,6 +208,8 @@ try {
     reducedMotion: "checked",
     mobileMenuKeyboard: "checked",
     scrollProgressResults,
+    internalLinkChecks: linkChecks.length,
+    linkChecks,
     failures,
     results,
   };
