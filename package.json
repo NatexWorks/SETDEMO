@@ -11,7 +11,11 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "content:extract": "node scripts/extract-legacy-content.mjs",
-    "content:verify": "node scripts/verify-content.mjs"
+    "content:verify": "node scripts/verify-content.mjs",
+    "qa:install": "npm install --no-save --package-lock=false vitest @testing-library/react @testing-library/jest-dom @testing-library/user-event jsdom playwright @axe-core/playwright @lhci/cli",
+    "test:unit": "vitest run --config vitest.config.ts",
+    "test:browser": "node scripts/browser-qa.mjs",
+    "test:lighthouse": "lhci autorun --config=./lighthouserc.json"
   },
   "dependencies": {
     "@react-three/fiber": "^9.1.2",
