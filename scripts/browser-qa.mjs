@@ -61,7 +61,7 @@ try {
         const requestedUrl = new URL(href, baseURL);
         const check = await page.request.get(requestedUrl.toString(), { maxRedirects: 5 });
         const finalUrl = new URL(check.url());
-        const normalizePath = (value) => value.length > 1 ? value.replace(/\\/+$/, "") : value;
+        const normalizePath = (value) => value.length > 1 && value.endsWith("/") ? value.slice(0, -1) : value;
         linkChecks.push({ source: route, href, status: check.status(), finalUrl: check.url() });
         if (!check.ok()) failures.push(route + ": internal link " + href + " returned " + check.status());
         if (finalUrl.origin !== baseOrigin) {
