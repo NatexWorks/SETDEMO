@@ -335,6 +335,16 @@ try {
       await page.locator("#contact-message").fill("A test message to validate the contact flow.");
       const emailValidity = await page.locator("#contact-email").evaluate((input) => input.validity.typeMismatch);
       if (!emailValidity) failures.push("Contact form accepted a malformed email address");
+
+      // Confirm a complete, valid contact brief without activating the mailto
+      // hand-off (which would launch a visitor's external email application).
+      await page.locator("#contact-email").fill("qa@example.com");
+      await page.locator("#contact-type").selectOption("Business website");
+      const contactFormValid = await form.evaluate((element) => element.checkValidity());
+      if (!contactFormValid) failures.push("Contact form rejected a complete valid enquiry");
+      if (!(await page.locator(".enquiry-form__privacy").innerText()).includes("does not send or store")) {
+        failures.push("Contact form's email-draft disclosure is missing");
+      }
     } else {
       const prefilled = await page.locator("#project-type").inputValue();
       if (prefilled !== "") failures.push("Start-project form should not select a project when no query parameter is supplied");
@@ -357,6 +367,11 @@ try {
       await page.locator("#project-type").selectOption("Custom web application");
       if (await page.locator("#project-type").inputValue() !== "Custom web application") {
         failures.push("Start-project form did not accept a project-type selection");
+      }
+      const projectFormValid = await form.evaluate((element) => element.checkValidity());
+      if (!projectFormValid) failures.push("Start-project form rejected a complete valid project brief");
+      if (!(await page.locator(".enquiry-form__privacy").innerText()).includes("does not send")) {
+        failures.push("Start-project form's email-draft disclosure is missing");
       }
     }
     await page.close();
