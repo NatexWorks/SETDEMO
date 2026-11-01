@@ -14,7 +14,7 @@ const browser = await chromium.launch({ headless: true });
 
 function monitor(page, label) {
   page.on("pageerror", (error) => {
-    const source = error.stack?.match(/https?:\\/\\/[^\\s)]+/)?.[0];
+    const source = error.stack?.match(/https?:\/\/[^\s)]+/)?.[0];
     if (source && !sameOrigin(source)) warnings.push(label + ": third-party page error: " + source + " (" + error.message + ")");
     else failures.push(label + ": page error: " + error.message);
   });
@@ -22,7 +22,7 @@ function monitor(page, label) {
     if (message.type() !== "error") return;
     const text = message.text();
     const location = message.location().url;
-    const mentionedUrl = text.match(/https?:\\/\\/[^\\s"'<>)]*/)?.[0]?.replace(/[.,;)]*$/, "");
+    const mentionedUrl = text.match(/https?:\/\/[^\s"'<>)]*/)?.[0]?.replace(/[.,;)]*$/, "");
     const source = mentionedUrl || location;
     if (source && !sameOrigin(source)) {
       warnings.push(label + ": third-party console error: " + source + " (" + text + ")");
