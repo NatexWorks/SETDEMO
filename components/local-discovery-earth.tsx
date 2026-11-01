@@ -79,7 +79,7 @@ function addStarField(scene: THREE.Scene) {
   scene.add(new THREE.Points(brightGeometry, brightMaterial));
 }
 
-export default function LocalDiscoveryEarth() {
+export default function LocalDiscoveryEarth({ compact = false }: { compact?: boolean }) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
 
@@ -340,7 +340,7 @@ export default function LocalDiscoveryEarth() {
               );
 
               const hero = stage.closest(".case-hero");
-              if (hero && window.innerWidth > 700) {
+              if (hero && window.innerWidth > 700 && !compact) {
                 gsap.to(stage, {
                   yPercent: -2.5,
                   scale: 0.985,
@@ -375,7 +375,7 @@ export default function LocalDiscoveryEarth() {
   }, []);
 
   return (
-    <div className="local-discovery-earth" role="img" aria-label="A realistic nighttime Earth rotating slowly around its tilted axis, with warm city lights and a subtle blue atmosphere.">
+    <div className={`local-discovery-earth${compact ? " local-discovery-earth--compact" : ""}`} role="img" aria-label="A realistic nighttime Earth rotating slowly around its tilted axis, with warm city lights and a subtle blue atmosphere.">
       <div className="local-discovery-earth__stage" ref={stageRef}>
         <div className="local-discovery-earth__viewport" ref={viewportRef}>
           <div
@@ -384,10 +384,12 @@ export default function LocalDiscoveryEarth() {
             aria-hidden="true"
           />
         </div>
-        <div className="local-discovery-earth__caption" aria-hidden="true">
-          <span>EARTH / 01</span>
-          <span>NIGHT SIDE · AXIAL ROTATION</span>
-        </div>
+        {!compact && (
+          <div className="local-discovery-earth__caption" aria-hidden="true">
+            <span>EARTH / 01</span>
+            <span>NIGHT SIDE · AXIAL ROTATION</span>
+          </div>
+        )}
       </div>
     </div>
   );
