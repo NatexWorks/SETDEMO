@@ -9,6 +9,7 @@ const warnings = [];
 const navigationResults = [];
 const buttonInventory = {};
 const networkEvents = [];
+const canceledPrefetches = [];
 await mkdir("artifacts/interaction-qa", { recursive: true });
 const browser = await chromium.launch({ headless: true });
 
@@ -39,8 +40,20 @@ function monitor(page, label) {
       error: request.failure()?.errorText || "unknown",
     };
     networkEvents.push({ ...issue, page: label });
-    if (sameOrigin(request.url())) failures.push(label + ": same-origin request failed: " + issue.url + " (" + issue.error + ")");
-    else warnings.push(label + ": third-party request failed: " + issue.url + " (" + issue.error + ")");
+    const isNextFlightPrefetchCancellation =
+      issue.error === "net::ERR_ABORTED" &&
+      new URL(issue.url).searchParams.has("_rsc");
+    if (isNextFlightPrefetchCancellation) {
+      canceledPrefetches.push({
+        ...issue,
+        page: label,
+        classification: "Next.js RSC prefetch canceled during navigation or page teardown",
+      });
+    } else if (sameOrigin(request.url())) {
+      failures.push(label + ": same-origin request failed: " + issue.url + " (" + issue.error + ")");
+    } else {
+      warnings.push(label + ": third-party request failed: " + issue.url + " (" + issue.error + ")");
+    }
   });
   page.on("response", (response) => {
     if (response.status() < 400) return;
@@ -379,6 +392,7 @@ try {
     nonNavigatedLinks,
     redirectResults,
     networkEvents,
+    canceledPrefetches,
     thirdPartyWarnings: warnings,
     failures,
   };
