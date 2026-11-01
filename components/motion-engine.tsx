@@ -1,10 +1,10 @@
 "use client";
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 
 export default function MotionEngine() {
   const pathname = usePathname();
-  useEffect(() => {
+  useLayoutEffect(() => {
     let cancelled = false;
     let dispose: () => void = () => {};
     const hasMotionTargets = document.querySelector(".hero-story, .service-transform, .work-gallery, .about-hero-visual, [data-workflow-desktop], [data-process-story], [data-local-signal-field], [data-parallax], .case-study__visual, [data-reveal], [data-mobile-reveal]");
@@ -212,7 +212,7 @@ export default function MotionEngine() {
     return () => { cancelled = true; dispose(); };
   }, [pathname]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     let cancelled = false;
     let starting = false;
     let cleanup = () => {};
