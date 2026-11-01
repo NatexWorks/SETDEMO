@@ -2,6 +2,7 @@ import { chromium } from "playwright";
 
 const baseURL = process.env.BASE_URL || "http://127.0.0.1:3000";
 const origin = new URL(baseURL).origin;
+const sameOrigin = (url) => { try { return new URL(url).origin === origin; } catch { return false; } };
 const failures = [];
 const warnings = [];
 const navigationResults = [];
@@ -21,14 +22,14 @@ function monitor(page, label) {
       error: request.failure()?.errorText || "unknown",
     };
     networkEvents.push({ ...issue, page: label });
-    if (new URL(request.url()).origin === origin) failures.push(label + ": same-origin request failed: " + issue.url + " (" + issue.error + ")");
+    if (sameOrigin(request.url())) failures.push(label + ": same-origin request failed: " + issue.url + " (" + issue.error + ")");
     else warnings.push(label + ": third-party request failed: " + issue.url + " (" + issue.error + ")");
   });
   page.on("response", (response) => {
     if (response.status() < 400) return;
     const issue = { type: "http-error", url: response.url(), status: response.status() };
     networkEvents.push({ ...issue, page: label });
-    if (new URL(response.url()).origin === origin) failures.push(label + ": same-origin HTTP " + response.status() + ": " + response.url());
+    if (sameOrigin(response.url())) failures.push(label + ": same-origin HTTP " + response.status() + ": " + response.url());
     else warnings.push(label + ": third-party HTTP " + response.status() + ": " + response.url());
   });
 }
@@ -173,7 +174,7 @@ try {
     await enter.waitFor({ state: "visible", timeout: 12000 }).catch(() => failures.push("Enter experience button did not render"));
     if (await enter.count()) {
       await enter.click();
-      await page.waitForFunction(() => window.scrollY > 0, { timeout: 5000 }).catch(() => failures.push("Enter experience button did not scroll the page"));
+      await page.waitForFunction(() => window.scrollY > 0, undefined, { timeout: 5000 }).catch(() => failures.push("Enter experience button did not scroll the page"));
       if (!(await page.locator("#work").count())) failures.push("Enter experience target #work is missing");
     }
     await page.close();
