@@ -216,7 +216,7 @@ try {
     if (!sitemapResponse.ok()) failures.push("sitemap.xml did not return a successful response (" + sitemapResponse.status() + ")");
     if (!robotsResponse.ok()) failures.push("robots.txt did not return a successful response (" + robotsResponse.status() + ")");
     const sitemapXml = await sitemapResponse.text();
-    const sitemapPaths = [...sitemapXml.matchAll(/<loc>[^<]*?(\/[^<]*)<\/loc>/g)].map((match) => match[1]);
+    const sitemapPaths = [...sitemapXml.matchAll(/<loc>https?:\/\/[^/]+(\/[^<]*)?<\/loc>/g)].map((match) => match[1] || "/");
     for (const route of routes) {
       const encodedRoute = route === "/" ? "/" : route;
       if (!sitemapPaths.includes(encodedRoute)) failures.push("sitemap.xml is missing public route " + route);
