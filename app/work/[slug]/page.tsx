@@ -35,7 +35,17 @@ export default async function ProjectPage({ params }: PageProps) {
   return (
     <>
       <section className={`case-hero section-pad${slug === "local-discovery" ? " case-hero--local-discovery" : ""}`}>
-        <div className="section-kicker"><span>SELECTED WORK / {project.number}</span><span>{project.status.toUpperCase()}</span></div>
+        <div className="section-kicker">
+          <span>SELECTED WORK / {project.number}</span>
+          {slug === "local-discovery" ? (
+            <span className="case-hero__kicker-meta">
+              <span>{project.status.toUpperCase()}</span>
+              <LocalDiscoveryEarth compact />
+            </span>
+          ) : (
+            <span>{project.status.toUpperCase()}</span>
+          )}
+        </div>
         {slug === "local-discovery" ? (
           <div className="case-hero__layout">
             <div className="case-hero__copy">
@@ -44,7 +54,6 @@ export default async function ProjectPage({ params }: PageProps) {
               <p className="case-hero__summary">{project.summary}</p>
               <div className="case-hero__meta"><span>STATUS / {project.status.toUpperCase()}</span><span>TYPE / {project.category.toUpperCase()}</span></div>
             </div>
-            <LocalDiscoveryEarth />
           </div>
         ) : (
           <>
