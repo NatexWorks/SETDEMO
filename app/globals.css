@@ -1785,3 +1785,56 @@ main { display: block; overflow: clip; }
 @media (max-width: 700px) {
   .local-discovery-earth__caption { right: 12px; left: 12px; }
 }
+
+
+/* Local Discovery: keep the rotating Earth as a small editorial marker in the top kicker. */
+.case-hero__kicker-meta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+}
+.case-hero__layout {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+.local-discovery-earth--compact {
+  flex: 0 0 60px;
+  width: 60px;
+  min-width: 60px;
+  max-width: 60px;
+  height: 60px;
+  aspect-ratio: 1;
+  justify-self: auto;
+  overflow: visible;
+  background: none;
+}
+.local-discovery-earth--compact::before { content: none; }
+.local-discovery-earth--compact .local-discovery-earth__stage {
+  width: 100%;
+  height: 100%;
+}
+.local-discovery-earth--compact .local-discovery-earth__viewport {
+  overflow: visible;
+  border-radius: 50%;
+  background: none;
+}
+.local-discovery-earth--compact .local-discovery-earth__fallback {
+  inset: 8%;
+  box-shadow: inset -5px -4px 10px rgba(0, 0, 0, .46), 0 0 13px rgba(56, 107, 165, .22);
+}
+.local-discovery-earth--compact .local-discovery-earth__caption { display: none; }
+
+@media (max-width: 700px) {
+  .case-hero__kicker-meta { gap: 9px; }
+  .local-discovery-earth--compact {
+    flex-basis: 56px;
+    width: 56px;
+    min-width: 56px;
+    max-width: 56px;
+    height: 56px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .local-discovery-earth--compact .local-discovery-earth__stage { transform: none !important; }
+}
