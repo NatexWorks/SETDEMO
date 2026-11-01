@@ -110,6 +110,71 @@ try {
     await page.close();
   }
 
+  // Click every distinct same-origin link found on each public route. External
+  // destinations and mailto actions are inventoried but never activated.
+  const internalLinkResults = [];
+  const nonNavigatedLinks = [];
+  for (const route of routes) {
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    monitor(page, route + " internal links");
+    await page.goto(baseURL + route, { waitUntil: "domcontentloaded" });
+    const hrefs = await page.locator("a:visible[href]").evaluateAll((anchors) =>
+      anchors.map((anchor) => anchor.getAttribute("href")).filter(Boolean),
+    );
+    const uniqueTargets = new Map();
+    for (const href of hrefs) {
+      let target;
+      try {
+        target = new URL(href, baseURL);
+      } catch {
+        failures.push(route + ": invalid link URL " + href);
+        continue;
+      }
+      if (target.origin !== origin) {
+        nonNavigatedLinks.push({ route, href, reason: "external or non-HTTP destination; not activated" });
+        continue;
+      }
+      if (target.pathname === route && !target.search && !target.hash) {
+        nonNavigatedLinks.push({ route, href, reason: "self-link without a new destination" });
+        continue;
+      }
+      if (!uniqueTargets.has(target.href)) uniqueTargets.set(target.href, href);
+    }
+
+    for (const [expectedHref, rawHref] of uniqueTargets) {
+      await page.goto(baseURL + route, { waitUntil: "domcontentloaded" });
+      await page.evaluate(() => { window.__natexQaDocumentSentinel = "same-document"; });
+      const selector = "a[href=" + JSON.stringify(rawHref) + "]";
+      const link = page.locator(selector).first();
+      if (!(await link.count())) {
+        failures.push(route + ": discovered internal link could not be located: " + rawHref);
+        continue;
+      }
+      await link.click();
+      const expected = new URL(expectedHref);
+      await page.waitForURL((url) =>
+        url.origin === expected.origin &&
+        url.pathname === expected.pathname &&
+        url.search === expected.search &&
+        url.hash === expected.hash,
+      { timeout: 15000 }).catch(() => {
+        failures.push(route + ": clicking internal link " + rawHref + " did not reach " + expectedHref + " (current: " + page.url() + ")");
+      });
+      const sentinel = await page.evaluate(() => window.__natexQaDocumentSentinel || null).catch(() => null);
+      if (sentinel !== "same-document") {
+        failures.push(route + ": internal link " + rawHref + " caused a full document reload");
+      }
+      if (expected.pathname !== route && !(await page.locator("main h1").count())) {
+        failures.push(route + ": destination for " + rawHref + " has no main heading");
+      }
+      if (expected.hash && !(await page.locator("#" + CSS.escape(decodeURIComponent(expected.hash.slice(1)))).count())) {
+        failures.push(route + ": hash link " + rawHref + " has no matching destination element");
+      }
+      internalLinkResults.push({ route, href: rawHref, destination: page.url(), softNavigation: sentinel === "same-document" });
+    }
+    await page.close();
+  }
+
   // Mobile menu: open, Escape-close, restore focus, then choose a route.
   {
     const page = await browser.newPage({ viewport: { width: 390, height: 820 }, isMobile: true });
@@ -165,17 +230,23 @@ try {
     await page.close();
   }
 
-  // The animated homepage CTA must scroll to the work section, not do nothing.
+  // The homepage's primary hero CTA must open the selected-work route.
   {
     const page = await browser.newPage({ viewport: { width: 390, height: 820 }, reducedMotion: "reduce" });
-    monitor(page, "Enter experience action");
+    monitor(page, "Homepage Explore selected work CTA");
     await page.goto(baseURL + "/", { waitUntil: "domcontentloaded" });
-    const enter = page.locator(".natex-enter");
-    await enter.waitFor({ state: "visible", timeout: 12000 }).catch(() => failures.push("Enter experience button did not render"));
-    if (await enter.count()) {
-      await enter.click();
-      await page.waitForFunction(() => window.scrollY > 0, undefined, { timeout: 5000 }).catch(() => failures.push("Enter experience button did not scroll the page"));
-      if (!(await page.locator("#work").count())) failures.push("Enter experience target #work is missing");
+    await page.evaluate(() => { window.__natexQaDocumentSentinel = "same-document"; });
+    const cta = page.locator('.hero-actions a[href="/work"]');
+    if (!(await cta.count())) {
+      failures.push("Homepage Explore selected work CTA was not found");
+    } else {
+      await cta.click();
+      await page.waitForURL((url) => url.origin === origin && url.pathname === "/work", { timeout: 15000 })
+        .catch(() => failures.push("Homepage Explore selected work CTA did not open /work"));
+      if (await page.evaluate(() => window.__natexQaDocumentSentinel || null) !== "same-document") {
+        failures.push("Homepage hero CTA caused a full document reload");
+      }
+      if (!(await page.locator("main h1").count())) failures.push("Homepage hero CTA destination has no main heading");
     }
     await page.close();
   }
@@ -220,6 +291,9 @@ try {
     routesAudited: Object.keys(buttonInventory).length,
     visibleButtonsByRoute: buttonInventory,
     navigationResults,
+    internalLinksTested: internalLinkResults.length,
+    internalLinkResults,
+    nonNavigatedLinks,
     networkEvents,
     thirdPartyWarnings: warnings,
     failures,
