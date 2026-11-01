@@ -30,7 +30,7 @@ const isThirdPartyUrl = (value) => {
 };
 function monitorPage(page, label) {
   page.on("pageerror", (error) => {
-    const source = error.stack?.match(/https?:\\/\\/[^\\s)]+/)?.[0];
+    const source = error.stack?.match(/https?:\/\/[^\s)]+/)?.[0];
     if (source && isThirdPartyUrl(source)) thirdPartyWarnings.push({ page: label, type: "third-party-page-error", source, message: error.message });
     else browserErrors.push(label + ": " + error.message);
   });
@@ -38,7 +38,7 @@ function monitorPage(page, label) {
     if (message.type() !== "error") return;
     const text = message.text();
     const location = message.location().url;
-    const mentionedUrl = text.match(/https?:\\/\\/[^\\s"'<>)]*/)?.[0]?.replace(/[.,;)]*$/, "");
+    const mentionedUrl = text.match(/https?:\/\/[^\s"'<>)]*/)?.[0]?.replace(/[.,;)]*$/, "");
     const source = mentionedUrl || location;
     if (source && isThirdPartyUrl(source)) {
       thirdPartyWarnings.push({ page: label, type: "third-party-console-error", source, message: text });
