@@ -1745,3 +1745,43 @@ main { display: block; overflow: clip; }
 @media (prefers-reduced-motion: reduce) {
   .local-discovery-earth__viewport canvas { transition: none; }
 }
+
+
+/* Space-night visual treatment based on the supplied Earth references:
+   a complete rotating globe, warm city lights, a delicate blue atmospheric edge,
+   and a quiet star field — intentionally no sun, orbit lines, or satellites. */
+.local-discovery-earth {
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 58% 42% at 63% 43%, rgba(35, 67, 101, .34) 0%, rgba(12, 29, 49, .16) 54%, transparent 82%),
+    radial-gradient(ellipse 45% 33% at 30% 78%, rgba(20, 45, 74, .2) 0%, transparent 78%),
+    linear-gradient(145deg, #02050b 0%, #071321 52%, #02060d 100%);
+}
+.local-discovery-earth__stage::before { content: none; }
+.local-discovery-earth__viewport {
+  z-index: 1;
+  border-radius: 0;
+  background:
+    radial-gradient(1px 1px at 12% 16%, rgba(223, 235, 255, .78) 45%, transparent 100%),
+    radial-gradient(1px 1px at 23% 72%, rgba(169, 198, 234, .58) 45%, transparent 100%),
+    radial-gradient(1px 1px at 76% 21%, rgba(213, 229, 255, .72) 45%, transparent 100%),
+    radial-gradient(1px 1px at 88% 67%, rgba(182, 211, 244, .62) 45%, transparent 100%),
+    radial-gradient(1px 1px at 54% 11%, rgba(226, 236, 255, .52) 45%, transparent 100%);
+  background-size: 100% 100%;
+}
+.local-discovery-earth__fallback {
+  inset: 9%;
+  box-shadow:
+    inset -24px -16px 48px rgba(0, 0, 0, .46),
+    0 0 46px rgba(56, 107, 165, .22);
+}
+.local-discovery-earth__caption {
+  z-index: 2;
+  right: 17px;
+  bottom: 15px;
+  left: 17px;
+  color: rgba(190, 207, 226, .62);
+}
+@media (max-width: 700px) {
+  .local-discovery-earth__caption { right: 12px; left: 12px; }
+}
