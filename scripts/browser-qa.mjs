@@ -1,6 +1,6 @@
 import { chromium } from "playwright";
 import AxeBuilder from "@axe-core/playwright";
-import { mkdir } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 
 const baseURL = process.env.BASE_URL || "http://127.0.0.1:3000";
 const baseOrigin = new URL(baseURL).origin;
@@ -282,6 +282,7 @@ try {
     failures,
     results,
   };
+  await writeFile("artifacts/browser-qa/report.json", JSON.stringify(summary, null, 2) + "\n", "utf8");
   console.log(JSON.stringify(summary, null, 2));
   if (failures.length) process.exitCode = 1;
 } finally {
