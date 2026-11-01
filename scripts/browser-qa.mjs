@@ -1,8 +1,9 @@
 import { chromium } from "playwright";
 import AxeBuilder from "@axe-core/playwright";
-import { mkdir } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 
 const baseURL = process.env.BASE_URL || "http://127.0.0.1:3000";
+const baseOrigin = new URL(baseURL).origin;
 const routes = [
   "/",
   "/services",
@@ -18,6 +19,71 @@ const widths = [320, 360, 390, 430, 768, 1024, 1280, 1440];
 const failures = [];
 const results = [];
 const browserErrors = [];
+const linkChecks = [];
+const externalLinks = new Set();
+const externalLinkChecks = [];
+const externalLinkWarnings = [];
+const networkEvents = [];
+const canceledPrefetches = [];
+const thirdPartyWarnings = [];
+const isThirdPartyUrl = (value) => {
+  try { return new URL(value).origin !== baseOrigin; } catch { return false; }
+};
+function monitorPage(page, label) {
+  page.on("pageerror", (error) => {
+    const source = error.stack?.match(/https?:\/\/[^\s)]+/)?.[0];
+    if (source && isThirdPartyUrl(source)) thirdPartyWarnings.push({ page: label, type: "third-party-page-error", source, message: error.message });
+    else browserErrors.push(label + ": " + error.message);
+  });
+  page.on("console", (message) => {
+    if (message.type() !== "error") return;
+    const text = message.text();
+    const location = message.location().url;
+    const mentionedUrl = text.match(/https?:\/\/[^\s"'<>)]*/)?.[0]?.replace(/[.,;)]*$/, "");
+    const source = mentionedUrl || location;
+    if (source && isThirdPartyUrl(source)) {
+      thirdPartyWarnings.push({ page: label, type: "third-party-console-error", source, message: text });
+    } else if (/Failed to load resource|net::ERR_|ERR_CERT_|ERR_BLOCKED_BY_CLIENT/i.test(text)) {
+      // The requestfailed/response listeners below record the precise URL and
+      // classify it as same-origin (failure) or third-party (warning).
+      thirdPartyWarnings.push({ page: label, type: "generic-resource-console-diagnostic", message: text });
+    } else {
+      browserErrors.push(label + ": " + text);
+    }
+  });
+  page.on("requestfailed", (request) => {
+    const issue = {
+      page: label,
+      type: "requestfailed",
+      url: request.url(),
+      error: request.failure()?.errorText || "unknown",
+    };
+    networkEvents.push(issue);
+    const isNextFlightPrefetchCancellation =
+      issue.error === "net::ERR_ABORTED" &&
+      new URL(request.url()).searchParams.has("_rsc");
+    if (isNextFlightPrefetchCancellation) {
+      canceledPrefetches.push({ ...issue, classification: "Next.js RSC prefetch canceled during navigation or page teardown" });
+    } else if (isThirdPartyUrl(request.url())) {
+      thirdPartyWarnings.push(issue);
+    } else {
+      failures.push(label + ": same-origin request failed: " + issue.url + " (" + issue.error + ")");
+    }
+  });
+  page.on("response", (response) => {
+    if (response.status() < 400) return;
+    const issue = { page: label, type: "http-error", url: response.url(), status: response.status() };
+    networkEvents.push(issue);
+    if (isThirdPartyUrl(response.url())) thirdPartyWarnings.push(issue);
+    else failures.push(label + ": same-origin HTTP " + response.status() + ": " + response.url);
+  });
+}
+async function settleFrame(page) {
+  await page.evaluate(() => new Promise((resolve) =>
+    requestAnimationFrame(() => requestAnimationFrame(resolve)),
+  ));
+}
+
 await mkdir("artifacts/browser-qa", { recursive: true });
 
 const browser = await chromium.launch({ headless: true });
@@ -28,10 +94,7 @@ try {
       deviceScaleFactor: 1,
     });
     const page = await context.newPage();
-    page.on("pageerror", (error) => browserErrors.push(route + ": " + error.message));
-    page.on("console", (message) => {
-      if (message.type() === "error") browserErrors.push(route + ": " + message.text());
-    });
+    monitorPage(page, route);
 
     const response = await page.goto(baseURL + route, { waitUntil: "domcontentloaded" });
     if (!response || response.status() !== 200) {
@@ -50,19 +113,41 @@ try {
     if (!title.trim()) failures.push(route + ": document title is empty");
     if (h1Count !== 1) failures.push(route + ": expected one main h1, got " + h1Count);
 
+    const outboundLinks = await page.locator('a[href^="http"]').evaluateAll((anchors) =>
+      anchors.map((anchor) => anchor.getAttribute("href")).filter(Boolean),
+    );
+    for (const href of outboundLinks) {
+      if (isThirdPartyUrl(href)) externalLinks.add(href);
+    }
+
     const uniqueInternal = await page.locator('a[href^="/"]').evaluateAll((anchors) =>
       [...new Set(anchors.map((anchor) => anchor.getAttribute("href")).filter(Boolean))],
     );
     for (const href of uniqueInternal) {
       if (href.startsWith("//") || href.startsWith("/#")) continue;
-      const check = await page.request.get(new URL(href, baseURL).toString(), { maxRedirects: 5 });
-      if (!check.ok()) failures.push(route + ": internal link " + href + " returned " + check.status());
+      try {
+        const requestedUrl = new URL(href, baseURL);
+        const check = await page.request.get(requestedUrl.toString(), { maxRedirects: 5 });
+        const finalUrl = new URL(check.url());
+        const normalizePath = (value) => value.length > 1 && value.endsWith("/") ? value.slice(0, -1) : value;
+        linkChecks.push({ source: route, href, status: check.status(), finalUrl: check.url() });
+        if (!check.ok()) failures.push(route + ": internal link " + href + " returned " + check.status());
+        if (finalUrl.origin !== baseOrigin) {
+          failures.push(route + ": internal link " + href + " redirected outside the site to " + check.url());
+        }
+        if (normalizePath(finalUrl.pathname) !== normalizePath(requestedUrl.pathname) ||
+            finalUrl.search !== requestedUrl.search) {
+          failures.push(route + ": internal link " + href + " redirected to an unexpected route " + check.url());
+        }
+      } catch (error) {
+        failures.push(route + ": internal link " + href + " exceeded redirect limit or failed: " + (error instanceof Error ? error.message : String(error)));
+      }
     }
 
     const viewportResults = [];
     for (const width of widths) {
       await page.setViewportSize({ width, height: width < 500 ? 820 : 1000 });
-      await page.waitForTimeout(70);
+      await settleFrame(page);
       const dimensions = await page.evaluate(() => ({
         viewport: window.innerWidth,
         document: document.documentElement.scrollWidth,
@@ -102,8 +187,30 @@ try {
     await context.close();
   }
 
+  // Probe outbound HTTP(S) destinations with safe GET requests. This does not
+  // activate mailto links, open external pages, or submit any forms.
+  const externalContext = await browser.newContext();
+  for (const href of externalLinks) {
+    try {
+      const response = await externalContext.request.get(href, { maxRedirects: 5, timeout: 15000 });
+      const result = { href, status: response.status(), finalUrl: response.url() };
+      externalLinkChecks.push(result);
+      if (!response.ok()) externalLinkWarnings.push({ ...result, warning: "External destination returned a non-success status" });
+      if (isThirdPartyUrl(response.url()) === false) {
+        externalLinkWarnings.push({ ...result, warning: "External destination redirected back to the portfolio origin" });
+      }
+    } catch (error) {
+      externalLinkWarnings.push({
+        href,
+        warning: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+  await externalContext.close();
+
   const menuContext = await browser.newContext({ viewport: { width: 390, height: 820 } });
   const menuPage = await menuContext.newPage();
+  monitorPage(menuPage, "mobile menu keyboard journey");
   await menuPage.goto(baseURL + "/about", { waitUntil: "domcontentloaded" });
   const toggle = menuPage.locator(".menu-toggle");
   await toggle.click();
@@ -118,8 +225,9 @@ try {
     reducedMotion: "reduce",
   });
   const reducedPage = await reducedContext.newPage();
+  monitorPage(reducedPage, "reduced-motion route");
   await reducedPage.goto(baseURL + "/", { waitUntil: "domcontentloaded" });
-  await reducedPage.waitForTimeout(150);
+  await settleFrame(reducedPage);
   if (await reducedPage.locator(".hero-scene canvas").count() !== 0) {
     failures.push("Reduced-motion mode should use the static hero fallback");
   }
@@ -136,9 +244,9 @@ try {
   for (const sequence of scrollSequences) {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
     const page = await context.newPage();
-    page.on("pageerror", (error) => browserErrors.push(sequence.route + " scroll test: " + error.message));
+    monitorPage(page, sequence.route + " scroll test");
     await page.goto(baseURL + sequence.route, { waitUntil: "domcontentloaded" });
-    await page.waitForTimeout(1200);
+    await page.waitForLoadState("networkidle");
 
     const section = page.locator(sequence.section);
     const target = page.locator(sequence.target);
@@ -155,7 +263,7 @@ try {
       document.documentElement.style.scrollBehavior = "auto";
       window.scrollTo({ top, behavior: "instant" });
     }, sectionTop);
-    await page.waitForTimeout(450);
+    await settleFrame(page);
 
     const before = await target.evaluate((element) => ({
       transform: getComputedStyle(element).transform,
@@ -165,7 +273,19 @@ try {
     await page.evaluate((delta) =>
       window.scrollTo({ top: window.scrollY + delta, behavior: "instant" }),
     sequence.delta);
-    await page.waitForTimeout(500);
+
+    // ScrollTrigger uses scrub smoothing. Wait for the intended visual state
+    // rather than sampling after two frames while the scrub tween is still
+    // near its starting position. If the transform never changes, the
+    // assertion below still fails after this bounded condition-based wait.
+    await page.waitForFunction(
+      ({ selector, previousTransform }) => {
+        const element = document.querySelector(selector);
+        return Boolean(element && getComputedStyle(element).transform !== previousTransform);
+      },
+      { selector: sequence.target, previousTransform: before.transform },
+      { timeout: 2500, polling: "raf" },
+    ).catch(() => {});
 
     const after = await target.evaluate((element) => ({
       transform: getComputedStyle(element).transform,
@@ -197,9 +317,17 @@ try {
     reducedMotion: "checked",
     mobileMenuKeyboard: "checked",
     scrollProgressResults,
+    internalLinkChecks: linkChecks.length,
+    linkChecks,
+    externalLinkChecks,
+    externalLinkWarnings,
+    networkEvents,
+    canceledPrefetches,
+    thirdPartyWarnings,
     failures,
     results,
   };
+  await writeFile("artifacts/browser-qa/report.json", JSON.stringify(summary, null, 2) + "\n", "utf8");
   console.log(JSON.stringify(summary, null, 2));
   if (failures.length) process.exitCode = 1;
 } finally {

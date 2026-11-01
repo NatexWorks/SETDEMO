@@ -1,0 +1,455 @@
+import { mkdir, writeFile } from "node:fs/promises";
+import { chromium } from "playwright";
+
+const baseURL = process.env.BASE_URL || "http://127.0.0.1:3000";
+const origin = new URL(baseURL).origin;
+const sameOrigin = (url) => { try { return new URL(url).origin === origin; } catch { return false; } };
+const failures = [];
+const warnings = [];
+const navigationResults = [];
+const buttonInventory = {};
+const networkEvents = [];
+const canceledPrefetches = [];
+await mkdir("artifacts/interaction-qa", { recursive: true });
+const browser = await chromium.launch({ headless: true });
+
+function monitor(page, label) {
+  page.on("pageerror", (error) => {
+    const source = error.stack?.match(/https?:\/\/[^\s)]+/)?.[0];
+    const stack = error.stack || error.message;
+    if (source && !sameOrigin(source)) warnings.push(label + ": third-party page error: " + source + " (" + stack + ")");
+    else failures.push(label + ": page error: " + stack);
+  });
+  page.on("console", (message) => {
+    if (message.type() !== "error") return;
+    const text = message.text();
+    const location = message.location().url;
+    const mentionedUrl = text.match(/https?:\/\/[^\s"'<>)]*/)?.[0]?.replace(/[.,;)]*$/, "");
+    const source = mentionedUrl || location;
+    if (source && !sameOrigin(source)) {
+      warnings.push(label + ": third-party console error: " + source + " (" + text + ")");
+    } else if (/Failed to load resource|net::ERR_|ERR_CERT_|ERR_BLOCKED_BY_CLIENT/i.test(text)) {
+      warnings.push(label + ": generic resource console diagnostic; exact URL classified by request events: " + text);
+    } else {
+      failures.push(label + ": console error: " + text);
+    }
+  });
+  page.on("requestfailed", (request) => {
+    const issue = {
+      type: "requestfailed",
+      url: request.url(),
+      error: request.failure()?.errorText || "unknown",
+    };
+    networkEvents.push({ ...issue, page: label });
+    const isNextFlightPrefetchCancellation =
+      issue.error === "net::ERR_ABORTED" &&
+      new URL(issue.url).searchParams.has("_rsc");
+    if (isNextFlightPrefetchCancellation) {
+      canceledPrefetches.push({
+        ...issue,
+        page: label,
+        classification: "Next.js RSC prefetch canceled during navigation or page teardown",
+      });
+    } else if (sameOrigin(request.url())) {
+      failures.push(label + ": same-origin request failed: " + issue.url + " (" + issue.error + ")");
+    } else {
+      warnings.push(label + ": third-party request failed: " + issue.url + " (" + issue.error + ")");
+    }
+  });
+  page.on("response", (response) => {
+    if (response.status() < 400) return;
+    const issue = { type: "http-error", url: response.url(), status: response.status() };
+    networkEvents.push({ ...issue, page: label });
+    if (sameOrigin(response.url())) failures.push(label + ": same-origin HTTP " + response.status() + ": " + response.url());
+    else warnings.push(label + ": third-party HTTP " + response.status() + ": " + response.url());
+  });
+}
+
+try {
+  // Walk every public route and inventory every visible button/control.
+  const routes = [
+    "/", "/services", "/work", "/work/inventory-management",
+    "/work/local-discovery", "/work/cafe-presence",
+    "/about", "/contact", "/start-project",
+  ];
+
+  for (const route of routes) {
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    monitor(page, route);
+    const response = await page.goto(baseURL + route, { waitUntil: "domcontentloaded" });
+    if (!response || response.status() !== 200) {
+      failures.push(route + ": route did not return HTTP 200 (" + (response?.status() ?? "no response") + ")");
+    }
+    const resolved = new URL(page.url());
+    if (resolved.origin !== origin || resolved.pathname !== route) {
+      failures.push(route + ": unexpected redirect destination " + page.url());
+    }
+
+    const controls = await page.locator("button:visible").evaluateAll((buttons) =>
+      buttons.map((button) => ({
+        label: (button.getAttribute("aria-label") || button.innerText || "").trim().replace(/\s+/g, " "),
+        type: button.getAttribute("type") || "implicit",
+        disabled: button.disabled,
+      })),
+    );
+    buttonInventory[route] = controls;
+    for (const control of controls) {
+      if (!control.label) failures.push(route + ": visible button has no accessible name");
+    }
+
+    const unsafeBlankLinks = await page.locator('a[target="_blank"]').evaluateAll((links) =>
+      links
+        .filter((link) => !/(^|\s)noopener(\s|$)/i.test(link.getAttribute("rel") || "") &&
+          !/(^|\s)noreferrer(\s|$)/i.test(link.getAttribute("rel") || ""))
+        .map((link) => link.href),
+    );
+    for (const href of unsafeBlankLinks) failures.push(route + ": target=_blank link is missing noopener/noreferrer: " + href);
+
+    await page.close();
+  }
+
+  // These are real user journeys. The document sentinel detects hard reloads:
+  // client-side Next.js navigation must preserve the current JS document.
+  const navigationChecks = [
+    { from: "/", selector: '.desktop-nav a[href="/services"]', to: "/services", label: "header Services" },
+    { from: "/", selector: '.desktop-nav a[href="/work"]', to: "/work", label: "header Selected work" },
+    { from: "/", selector: ".header-cta", to: "/start-project", label: "header Start a project" },
+    { from: "/work", selector: 'a[href="/work/local-discovery"]', to: "/work/local-discovery", label: "Local Discovery project card" },
+    { from: "/work/local-discovery", selector: '.case-next a[href="/contact"]', to: "/contact", label: "Local Discovery contact CTA" },
+    { from: "/services", selector: 'a[href="/work/local-discovery"]', to: "/work/local-discovery", label: "Services local-discovery proof link" },
+  ];
+
+  for (const check of navigationChecks) {
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    monitor(page, check.label);
+    await page.goto(baseURL + check.from, { waitUntil: "domcontentloaded" });
+    await page.evaluate(() => { window.__natexQaDocumentSentinel = "same-document"; });
+    const link = page.locator(check.selector).first();
+    if (!(await link.count())) {
+      failures.push(check.label + ": control not found");
+      await page.close();
+      continue;
+    }
+    await link.click();
+    await page.waitForURL((url) => url.origin === origin && url.pathname === check.to, { timeout: 15000 }).catch(() => {
+      failures.push(check.label + ": click did not navigate to " + check.to + " (current: " + page.url() + ")");
+    });
+    const sentinel = await page.evaluate(() => window.__natexQaDocumentSentinel || null).catch(() => null);
+    if (sentinel !== "same-document") failures.push(check.label + ": internal navigation caused a full document reload");
+    if (!(await page.locator("main h1").count())) failures.push(check.label + ": destination has no main heading");
+    navigationResults.push({ label: check.label, destination: page.url(), softNavigation: sentinel === "same-document" });
+    await page.close();
+  }
+
+  // Click every distinct same-origin link found on each public route. External
+  // destinations and mailto actions are inventoried but never activated.
+  const internalLinkResults = [];
+  const nonNavigatedLinks = [];
+  for (const route of routes) {
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    monitor(page, route + " internal links");
+    await page.goto(baseURL + route, { waitUntil: "domcontentloaded" });
+    // The skip link is intentionally translated above the viewport until
+    // keyboard focus reveals it. Exercise it as a keyboard control below;
+    // pointer-clicking this visually hidden link would be an invalid test.
+    const hrefs = await page.locator('a:visible[href]:not(.skip-link)').evaluateAll((anchors) =>
+      anchors.map((anchor) => anchor.getAttribute("href")).filter(Boolean),
+    );
+    const uniqueTargets = new Map();
+    for (const href of hrefs) {
+      let target;
+      try {
+        target = new URL(href, baseURL);
+      } catch {
+        failures.push(route + ": invalid link URL " + href);
+        continue;
+      }
+      if (target.origin !== origin) {
+        nonNavigatedLinks.push({ route, href, reason: "external or non-HTTP destination; not activated" });
+        continue;
+      }
+      if (target.pathname === route && !target.search && !target.hash) {
+        nonNavigatedLinks.push({ route, href, reason: "self-link without a new destination" });
+        continue;
+      }
+      if (!uniqueTargets.has(target.href)) uniqueTargets.set(target.href, href);
+    }
+
+    for (const [expectedHref, rawHref] of uniqueTargets) {
+      await page.goto(baseURL + route, { waitUntil: "domcontentloaded" });
+      await page.evaluate(() => { window.__natexQaDocumentSentinel = "same-document"; });
+      const selector = "a[href=" + JSON.stringify(rawHref) + "]";
+      const link = page.locator(selector).first();
+      if (!(await link.count())) {
+        failures.push(route + ": discovered internal link could not be located: " + rawHref);
+        continue;
+      }
+      await link.click();
+      const expected = new URL(expectedHref);
+      await page.waitForURL((url) =>
+        url.origin === expected.origin &&
+        url.pathname === expected.pathname &&
+        url.search === expected.search &&
+        url.hash === expected.hash,
+      { timeout: 15000 }).catch(() => {
+        failures.push(route + ": clicking internal link " + rawHref + " did not reach " + expectedHref + " (current: " + page.url() + ")");
+      });
+      const sentinel = await page.evaluate(() => window.__natexQaDocumentSentinel || null).catch(() => null);
+      if (sentinel !== "same-document") {
+        failures.push(route + ": internal link " + rawHref + " caused a full document reload");
+      }
+      if (expected.pathname !== route && !(await page.locator("main h1").count())) {
+        failures.push(route + ": destination for " + rawHref + " has no main heading");
+      }
+      if (expected.hash && !(await page.locator("[id=" + JSON.stringify(decodeURIComponent(expected.hash.slice(1))) + "]").count())) {
+        failures.push(route + ": hash link " + rawHref + " has no matching destination element");
+      }
+      internalLinkResults.push({ route, href: rawHref, destination: page.url(), softNavigation: sentinel === "same-document" });
+    }
+    await page.close();
+  }
+
+  // Check documented legacy redirects and SEO endpoint routes explicitly.
+  const redirectResults = [];
+  const legacyRedirects = [
+    { from: "/index.html", to: "/" },
+    { from: "/services.html", to: "/services" },
+    { from: "/inventory.html", to: "/work/inventory-management" },
+  ];
+  for (const item of legacyRedirects) {
+    const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    monitor(page, "legacy redirect " + item.from);
+    const response = await page.goto(baseURL + item.from, { waitUntil: "domcontentloaded" });
+    const actual = new URL(page.url());
+    if (!response || response.status() !== 200) {
+      failures.push(item.from + ": final redirect response was not HTTP 200");
+    }
+    if (actual.origin !== origin || actual.pathname !== item.to) {
+      failures.push(item.from + ": expected redirect to " + item.to + " but reached " + page.url());
+    }
+    let request = response?.request();
+    let redirectHops = 0;
+    while (request?.redirectedFrom()) {
+      redirectHops += 1;
+      request = request.redirectedFrom();
+    }
+    if (redirectHops > 4) failures.push(item.from + ": redirect chain exceeded four hops");
+    redirectResults.push({ from: item.from, to: page.url(), redirectHops, status: response?.status() ?? null });
+    await page.close();
+  }
+
+  {
+    const page = await browser.newPage();
+    monitor(page, "sitemap and robots");
+    const [sitemapResponse, robotsResponse] = await Promise.all([
+      page.request.get(baseURL + "/sitemap.xml"),
+      page.request.get(baseURL + "/robots.txt"),
+    ]);
+    if (!sitemapResponse.ok()) failures.push("sitemap.xml did not return a successful response (" + sitemapResponse.status() + ")");
+    if (!robotsResponse.ok()) failures.push("robots.txt did not return a successful response (" + robotsResponse.status() + ")");
+    const sitemapXml = await sitemapResponse.text();
+    const sitemapPaths = [...sitemapXml.matchAll(/<loc>https?:\/\/[^/]+(\/[^<]*)?<\/loc>/g)].map((match) => match[1] || "/");
+    for (const route of routes) {
+      const encodedRoute = route === "/" ? "/" : route;
+      if (!sitemapPaths.includes(encodedRoute)) failures.push("sitemap.xml is missing public route " + route);
+    }
+    const robotsText = await robotsResponse.text();
+    if (!robotsText.includes("/sitemap.xml")) failures.push("robots.txt does not reference sitemap.xml");
+    await page.close();
+  }
+
+  // Keyboard-only skip navigation: the first Tab should reveal the
+  // visually hidden link, and Enter should jump to the main content target.
+  {
+    const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    monitor(page, "keyboard skip link");
+    await page.goto(baseURL + "/", { waitUntil: "domcontentloaded" });
+    await page.evaluate(() => { window.__natexQaDocumentSentinel = "same-document"; });
+    await page.keyboard.press("Tab");
+    const skipLink = page.locator(".skip-link");
+    if (!(await skipLink.evaluate((element) => element === document.activeElement))) {
+      failures.push("The first keyboard Tab did not focus the skip-to-content link");
+    }
+    const focusVisible = await skipLink.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      return rect.top >= 0 && rect.bottom > 0 && getComputedStyle(element).visibility !== "hidden";
+    });
+    if (!focusVisible) failures.push("Skip-to-content link did not become visible on keyboard focus");
+    await page.keyboard.press("Enter");
+    await page.waitForFunction(() => window.location.hash === "#main-content", undefined, { timeout: 5000 })
+      .catch(() => failures.push("Activating the skip link did not navigate to #main-content"));
+    if (!(await page.locator("#main-content").count())) failures.push("Skip link target #main-content does not exist");
+    if (await page.evaluate(() => window.__natexQaDocumentSentinel || null) !== "same-document") {
+      failures.push("Skip-to-content navigation caused an unexpected document reload");
+    }
+    await page.close();
+  }
+
+  // Mobile menu: open, Escape-close, restore focus, then choose a route.
+  {
+    const page = await browser.newPage({ viewport: { width: 390, height: 820 }, isMobile: true });
+    monitor(page, "mobile navigation");
+    await page.goto(baseURL + "/about", { waitUntil: "domcontentloaded" });
+    await page.evaluate(() => { window.__natexQaDocumentSentinel = "same-document"; });
+    // Use a stable locator because the accessible name intentionally changes
+    // from "Open navigation" to "Close navigation" after the click.
+    const toggle = page.locator(".menu-toggle");
+    if (await toggle.getAttribute("aria-label") !== "Open navigation") {
+      failures.push("Mobile navigation toggle did not start in the closed state");
+    }
+    await toggle.click();
+    if (await toggle.getAttribute("aria-expanded") !== "true") failures.push("Mobile menu did not open");
+    await page.keyboard.press("Escape");
+    if (await toggle.getAttribute("aria-expanded") !== "false") failures.push("Escape did not close mobile navigation");
+    if (!(await toggle.evaluate((element) => element === document.activeElement))) failures.push("Escape did not return focus to the menu button");
+    await toggle.click();
+    await page.locator('#mobile-navigation a[href="/work"]').click();
+    await page.waitForURL((url) => url.pathname === "/work", { timeout: 15000 }).catch(() => failures.push("Mobile Selected work link did not navigate"));
+    if (await page.locator(".menu-toggle").getAttribute("aria-expanded") !== "false") failures.push("Selecting a mobile menu item did not close the menu");
+    if (await page.evaluate(() => window.__natexQaDocumentSentinel || null) !== "same-document") failures.push("Mobile internal navigation caused a full document reload");
+    await page.close();
+  }
+
+  // Form controls: validate empty and malformed input without opening a real mail app.
+  for (const route of ["/contact", "/start-project"]) {
+    const page = await browser.newPage();
+    monitor(page, route + " form");
+    await page.goto(baseURL + route, { waitUntil: "domcontentloaded" });
+    const form = page.locator("form").first();
+    const submit = form.locator('button[type="submit"]');
+    if (!(await submit.count()) || !(await submit.isEnabled())) {
+      failures.push(route + ": submit control is missing or disabled");
+    } else {
+      await submit.click();
+      const validity = await form.evaluate((element) => ({
+        valid: element.checkValidity(),
+        invalidFields: element.querySelectorAll(":invalid").length,
+      }));
+      if (validity.valid || validity.invalidFields === 0) failures.push(route + ": empty form bypassed native validation");
+      if (new URL(page.url()).pathname !== route) failures.push(route + ": invalid form caused an unexpected navigation");
+    }
+
+    if (route === "/contact") {
+      await page.locator("#contact-name").fill("QA Test");
+      await page.locator("#contact-email").fill("not-an-email");
+      await page.locator("#contact-message").fill("A test message to validate the contact flow.");
+      const emailValidity = await page.locator("#contact-email").evaluate((input) => input.validity.typeMismatch);
+      if (!emailValidity) failures.push("Contact form accepted a malformed email address");
+
+      // Confirm a complete, valid contact brief without activating the mailto
+      // hand-off (which would launch a visitor's external email application).
+      await page.locator("#contact-email").fill("qa@example.com");
+      await page.locator("#contact-type").selectOption("Business website");
+      const contactFormValid = await form.evaluate((element) => element.checkValidity());
+      if (!contactFormValid) failures.push("Contact form rejected a complete valid enquiry");
+      if (!(await page.locator(".enquiry-form__privacy").innerText()).includes("does not send or store")) {
+        failures.push("Contact form's email-draft disclosure is missing");
+      }
+    } else {
+      const prefilled = await page.locator("#project-type").inputValue();
+      if (prefilled !== "") failures.push("Start-project form should not select a project when no query parameter is supplied");
+      const projectPrefills = [
+        ["inventory-management", "Inventory / business application"],
+        ["cafe-presence", "Café / business website"],
+        ["local-discovery", "Local SEO foundations"],
+      ];
+      for (const [project, expectedType] of projectPrefills) {
+        await page.goto(baseURL + "/start-project?project=" + project, { waitUntil: "domcontentloaded" });
+        const selected = await page.locator("#project-type").inputValue();
+        if (selected !== expectedType) failures.push("Start-project query prefill for " + project + " expected " + expectedType + " but received " + selected);
+      }
+      await page.locator("#project-name").fill("QA Test");
+      await page.locator("#project-email").fill("not-an-email");
+      await page.locator("#project-goal").fill("A sufficiently descriptive project goal for validation.");
+      const projectEmailValidity = await page.locator("#project-email").evaluate((input) => input.validity.typeMismatch);
+      if (!projectEmailValidity) failures.push("Start-project form accepted a malformed email address");
+      await page.locator("#project-email").fill("qa@example.com");
+      await page.locator("#project-type").selectOption("Custom web application");
+      if (await page.locator("#project-type").inputValue() !== "Custom web application") {
+        failures.push("Start-project form did not accept a project-type selection");
+      }
+      const projectFormValid = await form.evaluate((element) => element.checkValidity());
+      if (!projectFormValid) failures.push("Start-project form rejected a complete valid project brief");
+      if (!(await page.locator(".enquiry-form__privacy").innerText()).includes("does not send")) {
+        failures.push("Start-project form's email-draft disclosure is missing");
+      }
+    }
+    await page.close();
+  }
+
+  // The homepage's primary hero CTA must open the selected-work route.
+  {
+    const page = await browser.newPage({ viewport: { width: 390, height: 820 }, reducedMotion: "reduce" });
+    monitor(page, "Homepage Explore selected work CTA");
+    await page.goto(baseURL + "/", { waitUntil: "domcontentloaded" });
+    await page.evaluate(() => { window.__natexQaDocumentSentinel = "same-document"; });
+    const cta = page.locator('.hero-actions a[href="/work"]');
+    if (!(await cta.count())) {
+      failures.push("Homepage Explore selected work CTA was not found");
+    } else {
+      await cta.click();
+      await page.waitForURL((url) => url.origin === origin && url.pathname === "/work", { timeout: 15000 })
+        .catch(() => failures.push("Homepage Explore selected work CTA did not open /work"));
+      if (await page.evaluate(() => window.__natexQaDocumentSentinel || null) !== "same-document") {
+        failures.push("Homepage hero CTA caused a full document reload");
+      }
+      if (!(await page.locator("main h1").count())) failures.push("Homepage hero CTA destination has no main heading");
+    }
+    await page.close();
+  }
+
+  // Verify compact Earth sizing and test its graceful fallback when the texture CDN fails.
+  {
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    monitor(page, "Local Discovery Earth");
+    await page.goto(baseURL + "/work/local-discovery", { waitUntil: "domcontentloaded" });
+    const earth = page.locator(".local-discovery-earth--compact");
+    await earth.waitFor({ state: "visible" });
+    const desktopBox = await earth.boundingBox();
+    if (!desktopBox || desktopBox.width < 58 || desktopBox.width > 62) {
+      failures.push("Compact Earth should be approximately 60px on desktop; got " + JSON.stringify(desktopBox));
+    }
+    await page.setViewportSize({ width: 390, height: 820 });
+    const mobileBox = await earth.boundingBox();
+    if (!mobileBox || mobileBox.width < 54 || mobileBox.width > 58) {
+      failures.push("Compact Earth should be approximately 56px on mobile; got " + JSON.stringify(mobileBox));
+    }
+    await page.close();
+
+    const blockedContext = await browser.newContext({ viewport: { width: 390, height: 820 } });
+    await blockedContext.route("https://threejs.org/examples/textures/planets/**", (route) => route.abort("failed"));
+    const blockedPage = await blockedContext.newPage();
+    blockedPage.on("pageerror", (error) => failures.push("Earth texture fallback page error: " + error.message));
+    await blockedPage.goto(baseURL + "/work/local-discovery", { waitUntil: "domcontentloaded" });
+    const viewport = blockedPage.locator(".local-discovery-earth__viewport");
+    await viewport.waitFor({ state: "attached" });
+    await blockedPage.waitForFunction(() => {
+      const element = document.querySelector(".local-discovery-earth__viewport");
+      return Boolean(element?.classList.contains("is-fallback") || element?.classList.contains("is-ready"));
+    }, undefined, { timeout: 15000 }).catch(() => failures.push("Earth did not settle into a ready or fallback state after texture failure"));
+    if (!(await viewport.evaluate((element) => element.classList.contains("is-fallback")))) {
+      failures.push("Blocked Earth texture did not activate the static fallback");
+    }
+    await blockedContext.close();
+  }
+
+  const summary = {
+    baseURL,
+    routesAudited: Object.keys(buttonInventory).length,
+    visibleButtonsByRoute: buttonInventory,
+    navigationResults,
+    internalLinksTested: internalLinkResults.length,
+    internalLinkResults,
+    nonNavigatedLinks,
+    redirectResults,
+    networkEvents,
+    canceledPrefetches,
+    thirdPartyWarnings: warnings,
+    failures,
+  };
+  await writeFile("artifacts/interaction-qa/report.json", JSON.stringify(summary, null, 2) + "\n", "utf8");
+  console.log(JSON.stringify(summary, null, 2));
+  if (failures.length) process.exitCode = 1;
+} finally {
+  await browser.close();
+}

@@ -381,7 +381,7 @@ export default function LocalDiscoveryEarth({ compact = false }: { compact?: boo
       disposeScene();
       viewport.classList.remove("is-ready", "is-fallback");
     };
-  }, []);
+  }, [compact]);
 
   return (
     <div className={`local-discovery-earth${compact ? " local-discovery-earth--compact" : ""}`} role="img" aria-label="A realistic nighttime Earth rotating slowly around its tilted axis, with warm city lights and a subtle blue atmosphere.">
