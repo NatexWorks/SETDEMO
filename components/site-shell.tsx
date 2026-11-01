@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import MotionEngine from "@/components/motion-engine";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
@@ -98,7 +99,10 @@ export default function SiteShell({ children }: { children: ReactNode }) {
         </nav>
       </header>
 
-      <main id="main-content">{children}</main>
+      <main id="main-content">
+        <MotionEngine key={pathname} />
+        {children}
+      </main>
 
       <footer className="site-footer">
         <div className="site-footer__top">
