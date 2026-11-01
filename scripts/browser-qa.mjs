@@ -29,9 +29,26 @@ const isThirdPartyUrl = (value) => {
   try { return new URL(value).origin !== baseOrigin; } catch { return false; }
 };
 function monitorPage(page, label) {
-  page.on("pageerror", (error) => browserErrors.push(label + ": " + error.message));
+  page.on("pageerror", (error) => {
+    const source = error.stack?.match(/https?:\\/\\/[^\\s)]+/)?.[0];
+    if (source && isThirdPartyUrl(source)) thirdPartyWarnings.push({ page: label, type: "third-party-page-error", source, message: error.message });
+    else browserErrors.push(label + ": " + error.message);
+  });
   page.on("console", (message) => {
-    if (message.type() === "error") browserErrors.push(label + ": " + message.text());
+    if (message.type() !== "error") return;
+    const text = message.text();
+    const location = message.location().url;
+    const mentionedUrl = text.match(/https?:\\/\\/[^\\s"'<>)]*/)?.[0]?.replace(/[.,;)]*$/, "");
+    const source = mentionedUrl || location;
+    if (source && isThirdPartyUrl(source)) {
+      thirdPartyWarnings.push({ page: label, type: "third-party-console-error", source, message: text });
+    } else if (/Failed to load resource|net::ERR_|ERR_CERT_|ERR_BLOCKED_BY_CLIENT/i.test(text)) {
+      // The requestfailed/response listeners below record the precise URL and
+      // classify it as same-origin (failure) or third-party (warning).
+      thirdPartyWarnings.push({ page: label, type: "generic-resource-console-diagnostic", message: text });
+    } else {
+      browserErrors.push(label + ": " + text);
+    }
   });
   page.on("requestfailed", (request) => {
     const issue = {
