@@ -167,7 +167,7 @@ try {
       if (expected.pathname !== route && !(await page.locator("main h1").count())) {
         failures.push(route + ": destination for " + rawHref + " has no main heading");
       }
-      if (expected.hash && !(await page.locator("#" + CSS.escape(decodeURIComponent(expected.hash.slice(1)))).count())) {
+      if (expected.hash && !(await page.locator("[id=" + JSON.stringify(decodeURIComponent(expected.hash.slice(1))) + "]").count())) {
         failures.push(route + ": hash link " + rawHref + " has no matching destination element");
       }
       internalLinkResults.push({ route, href: rawHref, destination: page.url(), softNavigation: sentinel === "same-document" });
