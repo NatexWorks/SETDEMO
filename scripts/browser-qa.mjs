@@ -24,6 +24,7 @@ const externalLinks = new Set();
 const externalLinkChecks = [];
 const externalLinkWarnings = [];
 const networkEvents = [];
+const canceledPrefetches = [];
 const thirdPartyWarnings = [];
 const isThirdPartyUrl = (value) => {
   try { return new URL(value).origin !== baseOrigin; } catch { return false; }
@@ -58,8 +59,16 @@ function monitorPage(page, label) {
       error: request.failure()?.errorText || "unknown",
     };
     networkEvents.push(issue);
-    if (isThirdPartyUrl(request.url())) thirdPartyWarnings.push(issue);
-    else failures.push(label + ": same-origin request failed: " + issue.url + " (" + issue.error + ")");
+    const isNextFlightPrefetchCancellation =
+      issue.error === "net::ERR_ABORTED" &&
+      new URL(request.url()).searchParams.has("_rsc");
+    if (isNextFlightPrefetchCancellation) {
+      canceledPrefetches.push({ ...issue, classification: "Next.js RSC prefetch canceled during navigation or page teardown" });
+    } else if (isThirdPartyUrl(request.url())) {
+      thirdPartyWarnings.push(issue);
+    } else {
+      failures.push(label + ": same-origin request failed: " + issue.url + " (" + issue.error + ")");
+    }
   });
   page.on("response", (response) => {
     if (response.status() < 400) return;
@@ -301,6 +310,7 @@ try {
     externalLinkChecks,
     externalLinkWarnings,
     networkEvents,
+    canceledPrefetches,
     thirdPartyWarnings,
     failures,
     results,
