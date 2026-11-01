@@ -16,8 +16,9 @@ const browser = await chromium.launch({ headless: true });
 function monitor(page, label) {
   page.on("pageerror", (error) => {
     const source = error.stack?.match(/https?:\/\/[^\s)]+/)?.[0];
-    if (source && !sameOrigin(source)) warnings.push(label + ": third-party page error: " + source + " (" + error.message + ")");
-    else failures.push(label + ": page error: " + error.message);
+    const stack = error.stack || error.message;
+    if (source && !sameOrigin(source)) warnings.push(label + ": third-party page error: " + source + " (" + stack + ")");
+    else failures.push(label + ": page error: " + stack);
   });
   page.on("console", (message) => {
     if (message.type() !== "error") return;
