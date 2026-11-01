@@ -1,3 +1,4 @@
+import { mkdir, writeFile } from "node:fs/promises";
 import { chromium } from "playwright";
 
 const baseURL = process.env.BASE_URL || "http://127.0.0.1:3000";
@@ -8,6 +9,7 @@ const warnings = [];
 const navigationResults = [];
 const buttonInventory = {};
 const networkEvents = [];
+await mkdir("artifacts/interaction-qa", { recursive: true });
 const browser = await chromium.launch({ headless: true });
 
 function monitor(page, label) {
@@ -365,6 +367,7 @@ try {
     thirdPartyWarnings: warnings,
     failures,
   };
+  await writeFile("artifacts/interaction-qa/report.json", JSON.stringify(summary, null, 2) + "\n", "utf8");
   console.log(JSON.stringify(summary, null, 2));
   if (failures.length) process.exitCode = 1;
 } finally {
