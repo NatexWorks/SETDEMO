@@ -186,12 +186,21 @@ export default function LocalDiscoveryEarth({ compact = false }: { compact?: boo
         nightTexture.colorSpace = THREE.SRGBColorSpace;
         nightTexture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
 
-        const [lightsTexture, cloudsTexture, normalTexture, specularTexture] = await Promise.all([
-          loadTexture(loader, `${TEXTURE_ROOT}/earth_lights_2048.png`).catch(() => null),
-          loadTexture(loader, `${TEXTURE_ROOT}/earth_clouds_1024.png`).catch(() => null),
-          loadTexture(loader, `${TEXTURE_ROOT}/earth_normal_2048.jpg`).catch(() => null),
-          loadTexture(loader, `${TEXTURE_ROOT}/earth_specular_2048.jpg`).catch(() => null),
-        ]);
+        let lightsTexture: THREE.Texture | null = null;
+        let cloudsTexture: THREE.Texture | null = null;
+        let normalTexture: THREE.Texture | null = null;
+        let specularTexture: THREE.Texture | null = null;
+
+        // The 60px header marker only needs the night map; avoid downloading
+        // the large cloud, normal, and specular maps for this compact instance.
+        if (!compact) {
+          [lightsTexture, cloudsTexture, normalTexture, specularTexture] = await Promise.all([
+            loadTexture(loader, `${TEXTURE_ROOT}/earth_lights_2048.png`).catch(() => null),
+            loadTexture(loader, `${TEXTURE_ROOT}/earth_clouds_1024.png`).catch(() => null),
+            loadTexture(loader, `${TEXTURE_ROOT}/earth_normal_2048.jpg`).catch(() => null),
+            loadTexture(loader, `${TEXTURE_ROOT}/earth_specular_2048.jpg`).catch(() => null),
+          ]);
+        }
 
         if (disposed) {
           nightTexture.dispose();
@@ -227,7 +236,7 @@ export default function LocalDiscoveryEarth({ compact = false }: { compact?: boo
         blueEdgeFill.position.set(3.4, -1.7, -1.6);
         scene.add(blueEdgeFill);
 
-        addStarField(scene);
+        if (!compact) addStarField(scene);
 
         const tiltedAxis = new THREE.Group();
         tiltedAxis.rotation.z = THREE.MathUtils.degToRad(-23.5);
