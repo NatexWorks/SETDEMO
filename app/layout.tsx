@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import SiteShell from "@/components/site-shell";
-import MotionEngine from "@/components/motion-engine";
 import "./globals.css";
 
 const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL;
@@ -57,7 +56,6 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
       </head>
       <body>
         <SiteShell>{children}</SiteShell>
-        <MotionEngine />
       </body>
     </html>
   );
