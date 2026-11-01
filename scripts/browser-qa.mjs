@@ -58,12 +58,18 @@ try {
     for (const href of uniqueInternal) {
       if (href.startsWith("//") || href.startsWith("/#")) continue;
       try {
-        const check = await page.request.get(new URL(href, baseURL).toString(), { maxRedirects: 5 });
+        const requestedUrl = new URL(href, baseURL);
+        const check = await page.request.get(requestedUrl.toString(), { maxRedirects: 5 });
         const finalUrl = new URL(check.url());
+        const normalizePath = (value) => value.length > 1 ? value.replace(/\\/+$/, "") : value;
         linkChecks.push({ source: route, href, status: check.status(), finalUrl: check.url() });
         if (!check.ok()) failures.push(route + ": internal link " + href + " returned " + check.status());
         if (finalUrl.origin !== baseOrigin) {
           failures.push(route + ": internal link " + href + " redirected outside the site to " + check.url());
+        }
+        if (normalizePath(finalUrl.pathname) !== normalizePath(requestedUrl.pathname) ||
+            finalUrl.search !== requestedUrl.search) {
+          failures.push(route + ": internal link " + href + " redirected to an unexpected route " + check.url());
         }
       } catch (error) {
         failures.push(route + ": internal link " + href + " exceeded redirect limit or failed: " + (error instanceof Error ? error.message : String(error)));
