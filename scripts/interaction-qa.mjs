@@ -290,7 +290,12 @@ try {
     monitor(page, "mobile navigation");
     await page.goto(baseURL + "/about", { waitUntil: "domcontentloaded" });
     await page.evaluate(() => { window.__natexQaDocumentSentinel = "same-document"; });
-    const toggle = page.getByRole("button", { name: "Open navigation" });
+    // Use a stable locator because the accessible name intentionally changes
+    // from "Open navigation" to "Close navigation" after the click.
+    const toggle = page.locator(".menu-toggle");
+    if (await toggle.getAttribute("aria-label") !== "Open navigation") {
+      failures.push("Mobile navigation toggle did not start in the closed state");
+    }
     await toggle.click();
     if (await toggle.getAttribute("aria-expanded") !== "true") failures.push("Mobile menu did not open");
     await page.keyboard.press("Escape");
