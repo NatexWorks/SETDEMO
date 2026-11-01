@@ -31,6 +31,7 @@ export default function LocalDiscoveryEarth() {
     let body: THREE.Mesh | null = null;
     let cloudLayer: THREE.Mesh | null = null;
     let resizeObserver: ResizeObserver | null = null;
+    let resizeHandler: (() => void) | null = null;
     let intersectionObserver: IntersectionObserver | null = null;
     let gsapContext: { revert: () => void } | null = null;
     const textures: THREE.Texture[] = [];
@@ -72,6 +73,7 @@ export default function LocalDiscoveryEarth() {
       intersectionObserver?.disconnect();
       resizeObserver?.disconnect();
       document.removeEventListener("visibilitychange", handleVisibilityChange);
+      if (resizeHandler) window.removeEventListener("resize", resizeHandler);
       gsapContext?.revert();
 
       scene?.traverse((object) => {
@@ -220,9 +222,10 @@ export default function LocalDiscoveryEarth() {
         };
 
         resize();
+        resizeHandler = resize;
         resizeObserver = new ResizeObserver(resize);
         resizeObserver.observe(viewport);
-        window.addEventListener("resize", resize, { passive: true });
+        window.addEventListener("resize", resizeHandler, { passive: true });
         document.addEventListener("visibilitychange", handleVisibilityChange);
 
         intersectionObserver = new IntersectionObserver(([entry]) => {
@@ -249,7 +252,7 @@ export default function LocalDiscoveryEarth() {
               );
 
               const hero = stage.closest(".case-hero");
-              if (hero) {
+              if (hero && window.innerWidth > 700) {
                 gsap.to(stage, {
                   yPercent: -2.5,
                   scale: 0.985,
@@ -278,7 +281,6 @@ export default function LocalDiscoveryEarth() {
 
     return () => {
       disposed = true;
-      window.removeEventListener("resize", () => {});
       disposeScene();
       viewport.classList.remove("is-ready", "is-fallback");
     };
