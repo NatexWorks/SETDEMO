@@ -273,7 +273,19 @@ try {
     await page.evaluate((delta) =>
       window.scrollTo({ top: window.scrollY + delta, behavior: "instant" }),
     sequence.delta);
-    await settleFrame(page);
+
+    // ScrollTrigger uses scrub smoothing. Wait for the intended visual state
+    // rather than sampling after two frames while the scrub tween is still
+    // near its starting position. If the transform never changes, the
+    // assertion below still fails after this bounded condition-based wait.
+    await page.waitForFunction(
+      ({ selector, previousTransform }) => {
+        const element = document.querySelector(selector);
+        return Boolean(element && getComputedStyle(element).transform !== previousTransform);
+      },
+      { selector: sequence.target, previousTransform: before.transform },
+      { timeout: 2500, polling: "raf" },
+    ).catch(() => {});
 
     const after = await target.evaluate((element) => ({
       transform: getComputedStyle(element).transform,
