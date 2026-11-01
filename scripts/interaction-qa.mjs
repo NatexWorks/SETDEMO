@@ -201,14 +201,14 @@ try {
     const blockedContext = await browser.newContext({ viewport: { width: 390, height: 820 } });
     await blockedContext.route("https://threejs.org/examples/textures/planets/**", (route) => route.abort("failed"));
     const blockedPage = await blockedContext.newPage();
-    monitor(blockedPage, "Earth texture failure simulation");
+    blockedPage.on("pageerror", (error) => failures.push("Earth texture fallback page error: " + error.message));
     await blockedPage.goto(baseURL + "/work/local-discovery", { waitUntil: "domcontentloaded" });
     const viewport = blockedPage.locator(".local-discovery-earth__viewport");
     await viewport.waitFor({ state: "attached" });
     await blockedPage.waitForFunction(() => {
       const element = document.querySelector(".local-discovery-earth__viewport");
       return Boolean(element?.classList.contains("is-fallback") || element?.classList.contains("is-ready"));
-    }, { timeout: 15000 }).catch(() => failures.push("Earth did not settle into a ready or fallback state after texture failure"));
+    }, undefined, { timeout: 15000 }).catch(() => failures.push("Earth did not settle into a ready or fallback state after texture failure"));
     if (!(await viewport.evaluate((element) => element.classList.contains("is-fallback")))) {
       failures.push("Blocked Earth texture did not activate the static fallback");
     }
