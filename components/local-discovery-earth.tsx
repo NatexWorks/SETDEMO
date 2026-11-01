@@ -12,6 +12,73 @@ function loadTexture(loader: THREE.TextureLoader, url: string): Promise<THREE.Te
   });
 }
 
+function addStarField(scene: THREE.Scene) {
+  let seed = 48271;
+  const random = () => {
+    seed = (seed * 16807) % 2147483647;
+    return (seed - 1) / 2147483646;
+  };
+
+  const starPositions = new Float32Array(1150 * 3);
+  for (let index = 0; index < 1150; index += 1) {
+    const offset = index * 3;
+    starPositions[offset] = (random() - 0.5) * 15.5;
+    starPositions[offset + 1] = (random() - 0.5) * 9.5;
+    starPositions[offset + 2] = -7.5 - random() * 8;
+  }
+  const starGeometry = new THREE.BufferGeometry();
+  starGeometry.setAttribute("position", new THREE.BufferAttribute(starPositions, 3));
+  const starMaterial = new THREE.PointsMaterial({
+    color: 0xc7d7ed,
+    size: 0.022,
+    sizeAttenuation: true,
+    transparent: true,
+    opacity: 0.68,
+    depthWrite: false,
+  });
+  scene.add(new THREE.Points(starGeometry, starMaterial));
+
+  // A denser, faint blue-white dust lane echoes the distant galactic haze in the reference.
+  const dustPositions = new Float32Array(620 * 3);
+  for (let index = 0; index < 620; index += 1) {
+    const offset = index * 3;
+    const x = (random() - 0.5) * 14;
+    dustPositions[offset] = x;
+    dustPositions[offset + 1] = 2.0 + x * 0.29 + (random() - 0.5) * 1.35;
+    dustPositions[offset + 2] = -8 - random() * 5;
+  }
+  const dustGeometry = new THREE.BufferGeometry();
+  dustGeometry.setAttribute("position", new THREE.BufferAttribute(dustPositions, 3));
+  const dustMaterial = new THREE.PointsMaterial({
+    color: 0x739bc9,
+    size: 0.028,
+    sizeAttenuation: true,
+    transparent: true,
+    opacity: 0.2,
+    depthWrite: false,
+  });
+  scene.add(new THREE.Points(dustGeometry, dustMaterial));
+
+  const brightPositions = new Float32Array(34 * 3);
+  for (let index = 0; index < 34; index += 1) {
+    const offset = index * 3;
+    brightPositions[offset] = (random() - 0.5) * 13;
+    brightPositions[offset + 1] = (random() - 0.5) * 8;
+    brightPositions[offset + 2] = -7 - random() * 7;
+  }
+  const brightGeometry = new THREE.BufferGeometry();
+  brightGeometry.setAttribute("position", new THREE.BufferAttribute(brightPositions, 3));
+  const brightMaterial = new THREE.PointsMaterial({
+    color: 0xe0eaff,
+    size: 0.048,
+    sizeAttenuation: true,
+    transparent: true,
+    opacity: 0.82,
+    depthWrite: false,
+  });
+  scene.add(new THREE.Points(brightGeometry, brightMaterial));
+}
+
 export default function LocalDiscoveryEarth() {
   const viewportRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
@@ -81,6 +148,10 @@ export default function LocalDiscoveryEarth() {
           object.geometry.dispose();
           const materials = Array.isArray(object.material) ? object.material : [object.material];
           materials.forEach((material) => material.dispose());
+        } else if (object instanceof THREE.Points) {
+          object.geometry.dispose();
+          const materials = Array.isArray(object.material) ? object.material : [object.material];
+          materials.forEach((material) => material.dispose());
         }
       });
       textures.forEach((texture) => texture.dispose());
@@ -103,7 +174,7 @@ export default function LocalDiscoveryEarth() {
         renderer.setClearColor(0x000000, 0);
         renderer.outputColorSpace = THREE.SRGBColorSpace;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.08;
+        renderer.toneMappingExposure = 1.06;
         renderer.domElement.setAttribute("aria-hidden", "true");
         viewport.appendChild(renderer.domElement);
 
@@ -113,6 +184,7 @@ export default function LocalDiscoveryEarth() {
         const nightTexture = await loadTexture(loader, NIGHT_TEXTURE);
         textures.push(nightTexture);
         nightTexture.colorSpace = THREE.SRGBColorSpace;
+        nightTexture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
 
         const [lightsTexture, cloudsTexture, normalTexture, specularTexture] = await Promise.all([
           loadTexture(loader, `${TEXTURE_ROOT}/earth_lights_2048.png`).catch(() => null),
@@ -130,34 +202,48 @@ export default function LocalDiscoveryEarth() {
         [lightsTexture, cloudsTexture, normalTexture, specularTexture].forEach((texture) => {
           if (texture) textures.push(texture);
         });
-        if (lightsTexture) lightsTexture.colorSpace = THREE.SRGBColorSpace;
-        if (cloudsTexture) cloudsTexture.colorSpace = THREE.SRGBColorSpace;
+        if (lightsTexture) {
+          lightsTexture.colorSpace = THREE.SRGBColorSpace;
+          lightsTexture.anisotropy = Math.min(8, renderer!.capabilities.getMaxAnisotropy());
+        }
+        if (cloudsTexture) {
+          cloudsTexture.colorSpace = THREE.SRGBColorSpace;
+          cloudsTexture.anisotropy = Math.min(8, renderer!.capabilities.getMaxAnisotropy());
+        }
+        if (normalTexture) normalTexture.anisotropy = Math.min(8, renderer!.capabilities.getMaxAnisotropy());
+        if (specularTexture) specularTexture.anisotropy = Math.min(8, renderer!.capabilities.getMaxAnisotropy());
 
         scene = new THREE.Scene();
         camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
-        camera.position.set(0, 0.025, 3.55);
+        camera.position.set(0, 0.025, 4.0);
         camera.lookAt(0, 0, 0);
 
-        scene.add(new THREE.AmbientLight(0x8298b5, 0.42));
-        const softFill = new THREE.DirectionalLight(0x7897bd, 0.18);
-        softFill.position.set(-2.5, 1.8, 3.5);
-        scene.add(softFill);
+        // Low-level off-camera fills retain continental shape without introducing a visible sun.
+        scene.add(new THREE.AmbientLight(0x7890ac, 0.2));
+        const coolFill = new THREE.DirectionalLight(0x9ab7db, 0.28);
+        coolFill.position.set(-3.5, 2.6, 4.5);
+        scene.add(coolFill);
+        const blueEdgeFill = new THREE.PointLight(0x315984, 0.32, 9, 2);
+        blueEdgeFill.position.set(3.4, -1.7, -1.6);
+        scene.add(blueEdgeFill);
+
+        addStarField(scene);
 
         const tiltedAxis = new THREE.Group();
         tiltedAxis.rotation.z = THREE.MathUtils.degToRad(-23.5);
         scene.add(tiltedAxis);
 
-        const sphereGeometry = new THREE.SphereGeometry(1, 96, 96);
+        const sphereGeometry = new THREE.SphereGeometry(1.06, 112, 112);
         const earthMaterial = new THREE.MeshPhongMaterial({
           map: nightTexture,
           emissiveMap: lightsTexture || nightTexture,
-          emissive: new THREE.Color(0x9b704c),
-          emissiveIntensity: lightsTexture ? 0.72 : 0.22,
+          emissive: new THREE.Color(0xffc18a),
+          emissiveIntensity: lightsTexture ? 1.12 : 0.2,
           normalMap: normalTexture || undefined,
-          normalScale: new THREE.Vector2(0.22, 0.22),
+          normalScale: new THREE.Vector2(0.2, 0.2),
           specularMap: specularTexture || undefined,
-          specular: new THREE.Color(0x263b55),
-          shininess: 10,
+          specular: new THREE.Color(0x1c3048),
+          shininess: 7,
         });
 
         body = new THREE.Mesh(sphereGeometry, earthMaterial);
@@ -167,13 +253,13 @@ export default function LocalDiscoveryEarth() {
         if (cloudsTexture) {
           const cloudMaterial = new THREE.MeshPhongMaterial({
             map: cloudsTexture,
-            color: 0x9fb4c8,
+            color: 0xc3d0df,
             transparent: true,
-            opacity: 0.17,
+            opacity: 0.2,
             depthWrite: false,
           });
           cloudLayer = new THREE.Mesh(
-            new THREE.SphereGeometry(1.008, 80, 80),
+            new THREE.SphereGeometry(1.071, 96, 96),
             cloudMaterial,
           );
           cloudLayer.rotation.y = 0.75;
@@ -196,8 +282,9 @@ export default function LocalDiscoveryEarth() {
             varying vec3 vViewPosition;
             void main() {
               float facing = max(dot(normalize(vNormal), normalize(vViewPosition)), 0.0);
-              float rim = pow(1.0 - facing, 3.1);
-              gl_FragColor = vec4(0.20, 0.43, 0.72, rim * 0.38);
+              float rim = pow(1.0 - facing, 2.85);
+              float softBand = smoothstep(0.0, 0.8, rim);
+              gl_FragColor = vec4(0.24, 0.48, 0.78, softBand * 0.32);
             }
           `,
           side: THREE.BackSide,
@@ -206,7 +293,7 @@ export default function LocalDiscoveryEarth() {
           depthWrite: false,
         });
         const atmosphere = new THREE.Mesh(
-          new THREE.SphereGeometry(1.045, 80, 80),
+          new THREE.SphereGeometry(1.105, 96, 96),
           atmosphereMaterial,
         );
         tiltedAxis.add(atmosphere);
