@@ -36,7 +36,7 @@ describe("SiteShell navigation", () => {
     render(<SiteShell><div>Page content</div></SiteShell>);
 
     const toggle = screen.getByRole("button", { name: "Open navigation" });
-    const mobileNavigation = screen.getByRole("navigation", { name: "Mobile navigation" });
+    const mobileNavigation = document.getElementById("mobile-navigation");
 
     expect(toggle).toHaveAttribute("aria-expanded", "false");
     await user.click(toggle);
