@@ -15,7 +15,8 @@
     "qa:install": "npm install --no-save --package-lock=false vitest @testing-library/react @testing-library/jest-dom @testing-library/user-event jsdom playwright @axe-core/playwright @lhci/cli",
     "test:unit": "vitest run --config vitest.config.ts",
     "test:browser": "node scripts/browser-qa.mjs",
-    "test:lighthouse": "lhci autorun --config=./lighthouserc.json"
+    "test:lighthouse": "lhci autorun --config=./lighthouserc.json",
+    "test:interactions": "node scripts/interaction-qa.mjs"
   },
   "dependencies": {
     "@react-three/fiber": "^9.1.2",
