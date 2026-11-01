@@ -1589,3 +1589,159 @@ main { display: block; overflow: clip; }
   }
   .page-hero__bottom { animation: natexEditorialArrive .66s .16s both cubic-bezier(.2,.75,.2,1); }
 }
+
+
+/* Local Discovery hero: real Three.js Earth, kept inside the existing editorial layout. */
+.case-hero--local-discovery {
+  min-height: calc(100svh - 78px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-top: 58px;
+  padding-bottom: 56px;
+  overflow: hidden;
+}
+.case-hero--local-discovery > .section-kicker { width: 100%; }
+.case-hero__layout {
+  width: min(100%, var(--wrap));
+  margin: auto;
+  padding: 30px 0 12px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.04fr) minmax(320px, .96fr);
+  align-items: center;
+  gap: clamp(24px, 4.8vw, 76px);
+}
+.case-hero__copy { min-width: 0; position: relative; z-index: 1; }
+.case-hero--local-discovery .case-hero__copy > .eyebrow { margin-top: 34px; }
+.case-hero--local-discovery h1 {
+  max-width: 690px;
+  font-size: clamp(58px, 7.2vw, 102px);
+  line-height: .92;
+  letter-spacing: -.09em;
+}
+.case-hero--local-discovery .case-hero__summary {
+  max-width: 485px;
+  margin: 25px 0 35px;
+  font-size: 14px;
+  line-height: 1.85;
+}
+.case-hero--local-discovery .case-hero__meta {
+  max-width: 510px;
+  flex-wrap: wrap;
+  gap: 14px 34px;
+}
+.local-discovery-earth {
+  position: relative;
+  width: 100%;
+  max-width: 548px;
+  min-width: 0;
+  aspect-ratio: 1;
+  justify-self: end;
+  display: grid;
+  place-items: center;
+  isolation: isolate;
+}
+.local-discovery-earth::before {
+  content: "";
+  position: absolute;
+  inset: 6%;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(35, 62, 88, .18) 0, rgba(35, 62, 88, .08) 48%, transparent 73%);
+  filter: blur(22px);
+}
+.local-discovery-earth__stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-origin: 50% 50%;
+}
+.local-discovery-earth__stage::before {
+  content: "";
+  position: absolute;
+  inset: 8%;
+  border: 1px solid rgba(44, 72, 96, .08);
+  border-radius: 50%;
+  box-shadow: inset 0 0 70px rgba(15, 25, 38, .08), 0 24px 65px rgba(20, 35, 55, .10);
+  pointer-events: none;
+}
+.local-discovery-earth__viewport {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  border-radius: 50%;
+}
+.local-discovery-earth__viewport canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  opacity: 0;
+  transition: opacity .7s ease;
+  pointer-events: none;
+}
+.local-discovery-earth__fallback {
+  position: absolute;
+  inset: 8%;
+  border-radius: 50%;
+  background-position: center;
+  background-size: cover, 200% 100%;
+  background-repeat: no-repeat;
+  filter: brightness(.88) contrast(1.08);
+  box-shadow: inset -22px -14px 45px rgba(0, 0, 0, .36), 0 28px 70px rgba(20, 35, 55, .18);
+  transition: opacity .55s ease;
+}
+.local-discovery-earth__viewport.is-ready canvas { opacity: 1; }
+.local-discovery-earth__viewport.is-ready .local-discovery-earth__fallback { opacity: 0; }
+.local-discovery-earth__caption {
+  position: absolute;
+  right: 8%;
+  bottom: 1.5%;
+  left: 8%;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #606b78;
+  font: 8px/1.5 var(--mono);
+  letter-spacing: .09em;
+}
+@media (min-width: 701px) and (max-width: 1024px) {
+  .case-hero__layout {
+    grid-template-columns: minmax(0, 1fr) minmax(275px, .86fr);
+    gap: 26px;
+  }
+  .case-hero--local-discovery h1 { font-size: clamp(54px, 7vw, 82px); }
+  .local-discovery-earth { max-width: 420px; }
+}
+@media (max-width: 700px) {
+  .case-hero--local-discovery {
+    min-height: 0;
+    padding-top: 42px;
+    padding-bottom: 54px;
+  }
+  .case-hero__layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+    padding: 14px 0 0;
+  }
+  .case-hero--local-discovery .case-hero__copy > .eyebrow { margin-top: 34px; }
+  .case-hero--local-discovery h1 { font-size: clamp(56px, 14vw, 82px); }
+  .case-hero--local-discovery .case-hero__summary {
+    margin: 22px 0 28px;
+    font-size: 13px;
+  }
+  .local-discovery-earth {
+    width: min(100%, 410px);
+    justify-self: center;
+    margin-top: 3px;
+  }
+  .local-discovery-earth__caption { font-size: 7px; }
+}
+@media (max-width: 390px) {
+  .local-discovery-earth { width: 100%; }
+  .local-discovery-earth__caption { right: 4%; left: 4%; font-size: 6px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .local-discovery-earth__viewport canvas { transition: none; }
+}
