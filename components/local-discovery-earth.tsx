@@ -219,6 +219,7 @@ export default function LocalDiscoveryEarth() {
           renderer.setSize(width, height, false);
           camera.aspect = width / height;
           camera.updateProjectionMatrix();
+          if (reducedMotion && scene) renderer.render(scene, camera);
         };
 
         resize();
