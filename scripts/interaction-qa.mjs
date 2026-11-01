@@ -148,7 +148,10 @@ try {
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
     monitor(page, route + " internal links");
     await page.goto(baseURL + route, { waitUntil: "domcontentloaded" });
-    const hrefs = await page.locator("a:visible[href]").evaluateAll((anchors) =>
+    // The skip link is intentionally translated above the viewport until
+    // keyboard focus reveals it. Exercise it as a keyboard control below;
+    // pointer-clicking this visually hidden link would be an invalid test.
+    const hrefs = await page.locator('a:visible[href]:not(.skip-link)').evaluateAll((anchors) =>
       anchors.map((anchor) => anchor.getAttribute("href")).filter(Boolean),
     );
     const uniqueTargets = new Map();
@@ -251,6 +254,33 @@ try {
     }
     const robotsText = await robotsResponse.text();
     if (!robotsText.includes("/sitemap.xml")) failures.push("robots.txt does not reference sitemap.xml");
+    await page.close();
+  }
+
+  // Keyboard-only skip navigation: the first Tab should reveal the
+  // visually hidden link, and Enter should jump to the main content target.
+  {
+    const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    monitor(page, "keyboard skip link");
+    await page.goto(baseURL + "/", { waitUntil: "domcontentloaded" });
+    await page.evaluate(() => { window.__natexQaDocumentSentinel = "same-document"; });
+    await page.keyboard.press("Tab");
+    const skipLink = page.locator(".skip-link");
+    if (!(await skipLink.evaluate((element) => element === document.activeElement))) {
+      failures.push("The first keyboard Tab did not focus the skip-to-content link");
+    }
+    const focusVisible = await skipLink.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      return rect.top >= 0 && rect.bottom > 0 && getComputedStyle(element).visibility !== "hidden";
+    });
+    if (!focusVisible) failures.push("Skip-to-content link did not become visible on keyboard focus");
+    await page.keyboard.press("Enter");
+    await page.waitForFunction(() => window.location.hash === "#main-content", undefined, { timeout: 5000 })
+      .catch(() => failures.push("Activating the skip link did not navigate to #main-content"));
+    if (!(await page.locator("#main-content").count())) failures.push("Skip link target #main-content does not exist");
+    if (await page.evaluate(() => window.__natexQaDocumentSentinel || null) !== "same-document") {
+      failures.push("Skip-to-content navigation caused an unexpected document reload");
+    }
     await page.close();
   }
 
