@@ -52,6 +52,12 @@ function monitorPage(page, label) {
     else failures.push(label + ": same-origin HTTP " + response.status() + ": " + response.url);
   });
 }
+async function settleFrame(page) {
+  await page.evaluate(() => new Promise((resolve) =>
+    requestAnimationFrame(() => requestAnimationFrame(resolve)),
+  ));
+}
+
 await mkdir("artifacts/browser-qa", { recursive: true });
 
 const browser = await chromium.launch({ headless: true });
@@ -115,7 +121,7 @@ try {
     const viewportResults = [];
     for (const width of widths) {
       await page.setViewportSize({ width, height: width < 500 ? 820 : 1000 });
-      await page.waitForTimeout(70);
+      await settleFrame(page);
       const dimensions = await page.evaluate(() => ({
         viewport: window.innerWidth,
         document: document.documentElement.scrollWidth,
@@ -195,7 +201,7 @@ try {
   const reducedPage = await reducedContext.newPage();
   monitorPage(reducedPage, "reduced-motion route");
   await reducedPage.goto(baseURL + "/", { waitUntil: "domcontentloaded" });
-  await reducedPage.waitForTimeout(150);
+  await settleFrame(reducedPage);
   if (await reducedPage.locator(".hero-scene canvas").count() !== 0) {
     failures.push("Reduced-motion mode should use the static hero fallback");
   }
@@ -214,7 +220,7 @@ try {
     const page = await context.newPage();
     monitorPage(page, sequence.route + " scroll test");
     await page.goto(baseURL + sequence.route, { waitUntil: "domcontentloaded" });
-    await page.waitForTimeout(1200);
+    await page.waitForLoadState("networkidle");
 
     const section = page.locator(sequence.section);
     const target = page.locator(sequence.target);
@@ -231,7 +237,7 @@ try {
       document.documentElement.style.scrollBehavior = "auto";
       window.scrollTo({ top, behavior: "instant" });
     }, sectionTop);
-    await page.waitForTimeout(450);
+    await settleFrame(page);
 
     const before = await target.evaluate((element) => ({
       transform: getComputedStyle(element).transform,
@@ -241,7 +247,7 @@ try {
     await page.evaluate((delta) =>
       window.scrollTo({ top: window.scrollY + delta, behavior: "instant" }),
     sequence.delta);
-    await page.waitForTimeout(500);
+    await settleFrame(page);
 
     const after = await target.evaluate((element) => ({
       transform: getComputedStyle(element).transform,
