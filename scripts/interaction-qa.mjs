@@ -175,6 +175,55 @@ try {
     await page.close();
   }
 
+  // Check documented legacy redirects and SEO endpoint routes explicitly.
+  const redirectResults = [];
+  const legacyRedirects = [
+    { from: "/index.html", to: "/" },
+    { from: "/services.html", to: "/services" },
+    { from: "/inventory.html", to: "/work/inventory-management" },
+  ];
+  for (const item of legacyRedirects) {
+    const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+    monitor(page, "legacy redirect " + item.from);
+    const response = await page.goto(baseURL + item.from, { waitUntil: "domcontentloaded" });
+    const actual = new URL(page.url());
+    if (!response || response.status() !== 200) {
+      failures.push(item.from + ": final redirect response was not HTTP 200");
+    }
+    if (actual.origin !== origin || actual.pathname !== item.to) {
+      failures.push(item.from + ": expected redirect to " + item.to + " but reached " + page.url());
+    }
+    let request = response?.request();
+    let redirectHops = 0;
+    while (request?.redirectedFrom()) {
+      redirectHops += 1;
+      request = request.redirectedFrom();
+    }
+    if (redirectHops > 4) failures.push(item.from + ": redirect chain exceeded four hops");
+    redirectResults.push({ from: item.from, to: page.url(), redirectHops, status: response?.status() ?? null });
+    await page.close();
+  }
+
+  {
+    const page = await browser.newPage();
+    monitor(page, "sitemap and robots");
+    const [sitemapResponse, robotsResponse] = await Promise.all([
+      page.request.get(baseURL + "/sitemap.xml"),
+      page.request.get(baseURL + "/robots.txt"),
+    ]);
+    if (!sitemapResponse.ok()) failures.push("sitemap.xml did not return a successful response (" + sitemapResponse.status() + ")");
+    if (!robotsResponse.ok()) failures.push("robots.txt did not return a successful response (" + robotsResponse.status() + ")");
+    const sitemapXml = await sitemapResponse.text();
+    const sitemapPaths = [...sitemapXml.matchAll(/<loc>[^<]*?(\/[^<]*)<\/loc>/g)].map((match) => match[1]);
+    for (const route of routes) {
+      const encodedRoute = route === "/" ? "/" : route;
+      if (!sitemapPaths.includes(encodedRoute)) failures.push("sitemap.xml is missing public route " + route);
+    }
+    const robotsText = await robotsResponse.text();
+    if (!robotsText.includes("/sitemap.xml")) failures.push("robots.txt does not reference sitemap.xml");
+    await page.close();
+  }
+
   // Mobile menu: open, Escape-close, restore focus, then choose a route.
   {
     const page = await browser.newPage({ viewport: { width: 390, height: 820 }, isMobile: true });
@@ -223,9 +272,26 @@ try {
     } else {
       const prefilled = await page.locator("#project-type").inputValue();
       if (prefilled !== "") failures.push("Start-project form should not select a project when no query parameter is supplied");
-      await page.goto(baseURL + "/start-project?project=local-discovery", { waitUntil: "domcontentloaded" });
-      const selected = await page.locator("#project-type").inputValue();
-      if (selected !== "Local SEO foundations") failures.push("Start-project query prefill did not select Local SEO foundations");
+      const projectPrefills = [
+        ["inventory-management", "Inventory / business application"],
+        ["cafe-presence", "Café / business website"],
+        ["local-discovery", "Local SEO foundations"],
+      ];
+      for (const [project, expectedType] of projectPrefills) {
+        await page.goto(baseURL + "/start-project?project=" + project, { waitUntil: "domcontentloaded" });
+        const selected = await page.locator("#project-type").inputValue();
+        if (selected !== expectedType) failures.push("Start-project query prefill for " + project + " expected " + expectedType + " but received " + selected);
+      }
+      await page.locator("#project-name").fill("QA Test");
+      await page.locator("#project-email").fill("not-an-email");
+      await page.locator("#project-goal").fill("A sufficiently descriptive project goal for validation.");
+      const projectEmailValidity = await page.locator("#project-email").evaluate((input) => input.validity.typeMismatch);
+      if (!projectEmailValidity) failures.push("Start-project form accepted a malformed email address");
+      await page.locator("#project-email").fill("qa@example.com");
+      await page.locator("#project-type").selectOption("Custom web application");
+      if (await page.locator("#project-type").inputValue() !== "Custom web application") {
+        failures.push("Start-project form did not accept a project-type selection");
+      }
     }
     await page.close();
   }
@@ -294,6 +360,7 @@ try {
     internalLinksTested: internalLinkResults.length,
     internalLinkResults,
     nonNavigatedLinks,
+    redirectResults,
     networkEvents,
     thirdPartyWarnings: warnings,
     failures,
