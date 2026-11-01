@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import ProjectArt from "@/components/project-art";
 import InventoryCaseStudy from "@/components/inventory-case-study";
 import CafeCaseStudy from "@/components/cafe-case-study";
+import LocalDiscoveryEarth from "@/components/local-discovery-earth";
 import { projects } from "@/content/site";
 
 type PageProps = { params: Promise<{ slug: string }> };
@@ -33,12 +34,26 @@ export default async function ProjectPage({ params }: PageProps) {
 
   return (
     <>
-      <section className="case-hero section-pad">
+      <section className={`case-hero section-pad${slug === "local-discovery" ? " case-hero--local-discovery" : ""}`}>
         <div className="section-kicker"><span>SELECTED WORK / {project.number}</span><span>{project.status.toUpperCase()}</span></div>
-        <p className="eyebrow"><span className="eyebrow__dot" /> {project.category}</p>
-        <h1>{project.title.split(" ").slice(0, -1).join(" ")}<br /><em>{project.title.split(" ").slice(-1).join(" ")}</em></h1>
-        <p className="case-hero__summary">{project.summary}</p>
-        <div className="case-hero__meta"><span>STATUS / {project.status.toUpperCase()}</span><span>TYPE / {project.category.toUpperCase()}</span></div>
+        {slug === "local-discovery" ? (
+          <div className="case-hero__layout">
+            <div className="case-hero__copy">
+              <p className="eyebrow"><span className="eyebrow__dot" /> {project.category}</p>
+              <h1>{project.title.split(" ").slice(0, -1).join(" ")}<br /><em>{project.title.split(" ").slice(-1).join(" ")}</em></h1>
+              <p className="case-hero__summary">{project.summary}</p>
+              <div className="case-hero__meta"><span>STATUS / {project.status.toUpperCase()}</span><span>TYPE / {project.category.toUpperCase()}</span></div>
+            </div>
+            <LocalDiscoveryEarth />
+          </div>
+        ) : (
+          <>
+            <p className="eyebrow"><span className="eyebrow__dot" /> {project.category}</p>
+            <h1>{project.title.split(" ").slice(0, -1).join(" ")}<br /><em>{project.title.split(" ").slice(-1).join(" ")}</em></h1>
+            <p className="case-hero__summary">{project.summary}</p>
+            <div className="case-hero__meta"><span>STATUS / {project.status.toUpperCase()}</span><span>TYPE / {project.category.toUpperCase()}</span></div>
+          </>
+        )}
       </section>
 
       <section className="case-study__visual"><ProjectArt variant={project.art} /></section>
