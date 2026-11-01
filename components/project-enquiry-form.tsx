@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { buildProjectEmailDraft } from "@/lib/email-draft";
 import type { FormEvent } from "react";
 
 type ProjectEnquiryFormProps = { initialProjectType?: string };
@@ -20,22 +21,8 @@ export default function ProjectEnquiryForm({ initialProjectType = "" }: ProjectE
     const budget = String(data.get("budget") || "Not specified");
     const goal = String(data.get("goal") || "").trim();
     const details = String(data.get("details") || "").trim();
-    const subject = encodeURIComponent(`Project enquiry — ${type} — ${name}`);
-    const body = encodeURIComponent([
-      `Name: ${name}`,
-      `Email: ${email}`,
-      `Business / project: ${business}`,
-      `Project type: ${type}`,
-      `Estimated budget: ${budget}`,
-      "",
-      "What I want to build:",
-      goal,
-      "",
-      "Additional details:",
-      details || "Not provided"
-    ].join("\n"));
     setStatus("Your email app should open with the enquiry filled in. Review the draft and press Send to complete the enquiry.");
-    window.location.href = `mailto:natexworks@gmail.com?subject=${subject}&body=${body}`;
+    window.location.href = buildProjectEmailDraft({ name, email, business, type, budget, goal, details });
   }
 
   return (
