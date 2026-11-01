@@ -215,7 +215,7 @@ export default function LocalDiscoveryEarth() {
 
         scene = new THREE.Scene();
         camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
-        camera.position.set(0, 0.025, 3.7);
+        camera.position.set(0, 0.025, 4.0);
         camera.lookAt(0, 0, 0);
 
         // Low-level off-camera fills retain continental shape without introducing a visible sun.
