@@ -20,6 +20,38 @@ const failures = [];
 const results = [];
 const browserErrors = [];
 const linkChecks = [];
+const externalLinks = new Set();
+const externalLinkChecks = [];
+const externalLinkWarnings = [];
+const networkEvents = [];
+const thirdPartyWarnings = [];
+const isThirdPartyUrl = (value) => {
+  try { return new URL(value).origin !== baseOrigin; } catch { return false; }
+};
+function monitorPage(page, label) {
+  page.on("pageerror", (error) => browserErrors.push(label + ": " + error.message));
+  page.on("console", (message) => {
+    if (message.type() === "error") browserErrors.push(label + ": " + message.text());
+  });
+  page.on("requestfailed", (request) => {
+    const issue = {
+      page: label,
+      type: "requestfailed",
+      url: request.url(),
+      error: request.failure()?.errorText || "unknown",
+    };
+    networkEvents.push(issue);
+    if (isThirdPartyUrl(request.url())) thirdPartyWarnings.push(issue);
+    else failures.push(label + ": same-origin request failed: " + issue.url + " (" + issue.error + ")");
+  });
+  page.on("response", (response) => {
+    if (response.status() < 400) return;
+    const issue = { page: label, type: "http-error", url: response.url(), status: response.status() };
+    networkEvents.push(issue);
+    if (isThirdPartyUrl(response.url())) thirdPartyWarnings.push(issue);
+    else failures.push(label + ": same-origin HTTP " + response.status() + ": " + response.url);
+  });
+}
 await mkdir("artifacts/browser-qa", { recursive: true });
 
 const browser = await chromium.launch({ headless: true });
@@ -30,10 +62,7 @@ try {
       deviceScaleFactor: 1,
     });
     const page = await context.newPage();
-    page.on("pageerror", (error) => browserErrors.push(route + ": " + error.message));
-    page.on("console", (message) => {
-      if (message.type() === "error") browserErrors.push(route + ": " + message.text());
-    });
+    monitorPage(page, route);
 
     const response = await page.goto(baseURL + route, { waitUntil: "domcontentloaded" });
     if (!response || response.status() !== 200) {
@@ -51,6 +80,13 @@ try {
     const h1Count = await page.locator("main h1").count();
     if (!title.trim()) failures.push(route + ": document title is empty");
     if (h1Count !== 1) failures.push(route + ": expected one main h1, got " + h1Count);
+
+    const outboundLinks = await page.locator('a[href^="http"]').evaluateAll((anchors) =>
+      anchors.map((anchor) => anchor.getAttribute("href")).filter(Boolean),
+    );
+    for (const href of outboundLinks) {
+      if (isThirdPartyUrl(href)) externalLinks.add(href);
+    }
 
     const uniqueInternal = await page.locator('a[href^="/"]').evaluateAll((anchors) =>
       [...new Set(anchors.map((anchor) => anchor.getAttribute("href")).filter(Boolean))],
@@ -119,8 +155,30 @@ try {
     await context.close();
   }
 
+  // Probe outbound HTTP(S) destinations with safe GET requests. This does not
+  // activate mailto links, open external pages, or submit any forms.
+  const externalContext = await browser.newContext();
+  for (const href of externalLinks) {
+    try {
+      const response = await externalContext.request.get(href, { maxRedirects: 5, timeout: 15000 });
+      const result = { href, status: response.status(), finalUrl: response.url() };
+      externalLinkChecks.push(result);
+      if (!response.ok()) externalLinkWarnings.push({ ...result, warning: "External destination returned a non-success status" });
+      if (isThirdPartyUrl(response.url()) === false) {
+        externalLinkWarnings.push({ ...result, warning: "External destination redirected back to the portfolio origin" });
+      }
+    } catch (error) {
+      externalLinkWarnings.push({
+        href,
+        warning: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+  await externalContext.close();
+
   const menuContext = await browser.newContext({ viewport: { width: 390, height: 820 } });
   const menuPage = await menuContext.newPage();
+  monitorPage(menuPage, "mobile menu keyboard journey");
   await menuPage.goto(baseURL + "/about", { waitUntil: "domcontentloaded" });
   const toggle = menuPage.locator(".menu-toggle");
   await toggle.click();
@@ -135,6 +193,7 @@ try {
     reducedMotion: "reduce",
   });
   const reducedPage = await reducedContext.newPage();
+  monitorPage(reducedPage, "reduced-motion route");
   await reducedPage.goto(baseURL + "/", { waitUntil: "domcontentloaded" });
   await reducedPage.waitForTimeout(150);
   if (await reducedPage.locator(".hero-scene canvas").count() !== 0) {
@@ -153,7 +212,7 @@ try {
   for (const sequence of scrollSequences) {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
     const page = await context.newPage();
-    page.on("pageerror", (error) => browserErrors.push(sequence.route + " scroll test: " + error.message));
+    monitorPage(page, sequence.route + " scroll test");
     await page.goto(baseURL + sequence.route, { waitUntil: "domcontentloaded" });
     await page.waitForTimeout(1200);
 
@@ -216,6 +275,10 @@ try {
     scrollProgressResults,
     internalLinkChecks: linkChecks.length,
     linkChecks,
+    externalLinkChecks,
+    externalLinkWarnings,
+    networkEvents,
+    thirdPartyWarnings,
     failures,
     results,
   };
