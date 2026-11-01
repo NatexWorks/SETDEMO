@@ -46,3 +46,24 @@ Use Playwright's native request routing to simulate blocked, timed-out, and fail
 For every issue: reproduce it, identify the root cause, fix it at the correct layer, and add a regression test. Do not hide failures with broad timeouts, disabled assertions, blanket route exclusions, or ignored console errors. Keep a documented allowlist only for known, non-critical third-party failures, with an explanation and owner.
 
 Run lint, typecheck, production build, unit/component tests, browser E2E tests, accessibility checks, responsive checks, network/redirect checks, and Lighthouse CI. Report exact commands, route/viewport coverage, issue fixes, remaining risks, and pass/fail counts. Never claim a test passed unless its result was observed in CI or in a real local run.
+
+
+## Running the suite
+
+The QA-only tools are installed without changing the production dependency lockfile:
+
+```bash
+npm ci
+npm run qa:install
+npx playwright install chromium
+npm run lint
+npm run typecheck
+npm run test:unit
+npm run build
+npm run start
+npm run test:browser
+npm run test:interactions
+CHROME_PATH="$(node -e 'process.stdout.write(require("playwright").chromium.executablePath())')" npm run test:lighthouse
+```
+
+The CI workflow runs the same stages against a production build and stores browser screenshots and Lighthouse reports under `artifacts/`. The website currently has no server API or fetch/XHR submission flow; the forms intentionally create `mailto:` drafts. For that reason, network failure simulation uses Playwright's real-browser routing and request events instead of adding MSW to mock an endpoint that does not exist. If a real API is introduced, add MSW handlers and contract tests for that API at that time.
