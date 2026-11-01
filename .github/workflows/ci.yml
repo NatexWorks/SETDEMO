@@ -38,7 +38,10 @@ jobs:
         run: npm run typecheck
 
       - name: Run Vitest and React Testing Library suite
-        run: npm run test:unit
+        run: |
+          mkdir -p artifacts
+          set -o pipefail
+          npm run test:unit 2>&1 | tee artifacts/vitest.log
 
       - name: Production build
         run: npm run build
